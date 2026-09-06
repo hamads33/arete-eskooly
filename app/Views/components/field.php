@@ -1,0 +1,1 @@
+<div class="field"><label for="<?= e($id ?? $name) ?>"><?= e($label) ?></label><?= $slot ?? '' ?><?php if ($message = error($name)): ?><p class="field-error"><?= e($message) ?></p><?php endif; ?></div>

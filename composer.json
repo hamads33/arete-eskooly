@@ -1,0 +1,27 @@
+{
+  "name": "arete/coaching-center-dashboard",
+  "description": "Framework-free Core PHP administration system for Arete Coaching Center.",
+  "type": "project",
+  "require": {
+    "php": ">=8.2",
+    "mpdf/mpdf": "^8.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    },
+    "files": [
+      "app/Helpers/url.php",
+      "app/Helpers/view.php",
+      "app/Helpers/auth.php",
+      "app/Helpers/csrf.php",
+      "app/Helpers/old.php",
+      "app/Helpers/escape.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  }
+}

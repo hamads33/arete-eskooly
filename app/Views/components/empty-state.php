@@ -1,0 +1,1 @@
+<div class="empty-state"><div><span class="empty-state__icon"><i data-lucide="<?= e($icon ?? 'inbox') ?>"></i></span><strong><?= e($title ?? 'No records found') ?></strong><?php if (!empty($message)): ?><p><?= e($message) ?></p><?php endif; ?></div></div>

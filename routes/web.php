@@ -1,0 +1,209 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Controllers\AccountsController;
+use App\Controllers\AttendanceController;
+use App\Controllers\BehaviourController;
+use App\Controllers\CertificatesController;
+use App\Controllers\ClassesController;
+use App\Controllers\ClassTestsController;
+use App\Controllers\CommunicationController;
+use App\Controllers\DashboardController;
+use App\Controllers\EmployeesController;
+use App\Controllers\ExamsController;
+use App\Controllers\FeesController;
+use App\Controllers\HomeworkController;
+use App\Controllers\ReportsController;
+use App\Controllers\RolesController;
+use App\Controllers\ReportPdfController;
+use App\Controllers\ReportTemplateController;
+use App\Controllers\SalaryController;
+use App\Controllers\SettingsController;
+use App\Controllers\StudentsController;
+use App\Controllers\SubjectsController;
+use App\Core\Request;
+use App\Core\Response;
+use App\Middleware\AuthMiddleware;
+use App\Middleware\AdminAreaMiddleware;
+use App\Middleware\VerifyCsrfToken;
+
+$router->get('/', fn (Request $request): Response => Response::redirect(url('/admin/dashboard')), name: 'home');
+$router->get('/admin/dashboard', [DashboardController::class, 'index'], name: 'dashboard');
+
+$router->get('/admin/settings/account', [SettingsController::class, 'account'], name: 'settings.account');
+$router->get('/admin/settings/institute-profile', [SettingsController::class, 'instituteProfile'], name: 'settings.institute-profile');
+$router->get('/admin/settings/fee-particulars', [SettingsController::class, 'feeParticulars'], name: 'settings.fee-particulars');
+$router->get('/admin/settings/fee-invoice-accounts', [SettingsController::class, 'feeInvoiceAccounts'], name: 'settings.fee-invoice-accounts');
+$router->get('/admin/settings/rules-regulations', [SettingsController::class, 'rulesRegulations'], name: 'settings.rules-regulations');
+$router->get('/admin/settings/marks-grading', [SettingsController::class, 'marksGrading'], name: 'settings.marks-grading');
+$router->get('/admin/settings/fee-structure', [SettingsController::class, 'feeStructure'], name: 'settings.fee-structure');
+$router->get('/admin/settings/discount-types', [SettingsController::class, 'discountTypes'], name: 'settings.discount-types');
+$router->get('/admin/settings/theme-language', [SettingsController::class, 'themeLanguage'], name: 'settings.theme-language');
+$router->get('/admin/settings/report-templates', [ReportTemplateController::class, 'index'], [AdminAreaMiddleware::class], name: 'settings.report-templates');
+$router->get('/admin/settings/report-templates/{type}/preview', [ReportTemplateController::class, 'preview'], [AdminAreaMiddleware::class], name: 'settings.report-templates.preview');
+$router->post('/admin/settings/report-templates/{type}', [ReportTemplateController::class, 'save'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/settings/report-templates/{type}/reset', [ReportTemplateController::class, 'reset'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/settings/account', [SettingsController::class, 'updateAccount'], [VerifyCsrfToken::class]);
+$router->post('/admin/settings/institute-profile', [SettingsController::class, 'updateInstituteProfile'], [VerifyCsrfToken::class]);
+$router->post('/admin/settings/fee-particulars', [SettingsController::class, 'saveFeeParticulars'], [VerifyCsrfToken::class]);
+$router->post('/admin/settings/fee-invoice-accounts', [SettingsController::class, 'addFeeInvoiceAccount'], [VerifyCsrfToken::class]);
+$router->post('/admin/settings/fee-invoice-accounts/{id}/delete', [SettingsController::class, 'deleteFeeInvoiceAccount'], [VerifyCsrfToken::class]);
+$router->post('/admin/settings/rules-regulations', [SettingsController::class, 'saveRules'], [VerifyCsrfToken::class]);
+$router->post('/admin/settings/marks-grading', [SettingsController::class, 'saveMarksGrading'], [VerifyCsrfToken::class]);
+$router->post('/admin/settings/fee-structure', [SettingsController::class, 'saveFeeStructure'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/settings/discount-types', [SettingsController::class, 'saveDiscountType'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/settings/discount-types/{id}/status', [SettingsController::class, 'discountTypeStatus'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/settings/theme-language', [SettingsController::class, 'saveThemeLanguage'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/reports/admission-letter/{student}/pdf', [ReportPdfController::class, 'admissionLetter'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/job-letter/{employee}/pdf', [ReportPdfController::class, 'jobLetter'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/salary-slip/{payment}/pdf', [ReportPdfController::class, 'salarySlip'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/salary-sheet/pdf', [ReportPdfController::class, 'salarySheet'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/fee-receipt/{payment}/pdf', [ReportPdfController::class, 'feeReceipt'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/fee-invoice/{invoice}/pdf', [ReportPdfController::class, 'feeInvoice'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/report-card/{student}/pdf', [ReportPdfController::class, 'reportCard'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/certificate/{certificate}/pdf', [ReportPdfController::class, 'certificate'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/attendance/students/pdf', [ReportPdfController::class, 'studentAttendance'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/attendance/employees/pdf', [ReportPdfController::class, 'employeeAttendance'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/students/basic-list/pdf', [ReportPdfController::class, 'studentBasicList'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/admissions/pdf', [ReportPdfController::class, 'admissions'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/contacts/pdf', [ReportPdfController::class, 'contacts'], [AdminAreaMiddleware::class]);
+$router->get('/admin/reports/accounts/statement/pdf', [ReportPdfController::class, 'accountStatement'], [AdminAreaMiddleware::class]);
+
+$router->get('/admin/classes', [ClassesController::class, 'index'], [AdminAreaMiddleware::class], name: 'classes.index');
+$router->get('/admin/classes/create', [ClassesController::class, 'create'], [AdminAreaMiddleware::class], name: 'classes.create');
+$router->post('/admin/classes', [ClassesController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/classes/{id}/edit', [ClassesController::class, 'edit'], [AdminAreaMiddleware::class], name: 'classes.edit');
+$router->post('/admin/classes/bulk-delete', [ClassesController::class, 'bulkDelete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/classes/force-delete', [ClassesController::class, 'forceBulkDelete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/classes/{id}', [ClassesController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/classes/{id}/delete', [ClassesController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/classes/{id}/force-delete', [ClassesController::class, 'forceDelete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/subjects', [SubjectsController::class, 'index'], [AdminAreaMiddleware::class], name: 'subjects.index');
+$router->get('/admin/subjects/assign', [SubjectsController::class, 'assign'], [AdminAreaMiddleware::class], name: 'subjects.assign');
+$router->post('/admin/subjects', [SubjectsController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/students', [StudentsController::class, 'index'], name: 'students.index');
+$router->get('/admin/students/create', [StudentsController::class, 'create'], name: 'students.create');
+$router->get('/admin/students/families', [StudentsController::class, 'families'], name: 'students.families');
+$router->get('/admin/students/status', [StudentsController::class, 'statusManager'], name: 'students.status');
+$router->get('/admin/students/admission-letter', [StudentsController::class, 'admissionLetter'], name: 'students.admission-letter');
+$router->get('/admin/students/id-cards', [StudentsController::class, 'idCards'], name: 'students.id-cards');
+$router->get('/admin/students/basic-list', [StudentsController::class, 'basicList'], name: 'students.basic-list');
+$router->get('/admin/students/logins', [StudentsController::class, 'logins'], name: 'students.logins');
+$router->get('/admin/students/promotions', [StudentsController::class, 'promotions'], name: 'students.promotions');
+$router->get('/admin/students/report-card', [StudentsController::class, 'reportCard'], name: 'students.report-card');
+$router->post('/admin/students/logins', [StudentsController::class, 'createLogin'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/students/promotions', [StudentsController::class, 'promote'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/students', [StudentsController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/students/families', [StudentsController::class, 'saveFamilies'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/students/status', [StudentsController::class, 'bulkStatus'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/students/bulk-delete', [StudentsController::class, 'bulkDelete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/students/{id}', [StudentsController::class, 'show'], [AdminAreaMiddleware::class]);
+$router->get('/admin/students/{id}/edit', [StudentsController::class, 'edit'], [AdminAreaMiddleware::class]);
+$router->post('/admin/students/{id}', [StudentsController::class, 'update'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/students/{id}/status', [StudentsController::class, 'status'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/students/{id}/delete', [StudentsController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/employees', [EmployeesController::class, 'index'], name: 'employees.index');
+$router->get('/admin/employees/create', [EmployeesController::class, 'create'], name: 'employees.create');
+$router->get('/admin/employees/job-letter', [EmployeesController::class, 'jobLetter'], name: 'employees.job-letter');
+$router->get('/admin/employees/logins', [EmployeesController::class, 'logins'], name: 'employees.logins');
+$router->post('/admin/employees/logins', [EmployeesController::class, 'createLogin'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/employees', [EmployeesController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/employees/{id}/edit', [EmployeesController::class, 'edit'], [AdminAreaMiddleware::class]);
+$router->post('/admin/employees/{id}', [EmployeesController::class, 'update'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/employees/{id}/status', [EmployeesController::class, 'status'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/accounts', [AccountsController::class, 'chart'], name: 'accounts.chart');
+$router->get('/admin/accounts/income/create', [AccountsController::class, 'incomeCreate'], name: 'accounts.income-create');
+$router->get('/admin/accounts/expense/create', [AccountsController::class, 'expenseCreate'], name: 'accounts.expense-create');
+$router->get('/admin/accounts/statement', [AccountsController::class, 'statement'], name: 'accounts.statement');
+$router->post('/admin/accounts/heads', [AccountsController::class, 'storeHead'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/accounts/heads/{id}/delete', [AccountsController::class, 'deleteHead'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/accounts/{type}', [AccountsController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/fees/collect', [FeesController::class, 'collect'], name: 'fees.collect');
+$router->get('/admin/fees/receipt', [FeesController::class, 'receipt'], name: 'fees.receipt');
+$router->get('/admin/fees/defaulters', [FeesController::class, 'defaulters'], name: 'fees.defaulters');
+$router->get('/admin/fees/report', [FeesController::class, 'report'], name: 'fees.report');
+$router->get('/admin/fees/delete', [FeesController::class, 'deleteIndex'], name: 'fees.delete');
+$router->post('/admin/fees/invoice', [FeesController::class, 'createInvoice'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/fees/payment', [FeesController::class, 'payment'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/fees/{id}/delete', [FeesController::class, 'deleteInvoice'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/fees/receipt/{id}', [FeesController::class, 'receipt'], [AdminAreaMiddleware::class]);
+$router->get('/admin/salary/pay', [SalaryController::class, 'pay'], name: 'salary.pay');
+$router->get('/admin/salary/receipt', [SalaryController::class, 'receipt'], name: 'salary.receipt');
+$router->get('/admin/salary/receipt/{id}', [SalaryController::class, 'receipt'], [AdminAreaMiddleware::class]);
+$router->post('/admin/salary/pay', [SalaryController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/attendance/students', [AttendanceController::class, 'students'], name: 'attendance.students');
+$router->get('/admin/attendance/employees', [AttendanceController::class, 'employees'], name: 'attendance.employees');
+$router->get('/admin/attendance/classwise', [AttendanceController::class, 'classwise'], name: 'attendance.classwise');
+$router->get('/admin/attendance/student-report', [AttendanceController::class, 'studentReport'], name: 'attendance.student-report');
+$router->get('/admin/attendance/employee-report', [AttendanceController::class, 'employeeReport'], name: 'attendance.employee-report');
+$router->post('/admin/attendance/students', [AttendanceController::class, 'saveStudents'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/attendance/employees', [AttendanceController::class, 'saveEmployees'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/homework', [HomeworkController::class, 'index'], name: 'homework');
+$router->post('/admin/homework', [HomeworkController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/homework/{id}', [HomeworkController::class, 'update'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/homework/{id}/delete', [HomeworkController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/communication/messaging', [CommunicationController::class, 'messaging'], name: 'communication.messaging');
+$router->get('/admin/communication/sms-gateway', [CommunicationController::class, 'smsGateway'], name: 'communication.sms-gateway');
+$router->get('/admin/communication/live-class', [CommunicationController::class, 'liveClass'], name: 'communication.live-class');
+$router->post('/admin/communication/messaging', [CommunicationController::class, 'startConversation'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/communication/messaging/{id}', [CommunicationController::class, 'sendMessage'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/communication/sms-gateway', [CommunicationController::class, 'saveSms'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/communication/live-class', [CommunicationController::class, 'storeLiveClass'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/exams/create', [ExamsController::class, 'create'], name: 'exams.create');
+$router->get('/admin/exams/setup', [ExamsController::class, 'setup'], name: 'exams.setup');
+$router->get('/admin/exams/marks', [ExamsController::class, 'marks'], name: 'exams.marks');
+$router->get('/admin/exams/results', [ExamsController::class, 'results'], name: 'exams.results');
+$router->post('/admin/exams', [ExamsController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/setup', [ExamsController::class, 'saveSetup'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/marks', [ExamsController::class, 'saveMarks'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/{id}/delete', [ExamsController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/class-tests/marks', [ClassTestsController::class, 'marks'], name: 'class-tests.marks');
+$router->get('/admin/class-tests/results', [ClassTestsController::class, 'results'], name: 'class-tests.results');
+$router->post('/admin/class-tests/marks', [ClassTestsController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/class-tests', [ClassTestsController::class, 'index'], name: 'class-tests');
+$router->get('/admin/class-tests/{id}/edit', [ClassTestsController::class, 'edit'], name: 'class-tests.edit');
+$router->post('/admin/class-tests/{id}/update', [ClassTestsController::class, 'update'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/class-tests/{id}/marks', [ClassTestsController::class, 'saveMarks'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/class-tests/{id}/delete', [ClassTestsController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+$router->get('/admin/reports/admissions', [ReportsController::class, 'admissions'], name: 'reports.admissions');
+$router->get('/admin/reports/contacts', [ReportsController::class, 'contacts'], name: 'reports.contacts');
+$router->get('/admin/certificates', [CertificatesController::class, 'index'], name: 'certificates');
+$router->post('/admin/certificates', [CertificatesController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/certificates/{id}/delete', [CertificatesController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+
+$router->get('/admin/roles', [RolesController::class, 'index'], name: 'roles');
+$router->get('/admin/roles/{id}/edit', [RolesController::class, 'edit'], name: 'roles.edit');
+$router->post('/admin/roles', [RolesController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/roles/{id}/update', [RolesController::class, 'update'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/roles/{id}/permissions', [RolesController::class, 'savePermissions'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/roles/{id}/assign', [RolesController::class, 'assign'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/roles/{id}/unassign', [RolesController::class, 'unassign'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/roles/{id}/delete', [RolesController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+
+$router->get('/admin/behaviour/traits', [BehaviourController::class, 'traits'], name: 'behaviour.traits');
+$router->post('/admin/behaviour/traits', [BehaviourController::class, 'storeTrait'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/behaviour/traits/{id}/status', [BehaviourController::class, 'traitStatus'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/behaviour/traits/{id}/delete', [BehaviourController::class, 'deleteTrait'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/behaviour/rate', [BehaviourController::class, 'rateBehaviours'], name: 'behaviour.rate');
+$router->get('/admin/behaviour/skills', [BehaviourController::class, 'rateSkills'], name: 'behaviour.skills');
+$router->post('/admin/behaviour/ratings', [BehaviourController::class, 'saveRatings'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/behaviour/observations', [BehaviourController::class, 'observations'], name: 'behaviour.observations');
+$router->post('/admin/behaviour/observations', [BehaviourController::class, 'storeObservation'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/behaviour/observations/{id}/delete', [BehaviourController::class, 'deleteObservation'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/behaviour/reports/affective', [BehaviourController::class, 'affectiveReport'], name: 'behaviour.report.affective');
+$router->get('/admin/behaviour/reports/psychomotor', [BehaviourController::class, 'psychomotorReport'], name: 'behaviour.report.psychomotor');
+
+$router->middlewarePrefix('/admin', AuthMiddleware::class);
+$router->middlewarePrefix('/admin', AdminAreaMiddleware::class);

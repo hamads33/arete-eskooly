@@ -1,0 +1,9 @@
+Options -Indexes
+RewriteEngine On
+
+# Serve real public files and directories without routing them through PHP.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+RewriteRule ^ index.php [QSA,L]

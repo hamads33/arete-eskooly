@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "C:/Users/OGDCL/AppData/Roaming/npm/playwright-mcp.cmd",
+      "args": ["--browser", "chrome"]
+    }
+  }
+}

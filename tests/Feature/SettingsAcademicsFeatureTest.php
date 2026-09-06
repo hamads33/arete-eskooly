@@ -1,0 +1,25 @@
+<?php
+declare(strict_types=1);
+
+use App\Core\{CSRF,Request};
+use App\Repositories\{AcademicRepository,SettingsRepository,UserRepository};
+use App\Services\SettingsService;
+use App\Support\UploadPolicy;
+
+return static function (\App\Core\App $app): array {
+    $checks=[];$request=static fn(string $method,string $uri,array $body=[],array $query=[],array $files=[]):Request=>new Request($query,$body,$files,['REQUEST_METHOD'=>$method,'REQUEST_URI'=>$uri]);
+    $context=(new UserRepository($app->database()))->findAuthContext(1);$app->session()->set('auth_user',$context);$token=CSRF::token();$settings=new SettingsRepository($app->database());$institute=$settings->institute();$id=(int)$institute['id'];
+    foreach(['/admin/settings/account','/admin/settings/institute-profile','/admin/settings/fee-particulars','/admin/settings/fee-invoice-accounts','/admin/settings/rules-regulations','/admin/settings/marks-grading','/admin/classes','/admin/classes/create','/admin/subjects','/admin/subjects/assign'] as $uri)$checks["GET {$uri}"]=$app->run($request('GET',$uri))->status()===200;
+    $checks['settings POST rejects CSRF']=$app->run($request('POST','/admin/settings/rules-regulations',['student_rules'=>'x','employee_rules'=>'y','_token'=>'bad']))->status()===419;
+    $invalid=$app->run($request('POST','/admin/settings/account',['account_email'=>'bad','account_password'=>'','timezone'=>'UTC','currency'=>'USD','currency_symbol'=>'$','_token'=>$token]));$checks['invalid account email rejected']=$invalid->status()===302;
+    $service=new SettingsService($settings);$safe=$service->sanitizeHtml('<p onclick="bad()">Safe</p><script>alert(1)</script>');$checks['rich HTML sanitized']=str_contains($safe,'Safe')&&!str_contains($safe,'script')&&!str_contains($safe,'onclick');
+    [, $overlap]=$service->validateGrades(['A','B'],[80,70],[100,85],['PASS','PASS']);$checks['grade overlap rejected']=!empty($overlap);
+    [$validGrades,$validErrors]=$service->validateGrades(['F','A'],[0,50],[49,100],['FAIL','PASS']);$checks['valid grading accepted']=count($validGrades)===2&&!$validErrors;
+    $scope=['month_scope'=>'all','month_number'=>null,'target_scope'=>'all','target_reference'=>null];$service->saveFees($id,$scope,['admission'=>125]);$fees=$settings->feeParticulars($id,$scope);$checks['fee scope persisted']=count($fees)===count(SettingsService::FEE_ITEMS)&&(float)array_column($fees,'amount','item_key')['admission']===125.0;
+    $settings->saveRules($id,['student'=>'<p>Student policy</p>','employee'=>'<p>Employee policy</p>']);$checks['rules persisted']=count($settings->rules($id))===2;
+    $policy=new UploadPolicy(['image/png'],['png'],512000);$checks['invalid upload rejected']=!$policy->validate(['error'=>UPLOAD_ERR_OK,'size'=>4,'name'=>'bad.php','tmp_name'=>__FILE__]);
+    $academic=new AcademicRepository($app->database());$suffix=bin2hex(random_bytes(4));$className='Test Class '.$suffix;$checks['class created']=$academic->createClass($id,$className,1500,null);$class=array_values(array_filter($academic->classes($id),fn($c)=>$c['name']===$className))[0]??null;$checks['duplicate class rejected']=!$academic->createClass($id,$className,1500,null);$checks['class search works']=count($academic->classes($id,$suffix))===1;
+    if($class){$checks['class updated']=$academic->updateClass((int)$class['id'],$id,$className.' Updated',1750,'Teacher')==='updated' && $academic->findClass((int)$class['id'],$id)['name']===$className.' Updated';$checks['subject assigned']=$academic->assign($id,(int)$class['id'],'Math '.$suffix,100);$checks['duplicate assignment rejected']=!$academic->assign($id,(int)$class['id'],'Math '.$suffix,100);$mapped=$academic->withSubjects($id);$found=array_values(array_filter($mapped,fn($c)=>$c['id']==$class['id']))[0]??[];$checks['class subject mapping listed']=count($found['subjects']??[])===1;$checks['class deleted']=$academic->deleteClass((int)$class['id'],$id)==='deleted';$app->database()->query('DELETE FROM subjects WHERE institute_id=:id AND name=:name',['id'=>$id,'name'=>'Math '.$suffix]);}
+    $now=date('Y-m-d H:i:s');$app->database()->query("INSERT INTO users (name,email,password_hash,status,created_at,updated_at) VALUES ('No Permissions',:email,:password,'active',:created,:updated)",['email'=>'no-permissions-'.$suffix.'@example.test','password'=>password_hash('Temporary-Password-2026!',PASSWORD_DEFAULT),'created'=>$now,'updated'=>$now]);$limitedId=(int)$app->database()->connection()->lastInsertId();$limited=(new UserRepository($app->database()))->findAuthContext($limitedId);$app->session()->set('auth_user',$limited);$checks['settings authorization enforced']=$app->run($request('GET','/admin/settings/account'))->status()===403;$app->database()->query('DELETE FROM users WHERE id=:id',['id'=>$limitedId]);$app->session()->set('auth_user',$context);
+    return $checks;
+};

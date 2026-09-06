@@ -1,0 +1,3 @@
+<?php
+declare(strict_types=1);
+return static function(PDO $pdo):void{$cols=$pdo->query('SHOW COLUMNS FROM students')->fetchAll(PDO::FETCH_COLUMN);if(!in_array('monthly_fee_override',$cols,true))$pdo->exec('ALTER TABLE students ADD monthly_fee_override DECIMAL(12,2) NULL AFTER discount_in_fee');if(!in_array('discount_type',$cols,true))$pdo->exec("ALTER TABLE students ADD discount_type ENUM('percentage','fixed') NOT NULL DEFAULT 'percentage' AFTER monthly_fee_override");if(!in_array('discount_value',$cols,true)){$pdo->exec('ALTER TABLE students ADD discount_value DECIMAL(12,2) NOT NULL DEFAULT 0 AFTER discount_type');$pdo->exec('UPDATE students SET discount_value=discount_in_fee WHERE discount_in_fee>0');}};

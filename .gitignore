@@ -1,0 +1,17 @@
+/.env
+/storage/logs/*.log
+/storage/cache/*
+/storage/uploads/*
+/storage/tmp/
+/public/uploads/*
+!/storage/logs/.gitkeep
+!/storage/cache/.gitkeep
+!/storage/uploads/.gitkeep
+!/public/uploads/.gitkeep
+/.phpunit.cache/
+/storage/*.sqlite
+/vendor/
+/output/
+/tmp/
+*.tar.gz
+*.pem

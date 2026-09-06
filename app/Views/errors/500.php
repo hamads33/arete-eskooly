@@ -1,0 +1,1 @@
+<main class="error-card"><span>500</span><h1>Something went wrong</h1><p>The application could not complete this request.</p><?php if (!empty($debugMessage)): ?><p><code><?= e($debugMessage) ?></code></p><?php endif; ?><a href="<?= e(url('/admin/dashboard')) ?>">Return to dashboard</a></main>

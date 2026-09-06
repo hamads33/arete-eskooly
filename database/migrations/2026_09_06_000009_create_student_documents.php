@@ -1,0 +1,3 @@
+<?php
+declare(strict_types=1);
+return static function(PDO $pdo):void{$pdo->exec("CREATE TABLE IF NOT EXISTS student_documents(id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,student_id BIGINT UNSIGNED NOT NULL,document_type VARCHAR(60) NOT NULL,original_name VARCHAR(255) NOT NULL,file_path VARCHAR(255) NOT NULL,mime_type VARCHAR(100) NOT NULL,file_size INT UNSIGNED NOT NULL,uploaded_by BIGINT UNSIGNED NOT NULL,created_at DATETIME NOT NULL,INDEX idx_student_documents_student(student_id),CONSTRAINT fk_student_documents_student FOREIGN KEY(student_id) REFERENCES students(id) ON DELETE CASCADE,CONSTRAINT fk_student_documents_user FOREIGN KEY(uploaded_by) REFERENCES users(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");};
