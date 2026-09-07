@@ -27,8 +27,8 @@
     button.classList.add("is-active");
   }));
 
-  const addSubjectButton=document.querySelector('[data-demo-action="Add subject row"]');
-  const removeSubjectButton=document.querySelector('[data-demo-action="Remove last subject"]');
+  const addSubjectButton=document.querySelector('[data-subject-action="add"]');
+  const removeSubjectButton=document.querySelector('[data-subject-action="remove"]');
   if(addSubjectButton){
     const subjectGrid=addSubjectButton.closest("form").querySelector("[data-subject-rows],.module-form-grid");
     addSubjectButton.addEventListener("click",()=>{
