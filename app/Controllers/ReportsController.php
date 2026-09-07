@@ -85,4 +85,52 @@ final class ReportsController extends AdminPageController
             'progress'=>$student?$this->reporting()->studentProgress($i,(int)$student['id']):null,
         ]);
     }
+
+    public function attendanceShortage(Request$r):Response{
+        [$from,$to]=$this->range($r);$class=(int)$r->query('class',0);$i=$this->i();
+        $minimum=$this->reporting()->minimumAttendance($i);
+        $threshold=$minimum!==null?$minimum:(float)($r->query('threshold',75));
+        return$this->renderPage('report-attendance-shortage',[
+            'from'=>$from,'to'=>$to,'classes'=>$this->classes(),'selectedClass'=>$class,
+            'rows'=>$this->reporting()->attendanceShortage($i,$from,$to,$class),
+            'threshold'=>$threshold,'configured'=>$minimum!==null,
+        ]);
+    }
+
+    public function testHistory(Request$r):Response{
+        $i=$this->i();$studentId=(int)$r->query('student',0);$class=(int)$r->query('class',0);
+        [$from,$to]=$this->range($r);
+        $student=$studentId>0?(new StudentRepository($this->app->database()))->find($studentId,$i):null;
+        return$this->renderPage('report-test-history',[
+            'classes'=>$this->classes(),'selectedClass'=>$class,
+            'students'=>(new StudentRepository($this->app->database()))->paginate($i,'',$class?:null,300),
+            'student'=>$student,'from'=>$from,'to'=>$to,
+            'rows'=>$student?$this->reporting()->studentTestHistory($i,(int)$student['id'],$from,$to):[],
+        ]);
+    }
+
+    public function studentRegister(Request$r):Response{
+        $i=$this->i();$status=(string)$r->query('status','');$class=(int)$r->query('class',0);
+        return$this->renderPage('report-student-register',[
+            'classes'=>$this->classes(),'selectedClass'=>$class,'status'=>$status,
+            'rows'=>$this->reporting()->studentRegister($i,$status,$class),
+        ]);
+    }
+
+    public function families(Request$r):Response{
+        return$this->renderPage('report-families',[
+            'families'=>$this->reporting()->familyReport($this->i()),
+            'institute'=>(new SettingsRepository($this->app->database()))->institute(),
+        ]);
+    }
+
+    public function academic(Request$r):Response{
+        [$from,$to]=$this->range($r);$class=(int)$r->query('class',0);$i=$this->i();
+        return$this->renderPage('report-academic',[
+            'from'=>$from,'to'=>$to,'classes'=>$this->classes(),'selectedClass'=>$class,
+            'homework'=>$this->reporting()->homeworkReport($i,$from,$to,$class),
+            'notes'=>$this->reporting()->notesReport($i,$class),
+            'assignments'=>$this->reporting()->teacherAssignmentReport($i),
+        ]);
+    }
 }

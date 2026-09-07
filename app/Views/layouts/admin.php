@@ -3,16 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="<?= e(asset('images/arete-logo.png')) ?>"><link rel="apple-touch-icon" href="<?= e(asset('images/arete-logo.png')) ?>">
   <meta name="description" content="<?= e($pageDescription) ?>">
   <title><?= e($pageTitle) ?> · <?= e($institute['name'] ?? 'Arete Coaching Center') ?></title>
 <?php foreach (array_values(array_unique($styles)) as $style): ?>
   <link rel="stylesheet" href="<?= e(asset($style)) ?>">
 <?php endforeach; ?>
+  <link rel="stylesheet" href="<?= e(asset('css/premium-ui.css?v=1')) ?>">
 </head>
 <body>
   <div class="app-shell" id="appShell">
 <?php require BASE_PATH . '/app/Views/partials/header.php'; ?>
 <?php require BASE_PATH . '/app/Views/partials/sidebar.php'; ?>
+<?php require BASE_PATH . '/app/Views/partials/print-letterhead.php'; ?>
 <?= $content ?>
   </div>
 

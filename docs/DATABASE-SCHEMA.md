@@ -61,3 +61,8 @@ idempotent, and it:
   remain tenant-scoped.
 
 `institute_users.user_id` is the primary key, so a portal user belongs to exactly one institute.
+# Additive Pakistan ERP schema (migration 000018)
+
+New structures: `academic_sessions`, `academic_rule_profiles`, `academic_profile_grades`, `class_sections`, `academic_streams`, `teacher_assignments`, `guardians`, `guardian_students`, `guardian_accounts`, `institute_holidays`, `class_notes`, `fee_settings`, `fee_generation_runs`, `whatsapp_templates`, `whatsapp_logs`, and `audit_logs`.
+
+Existing student, subject, attendance, homework, class-test, exam, invoice and payment tables receive additive columns. Existing identifiers and records are preserved; no reset migration is used.

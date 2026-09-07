@@ -152,6 +152,12 @@ final class StudentPortalController extends PortalController
         ]);
     }
 
+    public function notes(Request$request):Response
+    {
+        if(!$student=$this->repo()->studentByUser($this->userId()))return$this->forbidden();
+        return $this->portalView('portal/student/notes','student',['pageTitle'=>'Class Notes','activeMenu'=>'portal-notes','instituteId'=>(int)$student['institute_id'],'student'=>$student,'notes'=>$this->repo()->studentNotes((int)$student['class_id'],(int)$student['institute_id'])]);
+    }
+
     /** Official documents the student can generate for themselves. */
     public function documents(Request $request): Response
     {

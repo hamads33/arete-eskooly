@@ -102,3 +102,6 @@ EXCLUDED per project scope. Suite: 206 checks passing.
 
 Files added: `app/Controllers/{PortalPdfController,PortalAccountController,PortalMessagesController}.php`,
 `app/Views/portal/{account,messages}.php`, `app/Views/portal/{student,employee}/documents.php`.
+# 2026-09-07 Pakistan ERP foundation update
+
+Added institute-scoped guardian accounts and parent ownership, normalized teacher assignments, class notes, four-state attendance, assessment absence/publication fields, academic sessions/rule profiles, fee automation/reversal/void metadata, WhatsApp templates/logging, and audit logs. See `MUST-HAVE-FEATURES-STATUS.md` for the honest completion matrix.

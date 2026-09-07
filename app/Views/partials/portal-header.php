@@ -2,12 +2,12 @@
 /** Portal header. Deliberately omits the admin search and admin-only profile links. */
 $currentUser = user();
 $currentUserName = $currentUser['name'] ?? 'Portal user';
-$currentUserRole = ($audience ?? 'student') === 'employee' ? 'Employee' : 'Student';
+$currentUserRole = ($audience ?? 'student') === 'employee' ? 'Employee' : (($audience ?? 'student') === 'parent' ? 'Parent / Guardian' : 'Student');
 $currentUserInitials = strtoupper(implode('', array_map(
     static fn (string $part): string => $part[0] ?? '',
     array_slice(preg_split('/\s+/', trim($currentUserName)) ?: [], 0, 2)
 )));
-$home = ($audience ?? 'student') === 'employee' ? '/portal/employee' : '/portal/student';
+$home = ($audience ?? 'student') === 'employee' ? '/portal/employee' : (($audience ?? 'student') === 'parent' ? '/portal/parent' : '/portal/student');
 $instituteName = $institute['name'] ?? 'Institute';
 ?>
 <header class="app-header">
@@ -23,6 +23,8 @@ $instituteName = $institute['name'] ?? 'Institute';
     <button class="icon-button" id="sidebarToggle" type="button" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="true">
       <i data-lucide="panel-left"></i>
     </button>
+
+    <div class="topbar-context" aria-hidden="true"><strong><?= e($pageTitle ?? 'Portal') ?></strong><span><?= e($currentUserRole) ?> workspace</span></div>
 
     <div class="header-spacer"></div>
     <div class="header-actions">

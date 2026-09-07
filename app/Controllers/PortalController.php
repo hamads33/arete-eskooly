@@ -41,6 +41,10 @@ abstract class PortalController extends Controller
         if (hasRole('employee') && ($employee = $this->repo()->employeeByUser($this->userId()))) {
             return ['audience' => 'employee', 'record' => $employee, 'instituteId' => (int) $employee['institute_id']];
         }
+        if (hasRole('parent')) {
+            $guardian = (new \App\Repositories\PakistanErpRepository($this->app->database()))->guardianByUser($this->userId());
+            if ($guardian) return ['audience' => 'parent', 'record' => $guardian, 'instituteId' => (int) $guardian['institute_id']];
+        }
         return null;
     }
 
@@ -91,13 +95,22 @@ abstract class PortalController extends Controller
                 $item('My Fees', 'portal-fees', 'badge-dollar-sign', '/portal/student/fees'),
                 $item('My Results', 'portal-results', 'graduation-cap', '/portal/student/results'),
                 $item('My Homework', 'portal-homework', 'book-open', '/portal/student/homework'),
+                $item('Class Notes', 'portal-notes', 'notebook-tabs', '/portal/student/notes'),
                 $item('My Documents', 'portal-documents', 'file-text', '/portal/student/documents'),
                 $item('Messages', 'portal-messages', 'messages-square', '/portal/messages'),
                 $item('Account Settings', 'portal-account', 'settings-2', '/portal/account'),
             ];
         }
 
-        return [
+        if ($audience === 'parent') {
+            return [
+                $item('My Children', 'portal-dashboard', 'users-round', '/portal/parent'),
+                $item('Messages', 'portal-messages', 'messages-square', '/portal/messages'),
+                $item('Account Settings', 'portal-account', 'settings-2', '/portal/account'),
+            ];
+        }
+
+        $employeeNav = [
             $item('Dashboard', 'portal-dashboard', 'layout-dashboard', '/portal/employee'),
             $item('My Profile', 'portal-profile', 'user-round', '/portal/employee/profile'),
             $item('My Attendance', 'portal-attendance', 'calendar-check', '/portal/employee/attendance'),
@@ -108,6 +121,27 @@ abstract class PortalController extends Controller
             $item('Messages', 'portal-messages', 'messages-square', '/portal/messages'),
             $item('Account Settings', 'portal-account', 'settings-2', '/portal/account'),
         ];
+
+        // The teaching workspace only appears for employees who actually hold an assignment,
+        // so non-teaching staff never see authoring links they cannot use.
+        if ($this->hasTeachingAssignments()) {
+            array_splice($employeeNav, 1, 0, [
+                $item('My Teaching', 'portal-teaching', 'graduation-cap', '/portal/employee/teaching'),
+            ]);
+        }
+
+        return $employeeNav;
+    }
+
+    /** Whether the signed-in employee holds at least one active teaching assignment. */
+    private function hasTeachingAssignments(): bool
+    {
+        return (bool) $this->app->database()->query(
+            'SELECT 1 FROM teacher_assignments ta
+             JOIN employee_accounts ea ON ea.employee_id = ta.employee_id
+             WHERE ea.user_id = :u AND ta.status = \'active\' LIMIT 1',
+            ['u' => $this->userId()]
+        )->fetchColumn();
     }
 
     /**

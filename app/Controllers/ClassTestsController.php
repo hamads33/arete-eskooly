@@ -12,9 +12,11 @@ private function i():int{return(int)(new SettingsRepository($this->app->database
 private function repo():WorkflowRepository{return new WorkflowRepository($this->app->database());}
 private function data(int$class=0):array{$i=$this->i();return['classes'=>(new AcademicRepository($this->app->database()))->classes($i),'subjects'=>(new SupportRepository($this->app->database()))->subjects($i,$class),'students'=>(new StudentRepository($this->app->database()))->paginate($i,'',$class?:null,100),'selectedClass'=>$class];}
 
-public function marks(Request$r):Response{return$this->renderPage('test-marks',$this->data((int)$r->query('class',0)));}
+/** Marks entry. Also lists every existing test so marks for any class or subject can be
+     * opened directly, without funnelling through a class then subject filter. */
+    public function marks(Request$r):Response{$class=(int)$r->query('class',0);return$this->renderPage('test-marks',$this->data($class)+['allTests'=>$this->repo()->classTests($this->i())]);}
 
-public function store(Request$r):Response{try{$w=$this->repo();$id=$w->createClassTest($this->i(),(int)$r->input('class'),(int)$r->input('subject'),(string)$r->input('date'),(string)$r->input('title'),(float)$r->input('total_marks'),(int)user()['id']);$w->saveClassTestMarks($this->i(),$id,(array)$r->input('marks',[]),(int)user()['id']);}catch(\DomainException$e){return Response::html(e($e->getMessage()),422);}Flash::add('success','Class test recorded.');return Response::redirect(url('/admin/class-tests'));}
+public function store(Request$r):Response{try{$w=$this->repo();$id=$w->createClassTest($this->i(),(int)$r->input('class'),(int)$r->input('subject'),(string)$r->input('date'),(string)$r->input('title'),(float)$r->input('total_marks'),(int)user()['id']);$w->saveClassTestMarks($this->i(),$id,(array)$r->input('marks',[]),(int)user()['id'],(array)$r->input('absent',[]),(array)$r->input('remarks',[]));}catch(\DomainException$e){return Response::html(e($e->getMessage()),422);}Flash::add('success','Class test recorded.');return Response::redirect(url('/admin/class-tests'));}
 
 /** Manage list: every recorded test with how many students are marked. */
 public function index(Request$r):Response{$class=(int)$r->query('class',0);return$this->renderPage('test-manage',$this->data($class)+['tests'=>$this->repo()->classTests($this->i(),$class,(int)$r->query('subject',0))]);}
@@ -24,9 +26,10 @@ public function edit(Request$r):Response{$test=$this->repo()->classTest($this->i
 
 public function update(Request$r):Response{$id=(int)$r->route('id');try{$this->repo()->updateClassTest($this->i(),$id,(string)$r->input('title'),(string)$r->input('date'),(float)$r->input('total_marks'));Flash::add('success','Class test updated.');}catch(\DomainException$e){Flash::add('error',$e->getMessage());}return Response::redirect(url('/admin/class-tests/'.$id.'/edit'));}
 
-public function saveMarks(Request$r):Response{$id=(int)$r->route('id');try{$this->repo()->saveClassTestMarks($this->i(),$id,(array)$r->input('marks',[]),(int)user()['id']);Flash::add('success','Test marks saved.');}catch(\DomainException$e){Flash::add('error',$e->getMessage());}return Response::redirect(url('/admin/class-tests/'.$id.'/edit'));}
+public function saveMarks(Request$r):Response{$id=(int)$r->route('id');try{$this->repo()->saveClassTestMarks($this->i(),$id,(array)$r->input('marks',[]),(int)user()['id'],(array)$r->input('absent',[]),(array)$r->input('remarks',[]));Flash::add('success','Test marks saved.');}catch(\DomainException$e){Flash::add('error',$e->getMessage());}return Response::redirect(url('/admin/class-tests/'.$id.'/edit'));}
 
 public function delete(Request$r):Response{$deleted=$this->repo()->deleteClassTest($this->i(),(int)$r->route('id'));Flash::add($deleted?'success':'error',$deleted?'Class test deleted.':'Class test not found.');return Response::redirect(url('/admin/class-tests'));}
+public function status(Request$r):Response{try{$ok=$this->repo()->setClassTestStatus($this->i(),(int)$r->route('id'),(string)$r->input('status'));Flash::add($ok?'success':'error',$ok?'Test publication status updated.':'Class test not found.');}catch(\DomainException$e){Flash::add('error',$e->getMessage());}return Response::redirect(url('/admin/class-tests'));}
 
 public function results(Request$r):Response{$class=(int)$r->query('class',0);$rows=$this->repo()->classTestResults($this->i(),$class,(int)$r->query('subject',0),(int)$r->query('student',0),(string)$r->query('from')?:null,(string)$r->query('to')?:null);return$this->renderPage('test-results',$this->data($class)+['rows'=>$rows]);}
 }

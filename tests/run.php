@@ -49,6 +49,17 @@ $pdfReporting = require BASE_PATH . '/tests/Feature/PdfReportingFeatureTest.php'
 $checks = array_merge($checks, $pdfReporting($app));
 $portalFeature = require BASE_PATH . '/tests/Feature/PortalFeatureTest.php';
 $checks = array_merge($checks, $portalFeature($app));
+$pakistanErp = require BASE_PATH . '/tests/Feature/PakistanErpMustHaveFeatureTest.php';
+$checks = array_merge($checks, $pakistanErp($app));
+
+$teacherWorkspace = require BASE_PATH . '/tests/Feature/TeacherWorkspaceFeatureTest.php';
+$checks = array_merge($checks, $teacherWorkspace($app));
+
+$academicStructure = require BASE_PATH . '/tests/Feature/AcademicStructureFeatureTest.php';
+$checks = array_merge($checks, $academicStructure($app));
+
+$whatsappOutreach = require BASE_PATH . '/tests/Feature/WhatsAppOutreachFeatureTest.php';
+$checks = array_merge($checks, $whatsappOutreach($app));
 
 foreach ($checks as $name => $result) {
     echo ($result ? '[PASS] ' : '[FAIL] ') . $name . PHP_EOL;

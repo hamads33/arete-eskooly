@@ -59,6 +59,9 @@ final class AuthController extends Controller
         if (hasRole('employee')) {
             return '/portal/employee';
         }
+        if (hasRole('parent')) {
+            return '/portal/parent';
+        }
         return '/login';
     }
 

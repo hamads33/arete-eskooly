@@ -6,7 +6,9 @@ use App\Controllers\EmployeePortalController;
 use App\Controllers\PortalAccountController;
 use App\Controllers\PortalMessagesController;
 use App\Controllers\PortalPdfController;
+use App\Controllers\ParentPortalController;
 use App\Controllers\StudentPortalController;
+use App\Controllers\TeacherWorkspaceController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\PortalMiddleware;
 use App\Middleware\VerifyCsrfToken;
@@ -29,6 +31,7 @@ $router->get('/portal/student/fees', [StudentPortalController::class, 'fees'], n
 $router->get('/portal/student/fees/{id}', [StudentPortalController::class, 'invoice'], name: 'portal.student.invoice');
 $router->get('/portal/student/results', [StudentPortalController::class, 'results'], name: 'portal.student.results');
 $router->get('/portal/student/homework', [StudentPortalController::class, 'homework'], name: 'portal.student.homework');
+$router->get('/portal/student/notes', [StudentPortalController::class, 'notes'], name: 'portal.student.notes');
 $router->get('/portal/student/documents', [StudentPortalController::class, 'documents'], name: 'portal.student.documents');
 
 // ---- employee --------------------------------------------------------------
@@ -39,6 +42,10 @@ $router->get('/portal/employee/salary', [EmployeePortalController::class, 'salar
 $router->get('/portal/employee/classes', [EmployeePortalController::class, 'classes'], name: 'portal.employee.classes');
 $router->get('/portal/employee/homework', [EmployeePortalController::class, 'homework'], name: 'portal.employee.homework');
 $router->get('/portal/employee/documents', [EmployeePortalController::class, 'documents'], name: 'portal.employee.documents');
+
+// ---- parent / guardian ------------------------------------------------------
+$router->get('/portal/parent', [ParentPortalController::class, 'index'], name: 'portal.parent.dashboard');
+$router->get('/portal/parent/children/{id}', [ParentPortalController::class, 'child'], name: 'portal.parent.child');
 
 // ---- branded PDF documents (self-scoped) -----------------------------------
 $router->get('/portal/student/documents/admission-letter', [PortalPdfController::class, 'admissionLetter'], name: 'portal.student.admission-letter');
@@ -54,6 +61,21 @@ $router->post('/portal/messages', [PortalMessagesController::class, 'start'], [V
 $router->post('/portal/messages/{id}', [PortalMessagesController::class, 'reply'], [VerifyCsrfToken::class]);
 $router->get('/portal/account', [PortalAccountController::class, 'edit'], name: 'portal.account');
 $router->post('/portal/account', [PortalAccountController::class, 'update'], [VerifyCsrfToken::class]);
+
+
+// ---- teacher workspace (write access, scoped by teacher_assignments) --------
+$router->get('/portal/employee/teaching', [TeacherWorkspaceController::class, 'index'], name: 'portal.teaching');
+$router->get('/portal/employee/teaching/attendance', [TeacherWorkspaceController::class, 'attendance'], name: 'portal.teaching.attendance');
+$router->post('/portal/employee/teaching/attendance', [TeacherWorkspaceController::class, 'saveAttendance'], [VerifyCsrfToken::class]);
+$router->get('/portal/employee/teaching/homework', [TeacherWorkspaceController::class, 'homework'], name: 'portal.teaching.homework');
+$router->post('/portal/employee/teaching/homework', [TeacherWorkspaceController::class, 'storeHomework'], [VerifyCsrfToken::class]);
+$router->post('/portal/employee/teaching/homework/{id}/delete', [TeacherWorkspaceController::class, 'deleteHomework'], [VerifyCsrfToken::class]);
+$router->get('/portal/employee/teaching/notes', [TeacherWorkspaceController::class, 'notes'], name: 'portal.teaching.notes');
+$router->post('/portal/employee/teaching/notes', [TeacherWorkspaceController::class, 'storeNote'], [VerifyCsrfToken::class]);
+$router->get('/portal/employee/teaching/tests', [TeacherWorkspaceController::class, 'tests'], name: 'portal.teaching.tests');
+$router->post('/portal/employee/teaching/tests', [TeacherWorkspaceController::class, 'storeTest'], [VerifyCsrfToken::class]);
+$router->get('/portal/employee/teaching/tests/{id}/marks', [TeacherWorkspaceController::class, 'testMarks'], name: 'portal.teaching.test-marks');
+$router->post('/portal/employee/teaching/tests/{id}/marks', [TeacherWorkspaceController::class, 'saveTestMarks'], [VerifyCsrfToken::class]);
 
 $router->middlewarePrefix('/portal', AuthMiddleware::class);
 $router->middlewarePrefix('/portal', PortalMiddleware::class);

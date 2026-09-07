@@ -221,4 +221,166 @@ final class ReportingRepository
             'behaviour' => $behaviour,
         ];
     }
+
+    /* ------------------------------------------------- attendance shortage */
+
+    /**
+     * The institute's configured minimum attendance (for example FBISE's 75%), taken from the
+     * default academic rule profile. Null when none is configured; nobody is ever auto-blocked,
+     * this only reports eligibility.
+     */
+    public function minimumAttendance(int $instituteId): ?float
+    {
+        $value = $this->database->query(
+            'SELECT min_attendance FROM academic_rule_profiles
+             WHERE institute_id = :i AND is_default = 1
+             ORDER BY effective_from DESC, id DESC LIMIT 1',
+            ['i' => $instituteId]
+        )->fetchColumn();
+        return $value === false || $value === null ? null : (float) $value;
+    }
+
+    public function attendanceShortage(int $instituteId, string $from, string $to, int $classId = 0): array
+    {
+        $sql = "SELECT s.id, s.registration_no, s.student_name, c.name AS class_name,
+                       COUNT(a.id) AS marked,
+                       SUM(a.status IN ('Present','Late')) AS present,
+                       SUM(a.status = 'Absent') AS absent,
+                       SUM(a.status = 'Leave') AS on_leave
+                FROM students s
+                LEFT JOIN classes c ON c.id = s.class_id
+                LEFT JOIN student_attendance a
+                       ON a.student_id = s.id AND a.attendance_date BETWEEN :from AND :to
+                WHERE s.institute_id = :i AND s.status = 'active'";
+        $params = ['i' => $instituteId, 'from' => $from, 'to' => $to];
+        if ($classId > 0) {
+            $sql .= ' AND s.class_id = :c';
+            $params['c'] = $classId;
+        }
+        $rows = $this->database->query($sql . ' GROUP BY s.id, s.registration_no, s.student_name, c.name ORDER BY c.name, s.student_name', $params)->fetchAll();
+        foreach ($rows as &$row) {
+            $marked = (int) $row['marked'];
+            // Late still counts as attending; only Absent and Leave reduce the percentage.
+            $row['percentage'] = $marked > 0 ? round((int) $row['present'] / $marked * 100, 1) : 0.0;
+        }
+        return $rows;
+    }
+
+    /* ------------------------------------------------------- test history */
+
+    /** Every recorded test for one student, with ABS preserved rather than shown as zero. */
+    public function studentTestHistory(int $instituteId, int $studentId, string $from = '', string $to = ''): array
+    {
+        $sql = 'SELECT t.test_date, t.title, t.total_marks, sub.name AS subject, c.name AS class_name,
+                       m.obtained_marks, COALESCE(m.is_absent,0) AS is_absent, m.remarks
+                FROM class_test_marks m
+                JOIN class_tests t ON t.id = m.class_test_id
+                LEFT JOIN subjects sub ON sub.id = t.subject_id
+                LEFT JOIN classes c ON c.id = t.class_id
+                WHERE m.student_id = :s AND t.institute_id = :i';
+        $params = ['s' => $studentId, 'i' => $instituteId];
+        if ($from !== '' && $to !== '') {
+            $sql .= ' AND t.test_date BETWEEN :from AND :to';
+            $params['from'] = $from;
+            $params['to'] = $to;
+        }
+        return $this->database->query($sql . ' ORDER BY t.test_date DESC, t.id DESC', $params)->fetchAll();
+    }
+
+    /* --------------------------------------------------- student register */
+
+    /** Student register with status and optional class filter. */
+    public function studentRegister(int $instituteId, string $status = '', int $classId = 0): array
+    {
+        $sql = 'SELECT s.id, s.registration_no, s.student_name, s.father_name, s.mobile, s.family,
+                       s.status, s.date_of_admission, c.name AS class_name,
+                       sec.name AS section_name, str.name AS stream_name
+                FROM students s
+                LEFT JOIN classes c ON c.id = s.class_id
+                LEFT JOIN class_sections sec ON sec.id = s.section_id
+                LEFT JOIN academic_streams str ON str.id = s.stream_id
+                WHERE s.institute_id = :i';
+        $params = ['i' => $instituteId];
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $sql .= ' AND s.status = :st';
+            $params['st'] = $status;
+        }
+        if ($classId > 0) {
+            $sql .= ' AND s.class_id = :c';
+            $params['c'] = $classId;
+        }
+        return $this->database->query($sql . ' ORDER BY c.name, s.student_name', $params)->fetchAll();
+    }
+
+    /** Siblings grouped by the family label, with each child's outstanding balance. */
+    public function familyReport(int $instituteId): array
+    {
+        $rows = $this->database->query(
+            "SELECT s.family, s.registration_no, s.student_name, s.father_name, s.mobile, c.name AS class_name,
+                    COALESCE(SUM(fi.remaining_amount),0) AS outstanding
+             FROM students s
+             LEFT JOIN classes c ON c.id = s.class_id
+             LEFT JOIN fee_invoices fi ON fi.student_id = s.id
+             WHERE s.institute_id = :i AND s.family IS NOT NULL AND s.family <> ''
+             GROUP BY s.id, s.family, s.registration_no, s.student_name, s.father_name, s.mobile, c.name
+             ORDER BY s.family, s.student_name",
+            ['i' => $instituteId]
+        )->fetchAll();
+        $families = [];
+        foreach ($rows as $row) {
+            $families[(string) $row['family']][] = $row;
+        }
+        return $families;
+    }
+
+    /* ------------------------------------------------------------ academic */
+
+    public function homeworkReport(int $instituteId, string $from, string $to, int $classId = 0): array
+    {
+        $sql = 'SELECT h.homework_date, h.homework_text, c.name AS class_name, sub.name AS subject_name,
+                       e.name AS teacher
+                FROM homework h
+                JOIN classes c ON c.id = h.class_id
+                LEFT JOIN subjects sub ON sub.id = h.subject_id
+                LEFT JOIN employees e ON e.id = h.teacher_id
+                WHERE c.institute_id = :i AND h.homework_date BETWEEN :from AND :to';
+        $params = ['i' => $instituteId, 'from' => $from, 'to' => $to];
+        if ($classId > 0) {
+            $sql .= ' AND h.class_id = :c';
+            $params['c'] = $classId;
+        }
+        return $this->database->query($sql . ' ORDER BY h.homework_date DESC LIMIT 500', $params)->fetchAll();
+    }
+
+    public function notesReport(int $instituteId, int $classId = 0): array
+    {
+        $sql = 'SELECT n.publish_date, n.title, n.chapter, n.status, c.name AS class_name,
+                       sub.name AS subject_name, e.name AS teacher
+                FROM class_notes n
+                JOIN classes c ON c.id = n.class_id
+                LEFT JOIN subjects sub ON sub.id = n.subject_id
+                LEFT JOIN employees e ON e.id = n.teacher_id
+                WHERE n.institute_id = :i';
+        $params = ['i' => $instituteId];
+        if ($classId > 0) {
+            $sql .= ' AND n.class_id = :c';
+            $params['c'] = $classId;
+        }
+        return $this->database->query($sql . ' ORDER BY n.publish_date DESC LIMIT 500', $params)->fetchAll();
+    }
+
+    public function teacherAssignmentReport(int $instituteId): array
+    {
+        return $this->database->query(
+            "SELECT e.employee_no, e.name AS teacher, e.role, c.name AS class_name,
+                    COALESCE(sub.name,'All subjects') AS subject_name, ta.assignment_type, ta.status
+             FROM teacher_assignments ta
+             JOIN employees e ON e.id = ta.employee_id
+             JOIN classes c ON c.id = ta.class_id
+             LEFT JOIN subjects sub ON sub.id = ta.subject_id
+             WHERE ta.institute_id = :i
+             ORDER BY e.name, c.name, sub.name",
+            ['i' => $instituteId]
+        )->fetchAll();
+    }
 }

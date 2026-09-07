@@ -30,4 +30,8 @@ return [
     'certificates' => ['view' => 'certificates.view',  'manage' => 'certificates.manage'],
     'communication'=> ['view' => 'communication.view', 'manage' => 'communication.manage'],
     'roles'        => ['view' => 'roles.view',         'manage' => 'roles.manage'],
+    'guardians'    => ['view' => 'students.view',      'manage' => 'students.manage'],
+    'teacher-assignments' => ['view' => 'classes.view','manage' => 'teacher-assignments.manage'],
+    'notes'        => ['view' => 'notes.view',          'manage' => 'notes.manage'],
+    'whatsapp'     => ['view' => 'communication.view',  'manage' => 'whatsapp.manage'],
 ];

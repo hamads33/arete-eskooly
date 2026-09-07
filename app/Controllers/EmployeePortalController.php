@@ -29,7 +29,7 @@ final class EmployeePortalController extends PortalController
             'attendance' => $this->repo()->employeeAttendanceSummary($employeeId, date('Y-01-01'), date('Y-m-d')),
             'salaryTotal' => $this->repo()->employeeSalaryTotal($employeeId),
             'salaries' => array_slice($this->repo()->employeeSalaryPayments($employeeId, 5), 0, 5),
-            'classes' => $this->repo()->employeeClasses($instituteId, (string) $employee['name']),
+            'classes' => $this->repo()->employeeClasses($instituteId, (string) $employee['name'], $employeeId),
             'homework' => array_slice($this->repo()->employeeHomework($employeeId, $instituteId, 5), 0, 5),
         ]);
     }
@@ -92,7 +92,7 @@ final class EmployeePortalController extends PortalController
             'activeMenu' => 'portal-classes',
             'instituteId' => (int) $employee['institute_id'],
             'employee' => $employee,
-            'classes' => $this->repo()->employeeClasses((int) $employee['institute_id'], (string) $employee['name']),
+            'classes' => $this->repo()->employeeClasses((int) $employee['institute_id'], (string) $employee['name'], (int)$employee['id']),
         ]);
     }
 

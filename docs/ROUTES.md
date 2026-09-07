@@ -165,3 +165,17 @@ Added after auditing eSkooly's `/bb/StudentPortal/` page inventory — see
 
 `/portal/messages` and `/portal/account` serve both audiences; the controller resolves the
 audience via `PortalController::identity()`.
+# Pakistan ERP routes added 2026-09-07
+
+- `GET/POST /admin/guardians`, `POST /admin/guardians/login`, `POST /admin/guardians/{id}/deactivate`
+- `GET/POST /admin/teacher-assignments`, `POST /admin/teacher-assignments/{id}/delete`
+- `GET/POST /admin/notes`, `POST /admin/notes/{id}/delete`
+- `GET /portal/parent`, `GET /portal/parent/children/{id}`, `GET /portal/student/notes`
+- `GET/POST /admin/settings/academic-profiles` (session/profile POST subroutes)
+- `GET/POST /admin/fees/automation`, `POST /admin/fees/generate-monthly`
+- `POST /admin/fees/payments/{id}/reverse`, `POST /admin/fees/{id}/void`
+- `GET/POST /admin/whatsapp` (template/open POST subroutes)
+- `POST /admin/dashboard/rebuild`
+- `POST /admin/exams/{id}/status`, `POST /admin/class-tests/{id}/status`
+- `GET /admin/reports/class-tests/{test}/marksheet/pdf`
+- `GET /admin/reports/exams/{exam}/classes/{class}/gazette/pdf`

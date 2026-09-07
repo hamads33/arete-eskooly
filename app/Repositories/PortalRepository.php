@@ -52,6 +52,7 @@ final class PortalRepository
                COUNT(*) AS total,
                SUM(status = 'Present') AS present,
                SUM(status = 'Absent') AS absent,
+               SUM(status = 'Late') AS late_count,
                SUM(status = 'Leave') AS leave_count
              FROM student_attendance
              WHERE student_id = :id AND attendance_date BETWEEN :from AND :to",
@@ -73,7 +74,7 @@ final class PortalRepository
     public function studentInvoices(int $studentId, int $limit = 60): array
     {
         return $this->database->query(
-            'SELECT id, fee_month, invoice_no, total_amount, paid_amount, remaining_amount, status, created_at
+            'SELECT id, fee_month, invoice_no, total_amount, paid_amount, remaining_amount, status, voided_at, created_at
              FROM fee_invoices WHERE student_id = :id
              ORDER BY fee_month DESC LIMIT ' . $this->limit($limit),
             ['id' => $studentId]
@@ -100,7 +101,7 @@ final class PortalRepository
     public function studentPayments(int $studentId, int $limit = 60): array
     {
         return $this->database->query(
-            'SELECT id, receipt_no, payment_date, amount, payment_method, reference
+            'SELECT id, receipt_no, payment_date, amount, payment_method, reference, reversed_at
              FROM fee_payments WHERE student_id = :id
              ORDER BY payment_date DESC, id DESC LIMIT ' . $this->limit($limit),
             ['id' => $studentId]
@@ -147,12 +148,12 @@ final class PortalRepository
     {
         return $this->database->query(
             'SELECT x.id AS exam_id, x.name AS exam_name, x.start_date, sub.name AS subject,
-                    es.total_marks, m.obtained_marks, m.remarks
+                    es.total_marks, m.obtained_marks, m.is_absent, m.remarks
              FROM exam_marks m
              JOIN exam_subjects es ON es.id = m.exam_subject_id
              JOIN exams x ON x.id = es.exam_id
              JOIN subjects sub ON sub.id = es.subject_id
-             WHERE m.student_id = :student AND x.institute_id = :institute
+             WHERE m.student_id = :student AND x.institute_id = :institute AND x.status = \'published\'
              ORDER BY x.start_date DESC, sub.name',
             ['student' => $studentId, 'institute' => $instituteId]
         )->fetchAll();
@@ -161,11 +162,11 @@ final class PortalRepository
     public function studentClassTests(int $studentId, int $instituteId, int $limit = 60): array
     {
         return $this->database->query(
-            'SELECT t.title, t.test_date, t.total_marks, sub.name AS subject, m.obtained_marks
+            'SELECT t.title, t.test_date, t.total_marks, sub.name AS subject, m.obtained_marks, m.is_absent, m.remarks
              FROM class_test_marks m
              JOIN class_tests t ON t.id = m.class_test_id
              LEFT JOIN subjects sub ON sub.id = t.subject_id
-             WHERE m.student_id = :student AND t.institute_id = :institute
+             WHERE m.student_id = :student AND t.institute_id = :institute AND t.status IN (\'published\',\'completed\')
              ORDER BY t.test_date DESC LIMIT ' . $this->limit($limit),
             ['student' => $studentId, 'institute' => $instituteId]
         )->fetchAll();
@@ -180,10 +181,15 @@ final class PortalRepository
              JOIN classes c ON c.id = h.class_id
              LEFT JOIN subjects sub ON sub.id = h.subject_id
              LEFT JOIN employees e ON e.id = h.teacher_id
-             WHERE h.class_id = :class AND c.institute_id = :institute
+             WHERE h.class_id = :class AND c.institute_id = :institute AND h.status = \'published\'
              ORDER BY h.homework_date DESC LIMIT ' . $this->limit($limit),
             ['class' => $classId, 'institute' => $instituteId]
         )->fetchAll();
+    }
+
+    public function studentNotes(int$classId,int$instituteId,int$limit=60):array
+    {
+        return $this->database->query('SELECT n.title,n.chapter,n.description,n.attachment_path,n.publish_date,s.name subject,e.name teacher FROM class_notes n JOIN subjects s ON s.id=n.subject_id LEFT JOIN employees e ON e.id=n.teacher_id WHERE n.class_id=:class AND n.institute_id=:institute AND n.status="published" ORDER BY n.publish_date DESC,n.id DESC LIMIT '.$this->limit($limit),['class'=>$classId,'institute'=>$instituteId])->fetchAll();
     }
 
     public function studentCertificates(int $studentId, int $instituteId): array
@@ -269,18 +275,19 @@ final class PortalRepository
      * Classes this employee is named on. classes.teacher_reference is free text rather than
      * a foreign key, so this matches on the stored name.
      */
-    public function employeeClasses(int $instituteId, string $employeeName): array
+    public function employeeClasses(int $instituteId, string $employeeName, int$employeeId=0): array
     {
-        if (trim($employeeName) === '') {
+        if (trim($employeeName) === '' && $employeeId <= 0) {
             return [];
         }
         return $this->database->query(
-            'SELECT c.id, c.name, c.monthly_tuition,
+            'SELECT DISTINCT c.id, c.name, c.monthly_tuition,
                     (SELECT COUNT(*) FROM students s WHERE s.class_id = c.id AND s.status = \'active\') AS student_count
              FROM classes c
-             WHERE c.institute_id = :institute AND c.teacher_reference = :teacher
+             LEFT JOIN teacher_assignments ta ON ta.class_id=c.id AND ta.employee_id=:employee AND ta.status=\'active\'
+             WHERE c.institute_id = :institute AND (c.teacher_reference = :teacher OR ta.id IS NOT NULL)
              ORDER BY c.name',
-            ['institute' => $instituteId, 'teacher' => $employeeName]
+            ['institute' => $instituteId, 'teacher' => $employeeName, 'employee'=>$employeeId]
         )->fetchAll();
     }
 
@@ -316,6 +323,7 @@ final class PortalRepository
             'present' => $present,
             'absent' => (int) ($row['absent'] ?? 0),
             'leave' => (int) ($row['leave_count'] ?? 0),
+            'late' => (int) ($row['late_count'] ?? 0),
             'percentage' => $total > 0 ? round($present / $total * 100, 1) : 0.0,
         ];
     }

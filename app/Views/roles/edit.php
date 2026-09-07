@@ -1,5 +1,5 @@
 <?php $sys=(int)$role['is_system']===1; $isAdmin=$role['slug']==='admin'; ?>
-<main class="main"><div class="main__inner"><div class="module-page">
+<main class="main roles-page roles-edit-page"><div class="main__inner"><div class="module-page">
 <header class="module-page__header"><div><nav class="breadcrumb"><a href="<?=e(url('/admin/roles'))?>">Roles &amp; Permissions</a><i data-lucide="chevron-right"></i><span><?=e($role['name'])?></span></nav><h1><?=e($role['name'])?></h1><p><?=$isAdmin?'The administrator role always has full access.':'Grant or revoke what this role can do.'?></p></div></header>
 
 <section class="module-card"><header class="module-card__header"><div><h2>Role Details</h2><p>Slug <code><?=e($role['slug'])?></code><?=$sys?' · built-in role':''?></p></div></header><div class="module-card__body">

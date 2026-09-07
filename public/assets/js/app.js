@@ -26,12 +26,15 @@
 
   const lockedModal = document.getElementById("lockedModuleModal");
   const lockedTitle = document.getElementById("lockedModuleTitle");
+  // Locked modules use the single shared popup from preview-lock.js. The older
+  // lockedModuleModal markup is left in place but no longer opened, so only one
+  // dialog can ever appear.
   document.querySelectorAll("[data-locked-module]").forEach((control) => {
-    control.addEventListener("click", () => {
-      lockedTitle.textContent = `${control.dataset.lockedModule} is undergoing testing`;
-      lockedModal.hidden = false;
-      lockedModal.setAttribute("aria-hidden", "false");
-      document.body.classList.add("no-scroll");
+    control.addEventListener("click", (event) => {
+      event.preventDefault();
+      if (typeof window.showLockedModule === "function") {
+        window.showLockedModule(control.dataset.lockedModule);
+      }
     });
   });
   document.querySelectorAll("[data-locked-modal-close]").forEach((control) => control.addEventListener("click", () => {

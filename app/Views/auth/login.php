@@ -1,4 +1,4 @@
-<div class="auth-heading"><span class="eyebrow">YOUR SCHOOL, AT YOUR FINGERTIPS</span><h1>Welcome back<span>.</span></h1><p>A new day of possibilities starts here.<br>Sign in to your school workspace.</p></div>
+<div class="auth-heading"><span class="eyebrow">YOUR INSTITUTE, AT YOUR FINGERTIPS</span><h1>Welcome back<span>.</span></h1><p>A new day of possibilities starts here.<br>Sign in to your school workspace.</p></div>
 <form class="auth-form" method="post" action="<?= url('/login') ?>">
 <?= csrf_field() ?>
 <?php $fields=[['email','Email address','email','email','you@school.edu'],['password','Password','password','current-password','Enter your password']]; require BASE_PATH.'/app/Views/auth/fields.php'; ?>

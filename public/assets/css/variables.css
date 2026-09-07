@@ -15,10 +15,11 @@
   --text-secondary: #776d71;
   --text-muted: #9b9296;
   --border: #ece5e8;
+  --border-strong: #ded3d8;
   --success: #198754;
   --warning: #d9a441;
   --danger: #d84242;
-  --info: #4776e6;
+  --info: #516b91;
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
@@ -31,5 +32,5 @@
   --header-height: 72px;
   --sidebar-width: clamp(276px, 17.5vw, 336px);
   --sidebar-collapsed: 82px;
-  --content-max: 1680px;
+  --content-max: 1480px;
 }

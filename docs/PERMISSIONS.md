@@ -50,3 +50,12 @@ the single `employee` role regardless of designation.
 Portal authorization is enforced by `PortalMiddleware` (requires `student` or `employee`) plus
 per-request ownership: `PortalRepository` resolves the owning record from the session user id,
 and no portal route accepts a student or employee identifier.
+# Pakistan ERP permission additions
+
+- `portal.parent`
+- `teacher-assignments.manage`
+- `notes.view`
+- `notes.manage`
+- `whatsapp.manage`
+
+Parent child access is additionally enforced through `guardian_students`; route IDs cannot bypass ownership. New admin routes remain closed by default through `AdminAreaMiddleware` and the module permission map.

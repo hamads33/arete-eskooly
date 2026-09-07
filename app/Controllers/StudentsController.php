@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace App\Controllers;
-use App\Core\{Request,Response,Validator};use App\Repositories\{AcademicRepository,SettingsRepository,StudentRepository,WorkflowRepository,SupportRepository};use App\Services\{StudentService,CredentialService};use App\Support\Flash;
+use App\Core\{Request,Response,Validator};use App\Repositories\{AcademicRepository,SettingsRepository,StudentRepository,WorkflowRepository,SupportRepository,FeeRepository};use App\Services\{StudentService,CredentialService,FeeService};use App\Support\Flash;
 final class StudentsController extends AdminPageController{
 private function institute():int{return(int)(new SettingsRepository($this->app->database()))->institute()['id'];}private function repo():StudentRepository{return new StudentRepository($this->app->database());}private function admin():?Response{return can('students.view')?null:Response::html('Forbidden',403);}private function classes():array{return(new AcademicRepository($this->app->database()))->classes($this->institute());}private function fail(string$url,array$e,array$o):Response{$this->app->session()->flash('_errors',$e);$this->app->session()->flash('_old',$o);Flash::add('error',reset($e)[0]??'Please correct the form.');return Response::redirect(url($url));}
 public function index(Request$r):Response{if($x=$this->admin())return$x;$q=trim((string)$r->query('student_search',''));$c=(int)$r->query('student_class',0);return$this->renderPage('students',['students'=>$this->repo()->paginate($this->institute(),$q,$c?:null),'classes'=>$this->classes(),'search'=>$q,'classFilter'=>$c]);}

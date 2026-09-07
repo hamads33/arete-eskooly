@@ -1,0 +1,229 @@
+/*
+ * Print stylesheet.
+ *
+ * Screen chrome (sidebar, header, filters, buttons) is dropped so a printed page is a clean
+ * branded document rather than a screenshot of the application. The letterhead and footer are
+ * hidden on screen and only appear on paper.
+ */
+
+.print-letterhead,
+.print-footer {
+    display: none;
+}
+
+@media print {
+    @page {
+        size: A4;
+        margin: 14mm 12mm 16mm;
+    }
+
+    /* Screen-only chrome. */
+    .sidebar,
+    .sidebar-overlay,
+    .app-header,
+    .filter-bar,
+    .filter-actions,
+    .export-button,
+    .btn,
+    .text-button,
+    .inline-form,
+    .module-page__header a,
+    .module-card__header .btn,
+    .breadcrumb,
+    .flash-stack,
+    .modal-root,
+    .dropdown-menu,
+    .sidebar-search,
+    .pagination {
+        display: none !important;
+    }
+
+    html,
+    body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #000;
+        font-size: 10.5pt;
+    }
+
+    .app-shell,
+    .main,
+    .main__inner,
+    .module-page {
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        max-width: none !important;
+        background: #fff !important;
+        box-shadow: none !important;
+        border: 0 !important;
+    }
+
+    /* Institute letterhead, printed once at the top of the document. */
+    .print-letterhead {
+        display: block;
+        border-bottom: 2px solid #7a1632;
+        padding-bottom: 8px;
+        margin-bottom: 14px;
+    }
+
+    .print-letterhead__row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .print-letterhead__logo {
+        width: 54px;
+        height: 54px;
+        object-fit: contain;
+    }
+
+    .print-letterhead__name {
+        font-size: 16pt;
+        font-weight: 700;
+        color: #7a1632;
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .print-letterhead__meta {
+        font-size: 8.5pt;
+        color: #444;
+        margin: 2px 0 0;
+    }
+
+    .print-letterhead__title {
+        margin-top: 8px;
+        font-size: 12pt;
+        font-weight: 600;
+    }
+
+    .print-footer {
+        display: block;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-top: 1px solid #d8ccd2;
+        padding-top: 4px;
+        font-size: 7.5pt;
+        color: #666;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    /* Cards flatten into plain sections. */
+    .module-card {
+        border: 0 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        margin: 0 0 12px !important;
+        padding: 0 !important;
+        break-inside: auto;
+    }
+
+    .module-card__header {
+        border: 0 !important;
+        padding: 0 0 4px !important;
+        background: transparent !important;
+    }
+
+    .module-card__header h2 {
+        font-size: 11pt;
+        margin: 0;
+    }
+
+    .module-card__body {
+        padding: 0 !important;
+    }
+
+    /* Tables must repeat headers and never scroll. */
+    .table-scroll {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+
+    table.data-table,
+    table.responsive-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 8.5pt;
+    }
+
+    table.data-table thead,
+    table.responsive-table thead {
+        display: table-header-group;
+    }
+
+    table.data-table th,
+    table.data-table td,
+    table.responsive-table th,
+    table.responsive-table td {
+        border: 1px solid #c9bcc3 !important;
+        padding: 4px 6px !important;
+        color: #000 !important;
+        background: #fff !important;
+    }
+
+    table.data-table thead th,
+    table.responsive-table thead th {
+        background: #f2eaee !important;
+        font-weight: 700;
+    }
+
+    tr {
+        break-inside: avoid;
+    }
+
+    /* Metric tiles print as a compact summary strip. */
+    .metric-grid {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .metric-card {
+        border: 1px solid #c9bcc3 !important;
+        box-shadow: none !important;
+        padding: 5px 9px !important;
+        background: #fff !important;
+        flex: 0 0 auto;
+    }
+
+    .metric-card span {
+        font-size: 7.5pt;
+        color: #555;
+    }
+
+    .metric-card strong {
+        font-size: 10pt;
+        color: #000;
+    }
+
+    .status-badge {
+        border: 1px solid #c9bcc3 !important;
+        background: #fff !important;
+        color: #000 !important;
+        padding: 1px 5px !important;
+    }
+
+    h1 {
+        font-size: 13pt;
+        margin: 0 0 2px;
+    }
+
+    .module-page__header p {
+        font-size: 8.5pt;
+        color: #555;
+        margin: 0 0 10px;
+    }
+
+    a {
+        color: #000 !important;
+        text-decoration: none !important;
+    }
+}

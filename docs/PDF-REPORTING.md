@@ -19,3 +19,9 @@ Available documents include admission and job letters, salary slips and sheets, 
 Install dependencies with `composer install`, apply schema changes with `php database/migrate.php`, and run verification with `php tests/run.php`. The renderer needs write access to `storage/tmp/mpdf` and creates that directory when absent.
 
 To generate the visual QA fixture, run `php scripts/generate_pdf_sample.php`. The resulting artifact is `output/pdf/report-engine-sample.pdf`.
+# Academic PDF additions
+
+- Class-test marksheet: persisted marks, ABS, remarks, highest, lowest, average, pass/fail/absent counts.
+- Exam class gazette: institute-branded class result summary from persisted exam marks.
+
+Both use the centralized PDF service and tenant-scoped record lookup.

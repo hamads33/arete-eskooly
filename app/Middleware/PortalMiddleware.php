@@ -20,7 +20,7 @@ final class PortalMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
-        if (!hasRole('student') && !hasRole('employee')) {
+        if (!hasRole('student') && !hasRole('employee') && !hasRole('parent')) {
             return Response::html(View::render('errors/403', ['pageTitle' => 'Access Denied'], 'layouts/error'), 403);
         }
         return $next($request);
