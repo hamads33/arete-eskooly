@@ -36,7 +36,7 @@
 <div class="filter-actions"><button class="btn btn--primary" type="submit">Assign Role</button></div>
 </form>
 <div class="table-scroll"><table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Actions</th></tr></thead><tbody>
-<?php foreach($members as $m):?><tr><td><?=e($m['name'])?></td><td><?=e($m['email'])?></td><td><form method="post" action="<?=e(url('/admin/roles/'.(int)$role['id'].'/unassign'))?>"><?=csrf_field()?><input type="hidden" name="user_id" value="<?=(int)$m['id']?>"><button class="text-button" type="submit">Remove</button></form></td></tr><?php endforeach?>
+<?php foreach($members as $m):?><tr><td><?=e($m['name'])?></td><td><?=e($m['email'])?></td><td><div class="table-actions"><?php if(can('*') && (int)$m['id']!==(int)(user()['id']??0) && !$isAdmin):?><form method="post" action="<?=e(url('/admin/impersonate/'.(int)$m['id']))?>"><?=csrf_field()?><button class="btn btn--secondary" type="submit"><i data-lucide="eye"></i>View as user</button></form><?php endif?><form method="post" action="<?=e(url('/admin/roles/'.(int)$role['id'].'/unassign'))?>"><?=csrf_field()?><input type="hidden" name="user_id" value="<?=(int)$m['id']?>"><button class="text-button" type="submit">Remove</button></form></div></td></tr><?php endforeach?>
 <?php if(!$members):?><tr><td colspan="3"><div class="compact-empty"><h3>No Users</h3><p>Nobody currently holds this role.</p></div></td></tr><?php endif?>
 </tbody></table></div>
 </div></section>

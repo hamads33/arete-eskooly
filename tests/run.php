@@ -64,6 +64,9 @@ $checks = array_merge($checks, $whatsappOutreach($app));
 $studentCsvCrud = require BASE_PATH . '/tests/Feature/StudentCsvCrudFeatureTest.php';
 $checks = array_merge($checks, $studentCsvCrud($app));
 
+$impersonation = require BASE_PATH . '/tests/Feature/ImpersonationFeatureTest.php';
+$checks = array_merge($checks, $impersonation($app));
+
 foreach ($checks as $name => $result) {
     echo ($result ? '[PASS] ' : '[FAIL] ') . $name . PHP_EOL;
 }

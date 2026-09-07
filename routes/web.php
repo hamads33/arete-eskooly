@@ -23,6 +23,7 @@ use App\Controllers\AcademicStructureController;
 use App\Controllers\WhatsAppController;
 use App\Controllers\ReportsController;
 use App\Controllers\RolesController;
+use App\Controllers\ImpersonationController;
 use App\Controllers\ReportPdfController;
 use App\Controllers\ReportTemplateController;
 use App\Controllers\SalaryController;
@@ -226,6 +227,8 @@ $router->post('/admin/roles/{id}/permissions', [RolesController::class, 'savePer
 $router->post('/admin/roles/{id}/assign', [RolesController::class, 'assign'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/roles/{id}/unassign', [RolesController::class, 'unassign'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/roles/{id}/delete', [RolesController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/impersonate/{id}', [ImpersonationController::class, 'start'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/impersonation/stop', [ImpersonationController::class, 'stop'], [AuthMiddleware::class, VerifyCsrfToken::class]);
 
 
 $router->get('/admin/behaviour/traits', [BehaviourController::class, 'traits'], name: 'behaviour.traits');

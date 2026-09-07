@@ -29,6 +29,7 @@ final class AuthService
     public function logout(): void
     {
         $this->session->forget('auth_user');
+        $this->session->forget('impersonator_user_id');
         $this->session->regenerate();
     }
 

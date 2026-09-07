@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="<?= e(asset('css/premium-ui.css?v=1')) ?>">
 </head>
 <body class="portal-shell">
+<?php require BASE_PATH . '/app/Views/partials/impersonation-banner.php'; ?>
   <div class="app-shell" id="appShell">
 <?php require BASE_PATH . '/app/Views/partials/portal-header.php'; ?>
 <?php require BASE_PATH . '/app/Views/partials/sidebar.php'; ?>

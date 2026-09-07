@@ -229,7 +229,7 @@ final class RoleRepository
 
     private function slug(string $name): string
     {
-        $slug = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '-', $name) ?? ''), '-');
+        $slug = strtolower(trim(preg_replace('/[^a-zA-Z0-9]+/', '-', $name) ?? '', '-'));
         return mb_substr($slug, 0, 80);
     }
 }
