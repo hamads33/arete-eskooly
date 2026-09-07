@@ -45,6 +45,7 @@ $router->get('/portal/employee/documents', [EmployeePortalController::class, 'do
 
 // ---- parent / guardian ------------------------------------------------------
 $router->get('/portal/parent', [ParentPortalController::class, 'index'], name: 'portal.parent.dashboard');
+$router->get('/portal/parent/profile', [ParentPortalController::class, 'profile'], name: 'portal.parent.profile');
 $router->get('/portal/parent/children/{id}', [ParentPortalController::class, 'child'], name: 'portal.parent.child');
 
 // ---- branded PDF documents (self-scoped) -----------------------------------

@@ -105,6 +105,7 @@ abstract class PortalController extends Controller
         if ($audience === 'parent') {
             return [
                 $item('My Children', 'portal-dashboard', 'users-round', '/portal/parent'),
+                $item('My Profile', 'portal-profile', 'user-round', '/portal/parent/profile'),
                 $item('Messages', 'portal-messages', 'messages-square', '/portal/messages'),
                 $item('Account Settings', 'portal-account', 'settings-2', '/portal/account'),
             ];

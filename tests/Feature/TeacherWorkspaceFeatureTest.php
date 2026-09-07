@@ -98,6 +98,23 @@ return static function (App $app): array {
         $check('absent is recorded rather than a zero mark', (int) $absent === 1);
     }
 
+    // ---- a staff role alone must still open the portal ----------------------
+    // An admin can grant "teacher" from Roles & Permissions without also granting the generic
+    // "employee" role. Gating the portal on role slugs alone locked such users out of their
+    // own workspace, so access is decided by the linked employee record.
+    $db->query('DELETE FROM user_roles WHERE user_id=:u', ['u' => $user]);
+    $db->query('INSERT IGNORE INTO user_roles(user_id,role_id) SELECT :u,id FROM roles WHERE slug=:s', ['u' => $user, 's' => 'teacher']);
+    $app->session()->set('auth_user', (new UserRepository($db))->findAuthContext($user));
+    $roles = (array) (user()['roles'] ?? []);
+    $check('staff role without the generic employee role is set up', in_array('teacher', $roles, true) && !in_array('employee', $roles, true));
+    $check('teacher-only role can still open the employee portal', $get('/portal/employee')->status() === 200);
+    $check('teacher-only role can still open the teaching workspace', $get('/portal/employee/teaching')->status() === 200);
+
+    // Restore the employee role for the remaining assertions.
+    $db->query('DELETE FROM user_roles WHERE user_id=:u', ['u' => $user]);
+    $db->query('INSERT IGNORE INTO user_roles(user_id,role_id) SELECT :u,id FROM roles WHERE slug=:s', ['u' => $user, 's' => 'employee']);
+    $app->session()->set('auth_user', (new UserRepository($db))->findAuthContext($user));
+
     // ---- an employee with no assignment gets no workspace --------------------
     $db->query('DELETE FROM teacher_assignments WHERE employee_id=:e', ['e' => $employee]);
     $app->session()->set('auth_user', (new UserRepository($db))->findAuthContext($user));
