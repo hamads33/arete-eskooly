@@ -16,7 +16,7 @@ abstract class Controller
             $baseStyles = [
                 'css/variables.css', 'css/reset.css', 'css/base.css', 'css/layout.css',
                 'css/components.css?v=6', 'css/account-settings.css?v=1',
-                'css/settings.css?v=2', 'css/admin-pages.css?v=4', 'css/dashboard.css',
+                'css/settings.css?v=2', 'css/admin-pages.css?v=5', 'css/dashboard.css',
                 'css/responsive.css',
                 'css/print.css?v=1',
             ];
