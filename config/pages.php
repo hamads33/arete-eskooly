@@ -133,7 +133,7 @@ return [
         'activeMenu' => 'classes',
         'activeSubmenu' => 'classes',
         'styles' => ['css/variables.css', 'css/reset.css', 'css/base.css', 'css/layout.css', 'css/components.css?v=4', 'css/account-settings.css?v=1', 'css/settings.css?v=1', 'css/admin-pages.css?v=3', 'css/dashboard.css', 'css/responsive.css'],
-        'scripts' => ['vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=4', 'js/app.js', 'js/settings-shared.js?v=1', 'js/admin-pages.js?v=3'],
+        'scripts' => ['vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=4', 'js/app.js', 'js/settings-shared.js?v=1', 'js/admin-pages.js?v=4'],
         'source' => 'classes.html',
     ],
     'class-add' => [
@@ -175,7 +175,7 @@ return [
         'activeMenu' => 'subjects',
         'activeSubmenu' => 'subject-assign',
         'styles' => ['css/variables.css', 'css/reset.css', 'css/base.css', 'css/layout.css', 'css/components.css?v=4', 'css/account-settings.css?v=1', 'css/settings.css?v=1', 'css/admin-pages.css?v=3', 'css/dashboard.css', 'css/responsive.css'],
-        'scripts' => ['vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=4', 'js/app.js', 'js/settings-shared.js?v=1', 'js/admin-pages.js?v=3'],
+        'scripts' => ['vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=4', 'js/app.js', 'js/settings-shared.js?v=1', 'js/admin-pages.js?v=4'],
         'source' => 'subject-assign.html',
     ],
     'students' => [

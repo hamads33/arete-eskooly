@@ -31,6 +31,7 @@ return [
     ]),
     $item('Students', 'students', 'users-round', null, [
         $child('All Students', 'students', '/admin/students'), $child('Add New', 'student-add', '/admin/students/create'),
+        $child('Bulk Import CSV', 'student-import', '/admin/students#bulk-student-import'),
         $child('Manage Families', 'student-families', '/admin/students/families'), $child('Active / Inactive', 'student-status', '/admin/students/status'),
         $child('Admission Letter', 'student-admission-letter', '/admin/students/admission-letter'),
         $child('ID Cards', 'student-id-cards', '/admin/students/id-cards'), $child('Print Basic List', 'student-basic-list', '/admin/students/basic-list'),
