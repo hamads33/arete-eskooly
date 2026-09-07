@@ -103,6 +103,8 @@ $router->post('/admin/subjects/{id}/delete', [SubjectsController::class, 'delete
 
 $router->get('/admin/students', [StudentsController::class, 'index'], name: 'students.index');
 $router->get('/admin/students/create', [StudentsController::class, 'create'], name: 'students.create');
+$router->get('/admin/students/import/example', [StudentsController::class, 'importExample'], [AdminAreaMiddleware::class]);
+$router->post('/admin/students/import', [StudentsController::class, 'import'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->get('/admin/students/families', [StudentsController::class, 'families'], name: 'students.families');
 $router->get('/admin/students/status', [StudentsController::class, 'statusManager'], name: 'students.status');
 $router->get('/admin/students/admission-letter', [StudentsController::class, 'admissionLetter'], name: 'students.admission-letter');

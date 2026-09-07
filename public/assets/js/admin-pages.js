@@ -30,15 +30,15 @@
   const addSubjectButton=document.querySelector('[data-demo-action="Add subject row"]');
   const removeSubjectButton=document.querySelector('[data-demo-action="Remove last subject"]');
   if(addSubjectButton){
-    const subjectGrid=addSubjectButton.closest("form").querySelector(".module-form-grid");
+    const subjectGrid=addSubjectButton.closest("form").querySelector("[data-subject-rows],.module-form-grid");
     addSubjectButton.addEventListener("click",()=>{
-      const source=[...subjectGrid.children].slice(1,3);
+      const source=[...subjectGrid.children].slice(-2);
       source.forEach((field,index)=>{
         const clone=field.cloneNode(true);const input=clone.querySelector("input");const label=clone.querySelector("label");
         input.value="";input.name=index===0?"subject_name[]":"subject_marks[]";input.removeAttribute("id");label.removeAttribute("for");subjectGrid.append(clone);
       });
     });
-    removeSubjectButton?.addEventListener("click",()=>{if(subjectGrid.children.length>3){subjectGrid.lastElementChild.remove();subjectGrid.lastElementChild.remove();}});
+    removeSubjectButton?.addEventListener("click",()=>{if(subjectGrid.children.length>2){subjectGrid.lastElementChild.remove();subjectGrid.lastElementChild.remove();}});
   }
 
   function openModal(id) {
