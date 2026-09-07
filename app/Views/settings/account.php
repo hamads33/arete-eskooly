@@ -28,8 +28,8 @@
                   <div class="form-field">
                     <label class="form-label" for="accountPassword">Password <span class="required-marker" aria-hidden="true">*</span><span class="sr-only">(required)</span></label>
                     <!-- PHP INTEGRATION: preserve actual password/update behavior from backend -->
-                    <div class="field-control field-control--password"><i data-lucide="lock-keyhole" aria-hidden="true"></i><input class="form-input" id="accountPassword" name="account_password" type="password" value="" autocomplete="new-password" minlength="12"><button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password" aria-pressed="false"><i data-lucide="eye" aria-hidden="true"></i></button></div>
-                    <p class="field-help">Leave blank to keep the current password; new passwords require at least 12 characters.</p>
+                    <div class="field-control field-control--password"><i data-lucide="lock-keyhole" aria-hidden="true"></i><input class="form-input" id="accountPassword" name="account_password" type="password" value="" autocomplete="new-password" minlength="8" maxlength="72"><button class="password-toggle" id="passwordToggle" type="button" aria-label="Show password" aria-pressed="false"><i data-lucide="eye" aria-hidden="true"></i></button></div>
+                    <p class="field-help">Leave blank to keep the current password; new passwords require 8–72 characters.</p>
                   </div>
                 </div>
               </section>

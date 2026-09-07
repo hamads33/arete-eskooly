@@ -19,7 +19,7 @@ final class AuthService
         $context = $this->users->findAuthContext((int) $user['id']);
         if ($context === null) return 'invalid';
         $roles=(array)$context['roles'];
-        if(!array_intersect(['admin','student','employee','parent'],$roles))return'restricted';
+        if(!array_intersect(['admin','student','employee','parent'],$roles)&&!$this->users->hasLinkedIdentity((int)$user['id']))return'restricted';
         $this->users->updateLastLogin((int) $user['id']);
         $this->session->regenerate();
         $this->session->set('auth_user', $context);

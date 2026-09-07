@@ -50,7 +50,10 @@ final class AuthController extends Controller
      */
     private function landingRoute(): string
     {
-        if (hasRole('admin')) {
+        // Staff granted dashboard/module permissions belong in the administration workspace.
+        // Check effective permission before the generic employee role, otherwise every linked
+        // employee is incorrectly redirected to self-service even after a staff role is granted.
+        if (hasRole('admin') || can('dashboard.view')) {
             return '/admin/dashboard';
         }
         if (hasRole('student')) {

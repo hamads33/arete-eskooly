@@ -26,6 +26,24 @@ final class UserRepository
         return $user + ['roles' => $roles, 'permissions' => $permissions, 'institute_id'=>(int)$institute];
     }
 
+    /**
+     * A linked institute identity is valid portal ownership even when an administrator has
+     * replaced the generic employee role with a finer-grained staff role.
+     */
+    public function hasLinkedIdentity(int $userId): bool
+    {
+        foreach (['student_accounts', 'employee_accounts', 'guardian_accounts'] as $table) {
+            try {
+                if ($this->database->query("SELECT 1 FROM {$table} WHERE user_id=:u LIMIT 1", ['u' => $userId])->fetchColumn()) {
+                    return true;
+                }
+            } catch (\Throwable) {
+                // Older installations may not have every portal table yet.
+            }
+        }
+        return false;
+    }
+
     public function registerInstitute(string $name,string $institute,string $email,string $password): int
     {
         $pdo=$this->database->connection();

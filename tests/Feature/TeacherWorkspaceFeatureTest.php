@@ -4,6 +4,7 @@ declare(strict_types=1);
 use App\Core\{App,CSRF,Request};
 use App\Repositories\{AcademicRepository,PakistanErpRepository,UserRepository};
 use App\Services\CredentialService;
+use App\Services\AuthService;
 
 /**
  * Teacher workspace: authoring from the employee portal, constrained by teacher_assignments.
@@ -107,6 +108,12 @@ return static function (App $app): array {
     $app->session()->set('auth_user', (new UserRepository($db))->findAuthContext($user));
     $roles = (array) (user()['roles'] ?? []);
     $check('staff role without the generic employee role is set up', in_array('teacher', $roles, true) && !in_array('employee', $roles, true));
+    $app->session()->forget('auth_user');
+    $loginResult = (new AuthService(new UserRepository($db), $app->session()))->attempt('tw.' . $suffix . '@example.test', 'TeacherPass#' . $suffix);
+    $check('staff role without generic employee role can authenticate', $loginResult === 'authenticated');
+    $app->session()->forget('auth_user');
+    $loginResponse = $post('/login', ['_token' => CSRF::token(), 'email' => 'tw.' . $suffix . '@example.test', 'password' => 'TeacherPass#' . $suffix]);
+    $check('staff with dashboard permission lands in admin workspace', ($loginResponse->headers()['Location'] ?? '') === url('/admin/dashboard'));
     $check('teacher-only role can still open the employee portal', $get('/portal/employee')->status() === 200);
     $check('teacher-only role can still open the teaching workspace', $get('/portal/employee/teaching')->status() === 200);
 
