@@ -17,7 +17,7 @@ private function pinnedTeacher():int{if(can('*'))return 0;return$this->repo()->e
 public function index(Request$r):Response{$i=$this->i();$pinned=$this->pinnedTeacher();$teachers=(new EmployeeRepository($this->app->database()))->all($i,'',true);
 if($pinned>0)$teachers=array_values(array_filter($teachers,static fn(array$t):bool=>(int)$t['id']===$pinned));
 $teacherFilter=$pinned>0?$pinned:(int)$r->query('teacher',0);
-return$this->renderPage('homework',['rows'=>$this->repo()->homework($i,(string)$r->query('date')?:null,(int)$r->query('class',0),$teacherFilter),'classes'=>(new AcademicRepository($this->app->database()))->classes($i),'teachers'=>$teachers,'subjects'=>(new SupportRepository($this->app->database()))->subjects($i),'pinnedTeacher'=>$pinned]);}
+return$this->renderPage('homework',['rows'=>$this->repo()->homework($i,(string)$r->query('date')?:null,(int)$r->query('class',0),$teacherFilter),'classes'=>(new AcademicRepository($this->app->database()))->classes($i),'teachers'=>$teachers,'subjects'=>(new SupportRepository($this->app->database()))->subjects($i),'pinnedTeacher'=>$pinned,'editId'=>(int)$r->query('edit',0),'filterDate'=>(string)$r->query('date',''),'filterClass'=>(int)$r->query('class',0),'filterTeacher'=>$teacherFilter]);}
 
 public function store(Request$r):Response{return$this->save($r);}
 public function update(Request$r):Response{return$this->save($r,(int)$r->route('id'));}

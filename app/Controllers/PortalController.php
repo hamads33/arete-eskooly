@@ -116,17 +116,25 @@ abstract class PortalController extends Controller
             $item('My Attendance', 'portal-attendance', 'calendar-check', '/portal/employee/attendance'),
             $item('My Salary', 'portal-salary', 'badge-dollar-sign', '/portal/employee/salary'),
             $item('My Classes', 'portal-classes', 'school', '/portal/employee/classes'),
-            $item('My Homework', 'portal-homework', 'book-open', '/portal/employee/homework'),
             $item('My Documents', 'portal-documents', 'file-text', '/portal/employee/documents'),
             $item('Messages', 'portal-messages', 'messages-square', '/portal/messages'),
             $item('Account Settings', 'portal-account', 'settings-2', '/portal/account'),
         ];
 
-        // The teaching workspace only appears for employees who actually hold an assignment,
-        // so non-teaching staff never see authoring links they cannot use.
+        // A teacher needs to *do* things, not just read them, so an assigned teacher gets the
+        // authoring screens up front. Non-teaching staff only ever see the read-only list,
+        // since they have no class they are allowed to publish to.
         if ($this->hasTeachingAssignments()) {
             array_splice($employeeNav, 1, 0, [
                 $item('My Teaching', 'portal-teaching', 'graduation-cap', '/portal/employee/teaching'),
+                $item('Mark Attendance', 'portal-teaching-attendance', 'clipboard-check', '/portal/employee/teaching/attendance'),
+                $item('Assign Homework', 'portal-teaching-homework', 'book-open', '/portal/employee/teaching/homework'),
+                $item('Class Notes', 'portal-teaching-notes', 'file-text', '/portal/employee/teaching/notes'),
+                $item('Class Tests', 'portal-teaching-tests', 'clipboard-list', '/portal/employee/teaching/tests'),
+            ]);
+        } else {
+            array_splice($employeeNav, 5, 0, [
+                $item('My Homework', 'portal-homework', 'book-open', '/portal/employee/homework'),
             ]);
         }
 
