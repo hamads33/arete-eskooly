@@ -17,7 +17,14 @@ final class GoogleClientFactory
      * Minimum scopes for the job (§7): manage the events this app creates, and read the connected
      * account's email so the admin can confirm which account is linked. No Drive, no Gmail.
      */
-    public const SCOPES = ['https://www.googleapis.com/auth/calendar.events', 'https://www.googleapis.com/auth/userinfo.email'];
+    public const SCOPES = [
+        'https://www.googleapis.com/auth/calendar.events',
+        'https://www.googleapis.com/auth/userinfo.email',
+        // Lets the app create a Meet space it can configure as OPEN, so that holding the link is
+        // enough to walk in. Access is decided by this application's roles and audience rules; a
+        // second gate at Google's door only strands students the app has already authorised.
+        'https://www.googleapis.com/auth/meetings.space.created',
+    ];
 
     public function __construct(private readonly GoogleConnectionRepository $connections, private readonly TokenCipher $cipher) {}
 

@@ -3,24 +3,25 @@ declare(strict_types=1);
 namespace App\Services\Google;
 use Google\Service\Calendar;
 use Google\Service\Calendar\ConferenceData;
+use Google\Service\Calendar\ConferenceSolution;
 use Google\Service\Calendar\ConferenceSolutionKey;
 use Google\Service\Calendar\CreateConferenceRequest;
+use Google\Service\Calendar\EntryPoint;
 use Google\Service\Calendar\Event;
-use Google\Service\Calendar\EventAttendee;
 use Google\Service\Calendar\EventDateTime;
 
 /**
  * The real Google Calendar implementation of CalendarClient.
  *
- * Every Meet link in this product is created here, as a Calendar event carrying a
- * conferenceData.createRequest with the hangoutsMeet solution and conferenceDataVersion=1. Google
- * generates the conference asynchronously, so the caller (GoogleCalendarService) is responsible
- * for polling when conference_status comes back 'pending' (§17).
+ * Every Meet link in this product is created here. The link comes from a Meet space created with
+ * accessType OPEN and attached to a Calendar event, so that holding the link is enough to walk in:
+ * no invitation, no knocking, and no host needed before a student can enter. Access is decided by
+ * this application's roles and audience rules, which is the only place it should be decided —
+ * students are not Calendar attendees (§21) and frequently have no Google address at all.
  *
- * The class's teacher and its creator are added as attendees, because the event lives on the
- * institute's calendar and Meet otherwise treats them as uninvited guests at their own lesson.
- * Students are still not attendees (§21): they are LMS participants, they may have no Google
- * address at all, and adding them would email every guardian's inbox on every edit.
+ * Where the space cannot be created the event falls back to conferenceData.createRequest, Google's
+ * ordinary asynchronous conference; that path returns 'pending' until the conference exists, which
+ * is why GoogleCalendarService still polls (§17).
  */
 final class GoogleCalendarClient implements CalendarClient
 {
@@ -28,14 +29,68 @@ final class GoogleCalendarClient implements CalendarClient
 
     public function createEvent(array $connection, array $event): array
     {
-        return $this->call($connection, function (Calendar $service, string $calendarId) use ($event): array {
+        return $this->call($connection, function (Calendar $service, string $calendarId) use ($connection, $event): array {
             $payload = $this->event($event);
-            $payload->setConferenceData($this->conferenceRequest());
-            // sendUpdates=all so the teacher actually receives the invitation; attendee membership
-            // alone fixes Meet admission, but the invite is what puts the class on their calendar.
-            $created = $service->events->insert($calendarId, $payload, ['conferenceDataVersion' => 1, 'sendUpdates' => 'all']);
+            // Prefer a Meet space we have configured as OPEN: this application already decides who
+            // may see a class, and a second gate at Google's door only strands students it has
+            // authorised. Where the space cannot be made, fall back to letting Calendar mint an
+            // ordinary conference — a class that makes people knock still beats no class at all.
+            $space = $this->openSpace((int) $connection['institute_id']);
+            $payload->setConferenceData($space === null ? $this->conferenceRequest() : $this->existingConference($space));
+            $created = $service->events->insert($calendarId, $payload, ['conferenceDataVersion' => 1]);
             return $this->describe($created, $calendarId);
         });
+    }
+
+    /**
+     * Creates a Meet space that anyone holding the link may enter.
+     *
+     * accessType OPEN is Google's own wording for "anyone with the join information can join
+     * without knocking" — no invitation, no host waiting to admit people, which is what makes a
+     * student's Join button work the moment they press it. Null when the space cannot be created
+     * (scope not yet granted on an older connection, quota, an outage); the caller then degrades to
+     * a Calendar-created conference rather than failing the whole booking.
+     *
+     * @return array{uri:string,code:string}|null
+     */
+    private function openSpace(int $institute): ?array
+    {
+        try {
+            $response = $this->factory->forInstitute($institute)->authorize()->post('https://meet.googleapis.com/v2/spaces', [
+                'json' => ['config' => ['accessType' => 'OPEN', 'entryPointAccess' => 'ALL']],
+                'http_errors' => false,
+                'timeout' => 15,
+            ]);
+            if ($response->getStatusCode() !== 200) {
+                return null;
+            }
+            $body = json_decode((string) $response->getBody(), true);
+            $uri = is_array($body) ? (string) ($body['meetingUri'] ?? '') : '';
+            $code = is_array($body) ? (string) ($body['meetingCode'] ?? '') : '';
+            return $uri === '' ? null : ['uri' => $uri, 'code' => $code !== '' ? $code : $uri];
+        } catch (\Throwable) {
+            // Never fatal: the conference falls back, and the class is still created.
+            return null;
+        }
+    }
+
+    /** Attaches an already-created Meet space instead of asking Calendar to mint a new one. */
+    private function existingConference(array $space): ConferenceData
+    {
+        $key = new ConferenceSolutionKey();
+        $key->setType('hangoutsMeet');
+        $solution = new ConferenceSolution();
+        $solution->setKey($key);
+        $solution->setName('Google Meet');
+        $entryPoint = new EntryPoint();
+        $entryPoint->setEntryPointType('video');
+        $entryPoint->setUri($space['uri']);
+        $entryPoint->setLabel($space['code']);
+        $data = new ConferenceData();
+        $data->setConferenceId($space['code']);
+        $data->setConferenceSolution($solution);
+        $data->setEntryPoints([$entryPoint]);
+        return $data;
     }
 
     public function updateEvent(array $connection, string $eventId, array $event): array
@@ -43,7 +98,7 @@ final class GoogleCalendarClient implements CalendarClient
         return $this->call($connection, function (Calendar $service, string $calendarId) use ($eventId, $event): array {
             // Patch, never insert-over: a full update without the existing conferenceData would
             // drop the Meet conference and invalidate the link students already hold (§28).
-            $updated = $service->events->patch($calendarId, $eventId, $this->event($event), ['conferenceDataVersion' => 1, 'sendUpdates' => 'all']);
+            $updated = $service->events->patch($calendarId, $eventId, $this->event($event), ['conferenceDataVersion' => 1]);
             return $this->describe($updated, $calendarId);
         });
     }
@@ -103,24 +158,6 @@ final class GoogleCalendarClient implements CalendarClient
         }
         $google->setStart($this->when((string) $event['start'], (string) $event['timezone']));
         $google->setEnd($this->when((string) $event['end'], (string) $event['timezone']));
-        // Staff must be on the invite list or Meet makes them knock at a room whose organiser — the
-        // institute account — is not there to let them in. Accepted on their behalf so the class
-        // simply appears on their calendar, and allowed to invite so they can admit a straggler.
-        $attendees = [];
-        foreach ($event['host_emails'] ?? [] as $email) {
-            $email = trim((string) $email);
-            if ($email === '') {
-                continue;
-            }
-            $attendee = new EventAttendee();
-            $attendee->setEmail($email);
-            $attendee->setResponseStatus('accepted');
-            $attendees[] = $attendee;
-        }
-        if ($attendees !== []) {
-            $google->setAttendees($attendees);
-            $google->setGuestsCanInviteOthers(true);
-        }
         return $google;
     }
 

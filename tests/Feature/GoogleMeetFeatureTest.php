@@ -156,11 +156,9 @@ return static function (App $app): array {
     $sent = $fake->lastEvent();
     $check('google receives the institute timezone', ($sent['timezone'] ?? '') === $timezone);
     $check('google receives the entered wall clock', ($sent['start'] ?? '') === $startDate . ' 10:00:00');
-    // The administrator is no more the organiser than a teacher is: the event belongs to the
-    // institute account, so without an invite Google makes them ask to join their own class too.
-    $adminEmail = (string) $db->query('SELECT email FROM users WHERE id=:u', ['u' => $admin])->fetchColumn();
-    $check('the creating administrator is invited to their own class', in_array($adminEmail, $sent['host_emails'] ?? [], true));
-    $check('a class with no teacher invites only its creator', ($sent['host_emails'] ?? []) === [$adminEmail]);
+    // Nobody is invited to anything: admission is settled by the meeting space being OPEN, so the
+    // event carries no attendee list and no guardian inbox is touched.
+    $check('the event invites nobody', ($sent['host_emails'] ?? []) === []);
     $localBack = (new DateTimeImmutable((string) $scheduled['start_time'], new DateTimeZone('UTC')))->setTimezone(new DateTimeZone($timezone))->format('Y-m-d H:i');
     $check('stored UTC converts back to the entered local time', $localBack === $startDate . ' 10:00');
 
@@ -224,11 +222,7 @@ return static function (App $app): array {
     $check('teacher meeting records the teacher from the session', (int) ($teacherMeeting['teacher_id'] ?? 0) === $employee);
     $check('teacher meeting is attributed to the teacher role', ($teacherMeeting['created_by_role'] ?? '') === 'teacher');
 
-    // The event is created on the institute's calendar, so without an invite Google treats the
-    // teacher as an outsider and shows "Ask to join" at their own class, with no host to admit them.
-    $teacherSent = $teacherFake->lastEvent();
-    // Teacher and creator are the same person here, and Google rejects a duplicated attendee.
-    $check('teacher is invited to the event they created', ($teacherSent['host_emails'] ?? []) === [$teacherEmail]);
+    $check('the teacher\'s event invites nobody either', (($teacherFake->lastEvent())['host_emails'] ?? []) === []);
 
     // §19: changing the POST to an unassigned class must not widen the teacher's reach.
     $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Teacher Leak ' . $suffix, 'class_id' => $foreign, 'subject_id' => $foreignSubject, 'audience_type' => 'SC', 'date' => $startDate, 'time' => '09:00', 'duration' => 45]);
@@ -252,7 +246,6 @@ return static function (App $app): array {
     $teacherBMeeting = $db->query('SELECT * FROM live_classes WHERE title=:t', ['t' => 'LC Teacher B OK ' . $suffix])->fetch();
     $check('second teacher schedules without any admin involvement', is_array($teacherBMeeting));
     $check('second teacher owns their own meeting', (int) ($teacherBMeeting['teacher_id'] ?? 0) === $employeeB);
-    $check('second teacher is invited to their own event', (($teacherBFake->lastEvent())['host_emails'] ?? []) === [$teacherBEmail]);
 
     // Same wall-clock slot as teacher A's class: concurrent classes are a normal timetable, not a
     // collision, so they must not share an event or a link.
