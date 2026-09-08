@@ -75,6 +75,17 @@ return static function (App $app): array {
     $check('token cipher rejects tampered ciphertext', $cipher->decrypt(substr($encrypted, 0, -4) . 'AAAA') === null);
     $check('token cipher tolerates empty input', $cipher->decrypt(null) === null);
 
+    // A deployment that ran before APP_KEY was set encrypted managed passwords under the hardcoded
+    // fallback. Setting a real APP_KEY must not strand those rows, so reveal() still reads them.
+    $legacyKey = hash('sha256', 'arete-managed-credentials', true);
+    $legacyPlain = 'LegacyPass#' . $suffix;
+    $legacyIv = random_bytes(12);
+    $legacyTag = '';
+    $legacyBody = openssl_encrypt($legacyPlain, 'aes-256-gcm', $legacyKey, OPENSSL_RAW_DATA, $legacyIv, $legacyTag);
+    $legacyCipher = base64_encode($legacyIv . $legacyTag . $legacyBody);
+    $check('reveal reads credentials encrypted under the pre-APP_KEY fallback', $credentialService->reveal($legacyCipher) === $legacyPlain);
+    $check('reveal still rejects a foreign ciphertext', $credentialService->reveal(base64_encode(random_bytes(48))) === null);
+
     /* --------------------------------------------------- connection state */
 
     $connections->connect($institute, $admin, [
