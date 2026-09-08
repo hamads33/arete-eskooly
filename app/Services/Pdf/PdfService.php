@@ -15,7 +15,7 @@ final class PdfService
         $compact=($template['margin_mode']??'normal')==='compact';$margin=$compact?10:16;
         $tempDir=BASE_PATH.'/storage/tmp/mpdf';
         if(!is_dir($tempDir)&&!mkdir($tempDir,0775,true)&&!is_dir($tempDir))throw new \RuntimeException('Unable to create PDF temporary directory.');
-        $mpdf=new Mpdf(['format'=>$template['page_size']??'A4','orientation'=>$template['page_orientation']??'P','margin_left'=>$margin,'margin_right'=>$margin,'margin_top'=>$compact?22:28,'margin_bottom'=>$compact?18:22,'tempDir'=>$tempDir,'default_font'=>'dejavusans']);
+        $mpdf=new Mpdf(['format'=>$template['page_size']??'A4','orientation'=>$template['page_orientation']??'P','margin_left'=>$margin,'margin_right'=>$margin,'margin_top'=>$compact?29:34,'margin_bottom'=>$compact?18:22,'tempDir'=>$tempDir,'default_font'=>'dejavusans']);
         $mpdf->SetTitle((string)($template['title']??'Report'));
         $mpdf->SetAuthor((string)($data['institute']['name']??'Institute'));
         $html=$this->view($view,$data+['template'=>$template]);

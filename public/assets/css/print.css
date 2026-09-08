@@ -16,6 +16,7 @@
         size: A4;
         margin: 14mm 12mm 16mm;
     }
+    @page wide-report-page { size: A4 landscape; margin: 10mm 9mm 15mm; }
 
     /* Screen-only chrome. */
     .sidebar,
@@ -37,6 +38,7 @@
     .pagination {
         display: none !important;
     }
+    .module-page > .module-page__header { display: none !important; }
 
     html,
     body {
@@ -94,6 +96,9 @@
         color: #444;
         margin: 2px 0 0;
     }
+    .print-letterhead__identity { flex: 1; }
+    .print-letterhead__generated { margin-left: auto; text-align: right; color: #6f6569; font-size: 7pt; text-transform: uppercase; letter-spacing: .08em; }
+    .print-letterhead__generated strong,.print-letterhead__generated small { display: block; color: #211a1d; font-size: 8pt; letter-spacing: 0; text-transform: none; }
 
     .print-letterhead__title {
         margin-top: 8px;
@@ -114,6 +119,8 @@
         display: flex;
         justify-content: space-between;
     }
+    .print-footer > span:last-child { text-align: right; }
+    .print-footer__page::after { content: "Page " counter(page); }
 
     /* Cards flatten into plain sections. */
     .module-card {
@@ -157,26 +164,33 @@
     table.responsive-table thead {
         display: table-header-group;
     }
+    table.data-table tfoot, table.responsive-table tfoot { display: table-footer-group; }
 
     table.data-table th,
     table.data-table td,
     table.responsive-table th,
     table.responsive-table td {
-        border: 1px solid #c9bcc3 !important;
-        padding: 4px 6px !important;
+        border: 1px solid #ded6d9 !important;
+        padding: 4.5px 6px !important;
         color: #000 !important;
         background: #fff !important;
     }
 
     table.data-table thead th,
     table.responsive-table thead th {
-        background: #f2eaee !important;
+        background: #f4edef !important;
+        color: #3b0b18 !important;
         font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .035em;
     }
 
     tr {
         break-inside: avoid;
+        page-break-inside: avoid;
     }
+    table.data-table tbody tr:nth-child(even) td,table.responsive-table tbody tr:nth-child(even) td{background:#faf8f9!important}
+    .wide-report { page: wide-report-page; }
 
     /* Metric tiles print as a compact summary strip. */
     .metric-grid {

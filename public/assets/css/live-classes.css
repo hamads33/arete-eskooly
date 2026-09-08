@@ -1,0 +1,105 @@
+/*
+ * Live classes. Extends the existing maroon system — colours come from variables.css rather than
+ * being redefined here, so the module inherits any future theme change.
+ *
+ * The one place this file insists on something is the student Join button: on a phone it becomes
+ * full width and is the largest control on the card, because joining is the only thing a student
+ * comes to this screen to do.
+ */
+
+.live-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.live-grid--muted { opacity: .82; }
+.live-list { display: flex; flex-direction: column; gap: 12px; }
+.live-list--muted { opacity: .82; }
+
+/* ---------------------------------------------------------------- status badges */
+
+.live-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; background: var(--surface-muted, #f2f0f1); color: var(--text-muted, #6b6470); }
+.live-badge--live { background: #e8f6ec; color: #1c6b34; }
+.live-badge--live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #1c6b34; animation: live-pulse 1.6s ease-in-out infinite; }
+.live-badge--starting { background: #fdf3e2; color: #8a5a12; }
+.live-badge--upcoming { background: #eef1f7; color: #3f4a63; }
+.live-badge--completed { background: #f1f0f2; color: #6b6470; }
+.live-badge--cancelled { background: #fbecec; color: #8f2020; }
+.live-badge--warn { background: #fdf3e2; color: #8a5a12; }
+.live-badge--error { background: #fbecec; color: #8f2020; }
+
+@keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .live-badge--live::before { animation: none; } }
+
+/* ------------------------------------------------------------------ student card */
+
+.live-card { background: var(--surface, #fff); border: 1px solid var(--border, #e6e2e4); border-radius: 14px; overflow: hidden; transition: box-shadow .18s ease, transform .18s ease; }
+.live-card:hover { box-shadow: 0 10px 24px rgba(24, 12, 18, .08); }
+.live-card--live { border-color: #b9dcc3; }
+.live-card--cancelled { opacity: .7; }
+.live-card__body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.live-card__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.live-card__subject { font-size: .78rem; font-weight: 600; color: var(--brand, #7a1632); }
+.live-card__title { margin: 0; font-size: 1.05rem; line-height: 1.35; }
+.live-card__meta { margin: 0; display: grid; gap: 6px; }
+.live-card__meta div { display: flex; justify-content: space-between; gap: 12px; font-size: .84rem; }
+.live-card__meta dt { color: var(--text-muted, #6b6470); margin: 0; }
+.live-card__meta dd { margin: 0; font-weight: 600; text-align: right; }
+.live-card__actions { margin-top: 4px; }
+.live-card__join { width: 100%; justify-content: center; }
+.live-card__hint { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; color: var(--text-muted, #6b6470); }
+.live-card__hint svg { width: 15px; height: 15px; }
+
+/* --------------------------------------------------------------- admin/teacher row */
+
+.live-row { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; padding: 16px 18px; background: var(--surface, #fff); border: 1px solid var(--border, #e6e2e4); border-left: 3px solid var(--border, #e6e2e4); border-radius: 12px; }
+.live-row--live { border-left-color: #1c6b34; }
+.live-row--starting { border-left-color: #b8860b; }
+.live-row--cancelled { border-left-color: #8f2020; opacity: .78; }
+.live-row__main { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.live-row__head { display: flex; flex-wrap: wrap; gap: 6px; }
+.live-row__title { margin: 0; font-size: 1rem; }
+.live-row__meta, .live-row__time { margin: 0; font-size: .84rem; color: var(--text-muted, #6b6470); }
+.live-row__time { display: inline-flex; align-items: center; gap: 6px; }
+.live-row__time svg { width: 15px; height: 15px; }
+.live-row__error { margin: 4px 0 0; font-size: .82rem; color: #8f2020; }
+.live-row__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; flex-shrink: 0; }
+.live-row__actions form { margin: 0; }
+
+/* ------------------------------------------------------------------- connection */
+
+.live-connection__body { display: flex; gap: 20px; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; }
+.live-connection__status { margin: 6px 0 0; font-size: .88rem; }
+.live-connection__status--ok { color: #1c6b34; }
+.live-connection__status--error { color: #8f2020; }
+.live-connection__note { display: flex; gap: 8px; align-items: flex-start; margin: 12px 0 0; font-size: .8rem; color: var(--text-muted, #6b6470); max-width: 62ch; }
+.live-connection__note svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
+.live-connection__actions { display: flex; gap: 8px; align-items: center; }
+.live-connection__actions form { margin: 0; }
+
+.live-quick__actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.live-quick__blocked { margin: 10px 0 0; font-size: .84rem; color: #8f2020; }
+.live-instant, .live-schedule { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border, #e6e2e4); }
+
+.live-student-picker { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); max-height: 260px; overflow-y: auto; padding: 4px; }
+.live-student-picker__item { display: flex; gap: 8px; align-items: center; font-size: .86rem; }
+.live-student-picker__item em { color: var(--text-muted, #6b6470); font-style: normal; font-size: .78rem; }
+
+/* ----------------------------------------------------------------- dashboard tile */
+
+.live-tile__list { display: flex; flex-direction: column; gap: 10px; }
+.live-tile__item { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border, #e6e2e4); }
+.live-tile__item:last-child { border-bottom: 0; }
+.live-tile__copy { min-width: 0; }
+.live-tile__copy strong { display: block; font-size: .92rem; }
+.live-tile__copy span { font-size: .8rem; color: var(--text-muted, #6b6470); }
+
+/* --------------------------------------------------------------------- responsive */
+
+@media (max-width: 767px) {
+  .live-row { flex-direction: column; }
+  .live-row__actions { width: 100%; }
+  .live-row__actions .btn, .live-row__actions form { flex: 1 1 auto; }
+  .live-row__actions .btn { width: 100%; justify-content: center; }
+  .live-connection__actions { width: 100%; }
+  .live-connection__actions .btn { flex: 1 1 auto; justify-content: center; }
+  /* Join is the whole point of the student screen on a phone. */
+  .live-tile__item { flex-direction: column; align-items: stretch; gap: 8px; }
+  .live-tile__item .btn { width: 100%; justify-content: center; }
+}

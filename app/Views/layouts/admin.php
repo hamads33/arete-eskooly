@@ -10,13 +10,16 @@
   <link rel="stylesheet" href="<?= e(asset($style)) ?>">
 <?php endforeach; ?>
   <link rel="stylesheet" href="<?= e(asset('css/premium-ui.css?v=1')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/workflows.css?v=1')) ?>">
 </head>
-<body>
+<?php $reportScreen=($activeMenu??'')==='reports';$reportLandscape=in_array(($activeSubmenu??''),['report-student-attendance','report-employee-attendance','report-admissions','report-contacts'],true); ?>
+<body class="<?= $reportScreen?'report-screen ':'' ?><?= $reportLandscape?'report-landscape':'' ?>">
 <?php require BASE_PATH . '/app/Views/partials/impersonation-banner.php'; ?>
   <div class="app-shell" id="appShell">
 <?php require BASE_PATH . '/app/Views/partials/header.php'; ?>
 <?php require BASE_PATH . '/app/Views/partials/sidebar.php'; ?>
 <?php require BASE_PATH . '/app/Views/partials/print-letterhead.php'; ?>
+<?php if($reportScreen){ob_start();require BASE_PATH.'/app/Views/reports/partials/masthead.php';$reportMasthead=(string)ob_get_clean();$content=preg_replace_callback('/<div class="module-page">/',static fn(array$m):string=>$m[0].$reportMasthead,$content,1)??$content;} ?>
 <?= $content ?>
   </div>
 

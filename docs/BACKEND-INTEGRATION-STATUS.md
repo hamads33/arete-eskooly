@@ -105,3 +105,31 @@ Files added: `app/Controllers/{PortalPdfController,PortalAccountController,Porta
 # 2026-09-07 Pakistan ERP foundation update
 
 Added institute-scoped guardian accounts and parent ownership, normalized teacher assignments, class notes, four-state attendance, assessment absence/publication fields, academic sessions/rule profiles, fee automation/reversal/void metadata, WhatsApp templates/logging, and audit logs. See `MUST-HAVE-FEATURES-STATUS.md` for the honest completion matrix.
+# 2026-09-08 Google Meet live classes
+
+Live Classes moved from a hardcoded static page to a working Google Meet workflow, built into the
+existing `live_classes` domain rather than a parallel meetings module.
+
+- One Google account per institute, connected once by an administrator. Teachers and students hold
+  no Google credentials and complete no OAuth inside the LMS.
+- Tokens: AES-256-GCM, keyed from `APP_KEY`, never logged or rendered. Refresh is automatic;
+  `invalid_grant` flips the connection to `reconnect_required` with a plain admin message.
+- Admin and teacher can schedule and start instant classes; teacher scope is enforced against
+  `teacher_assignments` server-side, not by the narrowed `<select>`.
+- Students see only their audience's classes and join through an LMS route that re-checks
+  everything before redirecting; the Meet URL never reaches their HTML.
+- Google/database consistency is compensated rather than pretended: a local failure after event
+  creation deletes the event, and a pending conference or failed sync is recorded and retryable.
+- `join_clicked_at` is truthfully an LMS click, not Meet attendance. No recording, transcription or
+  participant-duration claims are made.
+
+Sidebar "Live Class" was a locked placeholder with a null route; it is now **Live Classes** at
+`/admin/live-classes`. The legacy `/admin/communication/live-class` room-code page is unchanged and
+unlinked.
+
+Automated suite: 409 checks passing, Google mocked throughout (`tests/Feature/GoogleMeetFeatureTest.php`,
+`tests/Support/FakeCalendarClient.php`). Live API coverage is the manual checklist in
+`docs/GOOGLE-MEET-INTEGRATION.md` §12.
+
+Remaining blocker: none in code. Deployment requires Google Cloud OAuth credentials and an institute
+Google account able to create Meet conferences.

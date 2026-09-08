@@ -8,6 +8,7 @@ use App\Controllers\PortalMessagesController;
 use App\Controllers\PortalPdfController;
 use App\Controllers\ParentPortalController;
 use App\Controllers\StudentPortalController;
+use App\Controllers\TeacherLiveClassController;
 use App\Controllers\TeacherWorkspaceController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\PortalMiddleware;
@@ -33,6 +34,10 @@ $router->get('/portal/student/results', [StudentPortalController::class, 'result
 $router->get('/portal/student/homework', [StudentPortalController::class, 'homework'], name: 'portal.student.homework');
 $router->get('/portal/student/notes', [StudentPortalController::class, 'notes'], name: 'portal.student.notes');
 $router->get('/portal/student/documents', [StudentPortalController::class, 'documents'], name: 'portal.student.documents');
+// Live classes. The list renders no Meet URL: the join route re-checks audience, window and
+// cancellation server-side before redirecting to Google (§24).
+$router->get('/portal/student/live-classes', [StudentPortalController::class, 'liveClasses'], name: 'portal.student.live-classes');
+$router->get('/portal/student/live-classes/{id}/join', [StudentPortalController::class, 'joinLiveClass'], name: 'portal.student.live-class-join');
 
 // ---- employee --------------------------------------------------------------
 $router->get('/portal/employee', [EmployeePortalController::class, 'dashboard'], name: 'portal.employee.dashboard');
@@ -77,6 +82,15 @@ $router->get('/portal/employee/teaching/tests', [TeacherWorkspaceController::cla
 $router->post('/portal/employee/teaching/tests', [TeacherWorkspaceController::class, 'storeTest'], [VerifyCsrfToken::class]);
 $router->get('/portal/employee/teaching/tests/{id}/marks', [TeacherWorkspaceController::class, 'testMarks'], name: 'portal.teaching.test-marks');
 $router->post('/portal/employee/teaching/tests/{id}/marks', [TeacherWorkspaceController::class, 'saveTestMarks'], [VerifyCsrfToken::class]);
+
+// Teacher-hosted Google Meet classes. The teacher holds no Google credentials: every call runs
+// against the institute connection an administrator authorised, and the class/subject is
+// re-checked against teacher_assignments on each write.
+$router->get('/portal/employee/teaching/live-classes', [TeacherLiveClassController::class, 'index'], name: 'portal.teaching.live-classes');
+$router->post('/portal/employee/teaching/live-classes', [TeacherLiveClassController::class, 'store'], [VerifyCsrfToken::class]);
+$router->post('/portal/employee/teaching/live-classes/instant', [TeacherLiveClassController::class, 'instant'], [VerifyCsrfToken::class]);
+$router->post('/portal/employee/teaching/live-classes/{id}', [TeacherLiveClassController::class, 'update'], [VerifyCsrfToken::class]);
+$router->post('/portal/employee/teaching/live-classes/{id}/cancel', [TeacherLiveClassController::class, 'cancel'], [VerifyCsrfToken::class]);
 
 $router->middlewarePrefix('/portal', AuthMiddleware::class);
 $router->middlewarePrefix('/portal', PortalMiddleware::class);

@@ -44,6 +44,7 @@ final class App
     public function router(): Router { return $this->router; }
     public function session(): Session { return $this->session; }
     public function database(): Database { return $this->database; }
+    public function logger(): Logger { return $this->logger; }
 
     public function config(string $key, mixed $default = null): mixed
     {

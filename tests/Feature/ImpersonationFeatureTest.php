@@ -34,13 +34,27 @@ return static function (App $app): array {
     $check('return to administrator restores original session', $stop->status() === 302 && !$app->session()->has('impersonator_user_id') && (int)(user()['id']??0) === $adminId);
     $check('impersonation stop is audited', (bool)$db->query("SELECT 1 FROM audit_logs WHERE action='impersonation.stopped' AND user_id=:a AND entity_id=:t", ['a'=>$adminId,'t'=>$targetId])->fetchColumn());
 
+    $studentUserId = (int) $db->query("SELECT sa.user_id FROM student_accounts sa JOIN students s ON s.id=sa.student_id JOIN users u ON u.id=sa.user_id WHERE s.institute_id=:i AND u.status='active' ORDER BY s.id LIMIT 1", ['i'=>$admin['institute_id']])->fetchColumn();
+    if ($studentUserId > 0) {
+        $app->session()->set('auth_user', $admin);
+        $studentLoginPage = $app->run($request('GET', '/admin/students/logins'));
+        $check('student account list offers administrator impersonation', $studentLoginPage->status() === 200 && str_contains($studentLoginPage->content(), '/admin/impersonate/' . $studentUserId) && str_contains($studentLoginPage->content(), 'View as student'));
+        $studentStart = $app->run($request('POST', '/admin/impersonate/' . $studentUserId, ['_token'=>CSRF::token()]));
+        $check('administrator impersonation opens the student dashboard', $studentStart->status() === 302 && ($studentStart->headers()['Location'] ?? '') === url('/portal/student') && (int)(user()['id'] ?? 0) === $studentUserId);
+        $studentDashboard = $app->run($request('GET', '/portal/student'));
+        $check('impersonated student dashboard renders', $studentDashboard->status() === 200 && str_contains($studentDashboard->content(), 'Return to admin'));
+        $app->run($request('POST', '/impersonation/stop', ['_token'=>CSRF::token()]));
+    } else {
+        $check('student impersonation fixture exists', false);
+    }
+
     $target = (new UserRepository($db))->findAuthContext($targetId);
     $app->session()->set('auth_user', $target);
     $denied = $app->run($request('POST', '/admin/impersonate/' . $adminId, ['_token'=>CSRF::token()]));
     $check('non-administrator cannot impersonate', $denied->status() === 403);
 
     $app->session()->set('auth_user', $admin);
-    $db->query("DELETE FROM audit_logs WHERE action IN ('impersonation.started','impersonation.stopped') AND user_id=:a AND entity_id=:t", ['a'=>$adminId,'t'=>$targetId]);
+    $db->query("DELETE FROM audit_logs WHERE action IN ('impersonation.started','impersonation.stopped') AND user_id=:a AND entity_id IN (:t,:s)", ['a'=>$adminId,'t'=>$targetId,'s'=>$studentUserId]);
     $roles->delete($roleId);
     return $checks;
 };

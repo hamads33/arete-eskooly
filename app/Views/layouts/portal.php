@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="<?= e(asset($style)) ?>">
 <?php endforeach; ?>
   <link rel="stylesheet" href="<?= e(asset('css/premium-ui.css?v=1')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/workflows.css?v=1')) ?>">
 </head>
 <body class="portal-shell">
 <?php require BASE_PATH . '/app/Views/partials/impersonation-banner.php'; ?>

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Controllers\Concerns\ResolvesLiveClasses;
 use App\Core\Request;
 use App\Core\Response;
+use App\Support\Flash;
 
 /**
  * Read-only self-service portal for students. Every query is scoped to the student record
@@ -13,6 +15,8 @@ use App\Core\Response;
  */
 final class StudentPortalController extends PortalController
 {
+    use ResolvesLiveClasses;
+
     public function dashboard(Request $request): Response
     {
         if (!$student = $this->repo()->studentByUser($this->userId())) {
@@ -33,6 +37,11 @@ final class StudentPortalController extends PortalController
             'invoices' => array_slice($this->repo()->studentInvoices($studentId, 5), 0, 5),
             'homework' => array_slice($this->repo()->studentHomework((int) $student['class_id'], $instituteId, 5), 0, 5),
             'latestExam' => $this->latestExam($results),
+            // Upcoming Live Classes tile (§22). Only classes that have not finished, so the
+            // dashboard shows what the student can act on rather than a history list.
+            'liveClasses' => $this->upcomingLiveClasses($studentId, $instituteId, 4),
+            'joinWindowMinutes' => $this->joinWindowMinutes(),
+            'styles' => ['css/live-classes.css?v=1'],
         ]);
     }
 
@@ -181,6 +190,116 @@ final class StudentPortalController extends PortalController
             'payments' => $this->repo()->studentPayments($studentId),
             'exams' => array_values($exams),
         ]);
+    }
+
+    /**
+     * The student's live classes. The list comes from a single audience-matching query, so a
+     * meeting the student is not in never enters this code path at all (§42).
+     */
+    public function liveClasses(Request $request): Response
+    {
+        if (!$student = $this->repo()->studentByUser($this->userId())) {
+            return $this->forbidden();
+        }
+        $instituteId = (int) $student['institute_id'];
+        $service = $this->liveClassService();
+        $timezone = $service->timezone($instituteId);
+        $window = $this->joinWindowMinutes();
+        $upcoming = $past = [];
+        foreach ($this->liveClassRepository()->forStudent((int) $student['id'], $instituteId) as $meeting) {
+            $card = $this->studentCard($meeting, $service, $timezone, $window);
+            if (in_array($card['state']['state'], ['completed', 'cancelled'], true)) {
+                $past[] = $card;
+            } else {
+                $upcoming[] = $card;
+            }
+        }
+        return $this->portalView('portal/student/live-classes', 'student', [
+            'pageTitle' => 'Live Classes',
+            'activeMenu' => 'portal-live-classes',
+            'instituteId' => $instituteId,
+            'student' => $student,
+            'upcoming' => $upcoming,
+            'past' => array_slice(array_reverse($past), 0, 20),
+            'timezone' => $timezone,
+            'joinWindow' => $window,
+            'styles' => ['css/live-classes.css?v=1'],
+        ]);
+    }
+
+    /**
+     * The join action. Every condition is re-checked here rather than trusted from the page that
+     * rendered the button, and the Meet URL only leaves the server as a redirect — it is never
+     * placed in the student's HTML (§24).
+     */
+    public function joinLiveClass(Request $request): Response
+    {
+        if (!$student = $this->repo()->studentByUser($this->userId())) {
+            return $this->forbidden();
+        }
+        $instituteId = (int) $student['institute_id'];
+        $meeting = $this->liveClassRepository()->findForStudent((int) $request->route('id'), (int) $student['id'], $instituteId);
+        if ($meeting === null) {
+            // Same response for "does not exist" and "not yours": an id guess learns nothing.
+            Flash::add('error', 'You do not have access to this live class.');
+            return Response::redirect(url('/portal/student/live-classes'));
+        }
+        $service = $this->liveClassService();
+        $state = $service->state($meeting, $this->joinWindowMinutes());
+        if ($state['state'] === 'cancelled') {
+            Flash::add('error', 'This live class was cancelled.');
+            return Response::redirect(url('/portal/student/live-classes'));
+        }
+        if ($state['state'] === 'completed') {
+            Flash::add('error', 'This class has ended.');
+            return Response::redirect(url('/portal/student/live-classes'));
+        }
+        if (!$state['joinable']) {
+            Flash::add('error', 'Live class is not available yet.');
+            return Response::redirect(url('/portal/student/live-classes'));
+        }
+        if (!$service->isSafeMeetLink($meeting['meet_link'] ?? null)) {
+            Flash::add('error', 'Live class is not available yet.');
+            return Response::redirect(url('/portal/student/live-classes'));
+        }
+        // Records the click only — this is not evidence the student entered the Meet (§15).
+        $this->liveClassRepository()->recordJoinClick((int) $meeting['id'], (int) $student['id']);
+        return Response::redirect((string) $meeting['meet_link']);
+    }
+
+    /** The next few live classes for the dashboard tile. */
+    private function upcomingLiveClasses(int $studentId, int $instituteId, int $limit): array
+    {
+        $service = $this->liveClassService();
+        $timezone = $service->timezone($instituteId);
+        $window = $this->joinWindowMinutes();
+        $cards = [];
+        foreach ($this->liveClassRepository()->forStudent($studentId, $instituteId) as $meeting) {
+            $card = $this->studentCard($meeting, $service, $timezone, $window);
+            if (!in_array($card['state']['state'], ['completed', 'cancelled'], true)) {
+                $cards[] = $card;
+            }
+            if (count($cards) >= $limit) {
+                break;
+            }
+        }
+        return $cards;
+    }
+
+    /** Presentation shape for one student-visible meeting; never carries the Meet URL. */
+    private function studentCard(array $meeting, \App\Services\LiveClassService $service, string $timezone, int $window): array
+    {
+        $state = $service->state($meeting, $window);
+        return [
+            'id' => (int) $meeting['id'],
+            'title' => (string) $meeting['title'],
+            'subject' => $meeting['subject_name'],
+            'teacher' => $meeting['teacher_name'],
+            'class' => $meeting['class_name'],
+            'local_start' => $service->toLocal((string) $meeting['start_time'], $timezone),
+            'duration' => (int) ($meeting['duration_minutes'] ?? 0),
+            'state' => $state,
+        ];
     }
 
     /** Highest-percentage summary for the most recent exam, used by the dashboard tile. */

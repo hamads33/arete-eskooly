@@ -58,6 +58,9 @@ $checks = array_merge($checks, $teacherWorkspace($app));
 $academicStructure = require BASE_PATH . '/tests/Feature/AcademicStructureFeatureTest.php';
 $checks = array_merge($checks, $academicStructure($app));
 
+$googleMeet = require BASE_PATH . '/tests/Feature/GoogleMeetFeatureTest.php';
+$checks = array_merge($checks, $googleMeet($app));
+
 $whatsappOutreach = require BASE_PATH . '/tests/Feature/WhatsAppOutreachFeatureTest.php';
 $checks = array_merge($checks, $whatsappOutreach($app));
 

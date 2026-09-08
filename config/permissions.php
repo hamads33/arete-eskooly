@@ -34,4 +34,8 @@ return [
     'teacher-assignments' => ['view' => 'classes.view','manage' => 'teacher-assignments.manage'],
     'notes'        => ['view' => 'notes.view',          'manage' => 'notes.manage'],
     'whatsapp'     => ['view' => 'communication.view',  'manage' => 'whatsapp.manage'],
+    'live-classes' => ['view' => 'live-classes.view',   'manage' => 'live-classes.manage'],
+    // The Google connection is administrator-only: 'google-calendar.manage' is granted to no role,
+    // so only the admin wildcard satisfies it and no teacher can reach the OAuth handshake.
+    'integrations' => ['view' => 'google-calendar.manage', 'manage' => 'google-calendar.manage'],
 ];

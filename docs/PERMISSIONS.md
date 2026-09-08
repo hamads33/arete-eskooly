@@ -59,3 +59,24 @@ and no portal route accepts a student or employee identifier.
 - `whatsapp.manage`
 
 Parent child access is additionally enforced through `guardian_students`; route IDs cannot bypass ownership. New admin routes remain closed by default through `AdminAreaMiddleware` and the module permission map.
+# Live class permissions (migration 000020)
+
+| Slug | Granted to |
+| --- | --- |
+| `live-classes.view` | admin (`*`), principal, teacher, management-staff |
+| `live-classes.manage` | admin (`*`), teacher |
+| `live-classes.instant` | admin (`*`), teacher |
+| `live-classes.manage-all` | admin only — no role grant exists |
+| `google-calendar.manage` | admin only — deliberately granted to no role |
+
+`google-calendar.manage` gates `/admin/integrations/*`. It is granted to no role, so only the admin
+wildcard satisfies it: a teacher can neither reach the OAuth handshake nor see any part of the
+institute's Google credentials.
+
+Teacher authority over live classes is not a permission alone. `live-classes.manage` lets a teacher
+create and edit; *which* class they may target is decided by `teacher_assignments` through
+`LiveClassAuthorizationService::teacherMayHost()`, re-checked server-side on every write. Editing or
+cancelling someone else's meeting additionally requires `live-classes.manage-all`.
+
+Students need no live-class permission: audience membership is the authorisation, evaluated inside
+the query that lists their meetings.

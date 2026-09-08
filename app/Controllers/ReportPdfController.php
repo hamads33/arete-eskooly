@@ -10,7 +10,17 @@ final class ReportPdfController extends Controller
 {
     private function institute():array{return(new SettingsRepository($this->app->database()))->institute();}
     private function template(int $institute,string $type):array{$service=new ReportTemplateService();return array_replace($service->defaults($type),(new ReportTemplateRepository($this->app->database()))->find($institute,$type)??[]);}
-    private function pdf(Request $r,string $type,string $filename,array $data,string $view='document'):Response{$institute=$this->institute();$template=$this->template((int)$institute['id'],$type);return(new PdfService())->render($view,$data+['institute'=>$institute,'type'=>$type,'templateService'=>new ReportTemplateService(),'placeholders'=>$data['placeholders']??['institute_name'=>$institute['name']]],$template,(new ReportFilenameService())->make($filename),$r->query('download')==='1');}
+    private function pdf(Request $r,string $type,string $filename,array $data,string $view='document'):Response
+    {
+        if ($type === 'report-card' && str_starts_with($filename, 'class-test-')) {
+            $type = 'class-test-marksheet';
+        } elseif ($type === 'report-card' && str_starts_with($filename, 'exam-')) {
+            $type = 'exam-gazette';
+        }
+        $institute=$this->institute();
+        $template=$this->template((int)$institute['id'],$type);
+        return(new PdfService())->render($view,$data+['institute'=>$institute,'type'=>$type,'templateService'=>new ReportTemplateService(),'placeholders'=>$data['placeholders']??['institute_name'=>$institute['name']]],$template,(new ReportFilenameService())->make($filename),$r->query('download')==='1');
+    }
     private function missing(string $message='Record not found.'):Response{return Response::html(e($message),404);}
     private function money(mixed $value,array $institute):string{return($institute['currency_symbol']??$institute['currency']??'').' '.number_format((float)$value,2);}
 

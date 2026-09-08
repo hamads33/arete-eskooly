@@ -95,6 +95,7 @@ abstract class PortalController extends Controller
                 $item('My Fees', 'portal-fees', 'badge-dollar-sign', '/portal/student/fees'),
                 $item('My Results', 'portal-results', 'graduation-cap', '/portal/student/results'),
                 $item('My Homework', 'portal-homework', 'book-open', '/portal/student/homework'),
+                $item('Live Classes', 'portal-live-classes', 'video', '/portal/student/live-classes'),
                 $item('Class Notes', 'portal-notes', 'notebook-tabs', '/portal/student/notes'),
                 $item('My Documents', 'portal-documents', 'file-text', '/portal/student/documents'),
                 $item('Messages', 'portal-messages', 'messages-square', '/portal/messages'),
@@ -132,6 +133,7 @@ abstract class PortalController extends Controller
                 $item('Assign Homework', 'portal-teaching-homework', 'book-open', '/portal/employee/teaching/homework'),
                 $item('Class Notes', 'portal-teaching-notes', 'file-text', '/portal/employee/teaching/notes'),
                 $item('Class Tests', 'portal-teaching-tests', 'clipboard-list', '/portal/employee/teaching/tests'),
+                $item('Live Classes', 'portal-teaching-live-classes', 'video', '/portal/employee/teaching/live-classes'),
             ]);
         } else {
             array_splice($employeeNav, 5, 0, [

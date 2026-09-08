@@ -24,6 +24,8 @@ use App\Controllers\WhatsAppController;
 use App\Controllers\ReportsController;
 use App\Controllers\RolesController;
 use App\Controllers\ImpersonationController;
+use App\Controllers\LiveClassesController;
+use App\Controllers\GoogleIntegrationController;
 use App\Controllers\ReportPdfController;
 use App\Controllers\ReportTemplateController;
 use App\Controllers\SalaryController;
@@ -179,6 +181,26 @@ $router->post('/admin/communication/messaging/{id}', [CommunicationController::c
 $router->post('/admin/communication/sms-gateway', [CommunicationController::class, 'saveSms'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/communication/live-class', [CommunicationController::class, 'storeLiveClass'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->get('/admin/whatsapp', [WhatsAppController::class, 'index'], [AdminAreaMiddleware::class], name: 'whatsapp');
+
+// ---- live classes (Google Meet) --------------------------------------------
+// The module segment 'live-classes' maps to live-classes.view / live-classes.manage in
+// config/permissions.php, so AdminAreaMiddleware gates these before the controller runs.
+$router->get('/admin/live-classes', [LiveClassesController::class, 'index'], name: 'live-classes');
+$router->get('/admin/live-classes/create', [LiveClassesController::class, 'create'], name: 'live-classes.create');
+$router->post('/admin/live-classes', [LiveClassesController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/live-classes/instant', [LiveClassesController::class, 'instant'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/live-classes/{id}/edit', [LiveClassesController::class, 'edit'], name: 'live-classes.edit');
+$router->post('/admin/live-classes/{id}', [LiveClassesController::class, 'update'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/live-classes/{id}/cancel', [LiveClassesController::class, 'cancel'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/live-classes/{id}/sync', [LiveClassesController::class, 'sync'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+
+// The institute's Google connection. 'integrations' maps to google-calendar.manage, which only
+// the admin wildcard satisfies, so teachers can never reach the OAuth handshake.
+// The callback is a GET Google redirects to, so it carries no CSRF token; its forgery protection
+// is the session-bound `state` parameter validated in GoogleOAuthService.
+$router->get('/admin/integrations/google/connect', [GoogleIntegrationController::class, 'connect'], [AdminAreaMiddleware::class], name: 'integrations.google.connect');
+$router->get('/admin/integrations/google/callback', [GoogleIntegrationController::class, 'callback'], [AdminAreaMiddleware::class], name: 'integrations.google.callback');
+$router->post('/admin/integrations/google/disconnect', [GoogleIntegrationController::class, 'disconnect'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/whatsapp/templates', [WhatsAppController::class, 'template'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/whatsapp/open', [WhatsAppController::class, 'open'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 

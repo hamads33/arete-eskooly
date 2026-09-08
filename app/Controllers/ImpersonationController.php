@@ -51,9 +51,9 @@ final class ImpersonationController extends Controller
 
     private function landingRoute(array $target): string
     {
-        if (in_array('dashboard.view', (array) $target['permissions'], true)) return '/admin/dashboard';
         if (in_array('student', (array) $target['roles'], true)) return '/portal/student';
         if (in_array('parent', (array) $target['roles'], true)) return '/portal/parent';
+        if (in_array('dashboard.view', (array) $target['permissions'], true)) return '/admin/dashboard';
         return '/portal/employee';
     }
 

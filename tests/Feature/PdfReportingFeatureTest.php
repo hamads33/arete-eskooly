@@ -16,5 +16,10 @@ return static function (App $app): array {
     $response=(new PdfService())->render('document',$data,$template,$names->make('sample',['report-card']));
     $checks['pdf response is a valid binary document']=str_starts_with($response->content(),'%PDF-')&&strlen($response->content())>2000;
     $checks['pdf response has safe inline headers']=($response->headers()['Content-Type']??'')==='application/pdf'&&str_starts_with($response->headers()['Content-Disposition']??'','inline; filename="sample-report-card.pdf"');
+    $reportCss=(string)file_get_contents(BASE_PATH.'/public/assets/css/reports.css');
+    $printCss=(string)file_get_contents(BASE_PATH.'/public/assets/css/print.css');
+    $checks['shared report system provides print-safe table pagination']=str_contains($reportCss,'display:table-header-group')&&str_contains($reportCss,'page-break-inside:avoid')&&str_contains($printCss,'display: table-header-group');
+    $checks['shared report system supports A4 portrait and landscape']=str_contains($reportCss,'size:A4 portrait')&&str_contains($reportCss,'size:A4 landscape');
+    $checks['class test and exam PDFs use dedicated document identities']=$templates->defaults('class-test-marksheet')['title']==='Class Test Mark Sheet'&&$templates->defaults('exam-gazette')['title']==='Class Examination Gazette';
     return $checks;
 };

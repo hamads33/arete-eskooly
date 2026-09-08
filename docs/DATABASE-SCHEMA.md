@@ -66,3 +66,31 @@ idempotent, and it:
 New structures: `academic_sessions`, `academic_rule_profiles`, `academic_profile_grades`, `class_sections`, `academic_streams`, `teacher_assignments`, `guardians`, `guardian_students`, `guardian_accounts`, `institute_holidays`, `class_notes`, `fee_settings`, `fee_generation_runs`, `whatsapp_templates`, `whatsapp_logs`, and `audit_logs`.
 
 Existing student, subject, attendance, homework, class-test, exam, invoice and payment tables receive additive columns. Existing identifiers and records are preserved; no reset migration is used.
+# Google Meet live classes (migration 000020)
+
+`live_classes` was **extended, not replaced** — it is already the live-class domain, and
+`AcademicRepository`'s class in-use check and cascade delete both reference it.
+
+Added: `provider ENUM('manual','google_meet')`, `created_by_role`, `teacher_id` (FK `employees`),
+`subject_id` (FK `subjects`), `section_id` (FK `class_sections`), `description`, `start_time` and
+`end_time` (UTC), `timezone`, `google_event_id`, `google_calendar_id`, `meet_link`,
+`conference_status`, `status ENUM('scheduled','completed','cancelled','google_error')`,
+`google_sync_status ENUM('synced','pending','failed','not_applicable')`, `last_google_error`,
+`cancelled_at`, `cancelled_by`. Unique `(institute_id, google_event_id)` prevents duplicate event
+mapping; indexes on `(institute_id, start_time, end_time)` and `(institute_id, teacher_id, status)`.
+
+`room_code` became nullable (Google rows have none; MySQL permits repeated NULLs in a unique index,
+so `uq_live_room` still protects real room codes). `audience_type` gained `SEC` (section) and `SEL`
+(selected students) alongside the existing eSkooly values, so legacy rows stay valid.
+
+New tables:
+
+- `google_oauth_connections` — one per `(institute_id, provider)`. AES-256-GCM ciphertext in
+  `access_token_encrypted` and `refresh_token_encrypted`, plus `account_email`, `calendar_id`,
+  `scopes`, `status ENUM('connected','reconnect_required','disconnected')`, `last_error`.
+- `live_class_participants` — `(live_class_id, student_id)` unique, plus `join_clicked_at`. Used
+  only for the `SEL` audience; class and section audiences resolve membership from `students` live,
+  so a transferred student immediately gains and loses the right meetings.
+
+`join_clicked_at` records an LMS join-link click. It is **not** verified Google Meet attendance, and
+the column carries a comment saying so.

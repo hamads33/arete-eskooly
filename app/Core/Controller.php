@@ -18,7 +18,7 @@ abstract class Controller
                 'css/components.css?v=6', 'css/account-settings.css?v=1',
                 'css/settings.css?v=2', 'css/admin-pages.css?v=5', 'css/dashboard.css',
                 'css/responsive.css',
-                'css/print.css?v=1',
+                'css/print.css?v=2', 'css/reports.css?v=1',
             ];
             $baseScripts = [
                 'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=4', 'js/app.js?v=3',

@@ -70,7 +70,8 @@ return [
     $item('SMS', 'sms', 'message-square-text', null, [
         $child('Gateway', 'sms-gateway', null, true),
     ]),
-    $item('Live Class', 'live-class', 'video', null, [], true),
+    // Was a locked placeholder with no route until Google Meet live classes shipped.
+    $item('Live Classes', 'live-classes', 'video', '/admin/live-classes'),
     $item('Exams', 'exams', 'file-check-2', null, [
         $child('Create New Exam', 'exam-create', '/admin/exams/create'), $child('Exam Setup', 'exam-setup', '/admin/exams/setup'),
         $child('Add / Update Marks', 'exam-marks', '/admin/exams/marks'), $child('Result Card', 'exam-results', '/admin/exams/results'),

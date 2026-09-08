@@ -179,3 +179,30 @@ audience via `PortalController::identity()`.
 - `POST /admin/exams/{id}/status`, `POST /admin/class-tests/{id}/status`
 - `GET /admin/reports/class-tests/{test}/marksheet/pdf`
 - `GET /admin/reports/exams/{exam}/classes/{class}/gazette/pdf`
+
+# Google Meet live classes (migration 000020)
+
+Admin. Module segment `live-classes` maps to `live-classes.view` / `live-classes.manage`;
+`integrations` maps to `google-calendar.manage`, which only the admin wildcard satisfies.
+
+- `GET /admin/live-classes`, `GET /admin/live-classes/create`
+- `POST /admin/live-classes`, `POST /admin/live-classes/instant`
+- `GET /admin/live-classes/{id}/edit`, `POST /admin/live-classes/{id}`
+- `POST /admin/live-classes/{id}/cancel`, `POST /admin/live-classes/{id}/sync`
+- `GET /admin/integrations/google/connect`, `GET /admin/integrations/google/callback`
+- `POST /admin/integrations/google/disconnect`
+
+Teacher and student routes live under `/portal`, not `/teacher` and `/student`: `AdminAreaMiddleware`
+covers all of `/admin` and would reject portal users.
+
+- `GET/POST /portal/employee/teaching/live-classes`, `POST /portal/employee/teaching/live-classes/instant`
+- `POST /portal/employee/teaching/live-classes/{id}`, `POST /portal/employee/teaching/live-classes/{id}/cancel`
+- `GET /portal/student/live-classes`, `GET /portal/student/live-classes/{id}/join`
+
+`/admin/integrations/google/callback` is the one GET Google redirects to and therefore carries no
+CSRF token; its forgery protection is the session-bound `state` parameter validated in
+`GoogleOAuthService`. Every POST above carries `VerifyCsrfToken`.
+
+The student join route redirects to Google only after re-checking institute, audience, join window
+and cancellation, and only to a validated `https://meet.google.com` URL. No Meet link is rendered
+into student HTML.
