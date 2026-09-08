@@ -39,6 +39,28 @@ final class LiveClassRepository
     public function teacherEmail(int $teacherId, int $institute): ?string
     {
         $email = $this->db->query('SELECT email FROM employees WHERE id=:e AND institute_id=:i LIMIT 1', ['e' => $teacherId, 'i' => $institute])->fetchColumn();
+        return $this->usableEmail($email);
+    }
+
+    /**
+     * The creating user's address, so whoever made the class can get into it.
+     *
+     * An administrator is no more the organiser than a teacher is — the event belongs to the
+     * institute account — so they are invited on the same footing. Joined through institute_users
+     * to keep the lookup inside the tenant.
+     */
+    public function userEmail(int $userId, int $institute): ?string
+    {
+        $email = $this->db->query(
+            'SELECT u.email FROM users u JOIN institute_users iu ON iu.user_id = u.id WHERE u.id=:u AND iu.institute_id=:i LIMIT 1',
+            ['u' => $userId, 'i' => $institute]
+        )->fetchColumn();
+        return $this->usableEmail($email);
+    }
+
+    /** An address is usable only if it is really there and really an address. */
+    private function usableEmail(mixed $email): ?string
+    {
         $email = is_string($email) ? trim($email) : '';
         return $email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
     }

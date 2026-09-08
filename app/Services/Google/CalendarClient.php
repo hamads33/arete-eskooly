@@ -21,10 +21,10 @@ namespace App\Services\Google;
 interface CalendarClient
 {
     /**
-     * @param array{summary:string,description:?string,start:string,end:string,timezone:string,host_email?:?string} $event
+     * @param array{summary:string,description:?string,start:string,end:string,timezone:string,host_emails?:list<string>} $event
      *        start/end are 'Y-m-d H:i:s' wall-clock times in $event['timezone'].
-     *        host_email, when present, is the teaching employee: they are invited to the event so
-     *        Meet admits them to their own class instead of making them ask to join.
+     *        host_emails are the staff running the class — its teacher and its creator. They are
+     *        invited so Meet admits them instead of making them ask to join their own class.
      */
     public function createEvent(array $connection, array $event): array;
 

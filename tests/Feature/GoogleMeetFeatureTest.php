@@ -58,12 +58,20 @@ return static function (App $app): array {
     $employee = (int) $pdo->lastInsertId();
     (new PakistanErpRepository($db))->saveAssignment($institute, $employee, $assigned, $subject, null, 'subject', $admin);
 
+    // A second teacher on the other class, so the suite can prove two teachers work their own
+    // classes at once off the one institute Google connection, with no administrator in the loop.
+    $teacherBEmail = 'lc.teacher.b.' . $suffix . '@example.test';
+    $db->query('INSERT INTO employees(institute_id,employee_no,name,email,joining_date,role,monthly_salary,status,created_at,updated_at) VALUES(:i,:e,:n,:m,:d,"Teacher",50000,"active",:x,:y)', ['i' => $institute, 'e' => 'LCB-' . $suffix, 'n' => 'LC Teacher B ' . $suffix, 'm' => $teacherBEmail, 'd' => date('Y-m-d'), 'x' => $now, 'y' => $now]);
+    $employeeB = (int) $pdo->lastInsertId();
+    (new PakistanErpRepository($db))->saveAssignment($institute, $employeeB, $foreign, $foreignSubject, null, 'subject', $admin);
+
     foreach ([['mine', $assigned], ['other', $foreign]] as [$label, $classId]) {
         $db->query('INSERT INTO students(institute_id,class_id,registration_no,student_name,date_of_admission,created_at,updated_at) VALUES(:i,:c,:r,:n,:d,:x,:y)', ['i' => $institute, 'c' => $classId, 'r' => 'LCS-' . $label . '-' . $suffix, 'n' => 'LC Student ' . $label, 'd' => date('Y-m-d'), 'x' => $now, 'y' => $now]);
         ${'student' . ucfirst($label)} = (int) $pdo->lastInsertId();
     }
     $credentialService = new CredentialService($db);
     $teacherUser = (int) $credentialService->create('employee', $employee, $institute, 'lc.teacher.' . $suffix . '@example.test', $admin, 'TeacherPass#' . $suffix)['user_id'];
+    $teacherBUser = (int) $credentialService->create('employee', $employeeB, $institute, $teacherBEmail, $admin, 'TeacherPass#B' . $suffix)['user_id'];
     $studentUser = (int) $credentialService->create('student', $studentMine, $institute, 'lc.student.' . $suffix . '@example.test', $admin, 'StudentPass#' . $suffix)['user_id'];
     $otherStudentUser = (int) $credentialService->create('student', $studentOther, $institute, 'lc.other.' . $suffix . '@example.test', $admin, 'StudentPass#' . $suffix)['user_id'];
 
@@ -148,8 +156,11 @@ return static function (App $app): array {
     $sent = $fake->lastEvent();
     $check('google receives the institute timezone', ($sent['timezone'] ?? '') === $timezone);
     $check('google receives the entered wall clock', ($sent['start'] ?? '') === $startDate . ' 10:00:00');
-    // No teacher on this one, so nobody is invited — the institute account hosts it alone.
-    $check('a class with no teacher invites nobody', ($sent['host_email'] ?? null) === null);
+    // The administrator is no more the organiser than a teacher is: the event belongs to the
+    // institute account, so without an invite Google makes them ask to join their own class too.
+    $adminEmail = (string) $db->query('SELECT email FROM users WHERE id=:u', ['u' => $admin])->fetchColumn();
+    $check('the creating administrator is invited to their own class', in_array($adminEmail, $sent['host_emails'] ?? [], true));
+    $check('a class with no teacher invites only its creator', ($sent['host_emails'] ?? []) === [$adminEmail]);
     $localBack = (new DateTimeImmutable((string) $scheduled['start_time'], new DateTimeZone('UTC')))->setTimezone(new DateTimeZone($timezone))->format('Y-m-d H:i');
     $check('stored UTC converts back to the entered local time', $localBack === $startDate . ' 10:00');
 
@@ -216,7 +227,8 @@ return static function (App $app): array {
     // The event is created on the institute's calendar, so without an invite Google treats the
     // teacher as an outsider and shows "Ask to join" at their own class, with no host to admit them.
     $teacherSent = $teacherFake->lastEvent();
-    $check('teacher is invited to the event they created', ($teacherSent['host_email'] ?? null) === $teacherEmail);
+    // Teacher and creator are the same person here, and Google rejects a duplicated attendee.
+    $check('teacher is invited to the event they created', ($teacherSent['host_emails'] ?? []) === [$teacherEmail]);
 
     // §19: changing the POST to an unassigned class must not widen the teacher's reach.
     $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Teacher Leak ' . $suffix, 'class_id' => $foreign, 'subject_id' => $foreignSubject, 'audience_type' => 'SC', 'date' => $startDate, 'time' => '09:00', 'duration' => 45]);
@@ -226,6 +238,38 @@ return static function (App $app): array {
     $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Spoof ' . $suffix, 'class_id' => $assigned, 'subject_id' => $subject, 'audience_type' => 'SC', 'teacher_id' => 999999, 'date' => $startDate, 'time' => '15:00', 'duration' => 30]);
     $spoof = $db->query('SELECT teacher_id FROM live_classes WHERE title=:t', ['t' => 'LC Spoof ' . $suffix])->fetch();
     $check('submitted teacher_id is ignored', (int) ($spoof['teacher_id'] ?? 0) === $employee);
+
+    /* ------------------------------------ a second teacher, same institute */
+
+    // Two teachers, two classes, one institute Google connection, no administrator involved. The
+    // interesting part is that teacher A's meeting is already live when teacher B creates theirs:
+    // both must end up with their own event and their own Meet link off the same shared token.
+    $app->session()->set('auth_user', (new UserRepository($db))->findAuthContext($teacherBUser));
+    $useFake($teacherBFake = new FakeCalendarClient());
+    $check('second teacher reaches their own live classes page', $get('/portal/employee/teaching/live-classes')->status() === 200);
+
+    $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Teacher B OK ' . $suffix, 'class_id' => $foreign, 'subject_id' => $foreignSubject, 'audience_type' => 'SC', 'date' => $startDate, 'time' => '09:00', 'duration' => 45]);
+    $teacherBMeeting = $db->query('SELECT * FROM live_classes WHERE title=:t', ['t' => 'LC Teacher B OK ' . $suffix])->fetch();
+    $check('second teacher schedules without any admin involvement', is_array($teacherBMeeting));
+    $check('second teacher owns their own meeting', (int) ($teacherBMeeting['teacher_id'] ?? 0) === $employeeB);
+    $check('second teacher is invited to their own event', (($teacherBFake->lastEvent())['host_emails'] ?? []) === [$teacherBEmail]);
+
+    // Same wall-clock slot as teacher A's class: concurrent classes are a normal timetable, not a
+    // collision, so they must not share an event or a link.
+    $check('concurrent teachers get separate google events', ($teacherBMeeting['google_event_id'] ?? '') !== ($teacherMeeting['google_event_id'] ?? ''));
+    $check('concurrent teachers get separate meet links', ($teacherBMeeting['meet_link'] ?? '') !== ($teacherMeeting['meet_link'] ?? ''));
+    $check('both teachers\' classes are scheduled at once', ($teacherMeeting['status'] ?? '') === 'scheduled' && ($teacherBMeeting['status'] ?? '') === 'scheduled');
+
+    // Neither teacher may reach across into the other's class or meeting.
+    $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC B Leak ' . $suffix, 'class_id' => $assigned, 'subject_id' => $subject, 'audience_type' => 'SC', 'date' => $startDate, 'time' => '11:00', 'duration' => 30]);
+    $check('second teacher cannot schedule for the first teacher\'s class', (int) $db->query('SELECT COUNT(*) FROM live_classes WHERE title=:t', ['t' => 'LC B Leak ' . $suffix])->fetchColumn() === 0);
+    $post('/portal/employee/teaching/live-classes/' . (int) $teacherMeeting['id'] . '/cancel', ['_token' => CSRF::token()]);
+    $stillLive = $repository->find((int) $teacherMeeting['id'], $institute);
+    $check('second teacher cannot cancel the first teacher\'s meeting', ($stillLive['status'] ?? '') === 'scheduled');
+
+    // Hand the session back to the first teacher; the checks below continue as them.
+    $app->session()->set('auth_user', (new UserRepository($db))->findAuthContext($teacherUser));
+    $useFake($teacherFake);
 
     $post('/portal/employee/teaching/live-classes/instant', ['_token' => CSRF::token(), 'class_id' => $assigned, 'subject_id' => $subject, 'audience_type' => 'SC', 'duration' => 30]);
     $check('teacher can start an instant class', (int) $db->query('SELECT COUNT(*) FROM live_classes WHERE teacher_id=:t AND institute_id=:i', ['t' => $employee, 'i' => $institute])->fetchColumn() >= 3);

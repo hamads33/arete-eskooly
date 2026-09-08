@@ -158,20 +158,30 @@ final class LiveClassService
     }
 
     /**
-     * The teaching employee's address, so the event can invite them to their own class.
+     * The staff who must be able to walk into this class: its teacher, and whoever created it.
      *
      * Every event is created on the *institute's* calendar, which makes the institute account the
-     * organiser. A teacher opening that Meet link is therefore an outsider and Google makes them
-     * knock ("Ask to join") — with nobody on the other side to admit them, since the institute
-     * account is not in the room. Naming the teacher as an attendee puts them on the invite list,
-     * which is what Meet checks before deciding whether to admit someone directly.
+     * organiser. Anyone else opening that Meet link — teacher or administrator alike — is an
+     * outsider, so Google makes them knock ("Ask to join") with nobody on the other side to admit
+     * them, because the institute account is not in the room. Naming them as attendees puts them on
+     * the invite list, which is what Meet checks before admitting someone directly.
      *
-     * This is the host only. Students are deliberately still not attendees (§21): they are LMS
-     * participants, may have no Google address, and would be emailed on every edit.
+     * Staff only. Students are deliberately still not attendees (§21): they are LMS participants,
+     * may have no Google address, and would be emailed on every edit.
+     *
+     * @return list<string>
      */
-    private function hostEmail(?int $teacherId, int $institute): ?string
+    private function hostEmails(?int $teacherId, ?int $creatorUserId, int $institute): array
     {
-        return $teacherId === null ? null : $this->repository->teacherEmail($teacherId, $institute);
+        $emails = [];
+        if ($teacherId !== null) {
+            $emails[] = $this->repository->teacherEmail($teacherId, $institute);
+        }
+        if ($creatorUserId !== null) {
+            $emails[] = $this->repository->userEmail($creatorUserId, $institute);
+        }
+        // A teacher creating their own class appears twice; Google rejects duplicate attendees.
+        return array_values(array_unique(array_filter($emails, static fn (?string $email): bool => $email !== null)));
     }
 
     /**
@@ -188,7 +198,7 @@ final class LiveClassService
             'start' => $normalised['local_start'],
             'end' => $normalised['local_end'],
             'timezone' => $normalised['timezone'],
-            'host_email' => $this->hostEmail($teacherId, $institute),
+            'host_emails' => $this->hostEmails($teacherId, $userId, $institute),
         ]);
 
         $pending = ($result['meet_link'] ?? null) === null;
@@ -249,7 +259,11 @@ final class LiveClassService
                     'start' => $normalised['local_start'],
                     'end' => $normalised['local_end'],
                     'timezone' => $normalised['timezone'],
-                    'host_email' => $this->hostEmail(isset($meeting['teacher_id']) ? (int) $meeting['teacher_id'] : null, $institute),
+                    'host_emails' => $this->hostEmails(
+                        isset($meeting['teacher_id']) ? (int) $meeting['teacher_id'] : null,
+                        isset($meeting['created_by']) ? (int) $meeting['created_by'] : null,
+                        $institute
+                    ),
                 ]);
                 $meetLink = $result['meet_link'] ?? $meetLink;
                 $conferenceStatus = (string) $result['conference_status'];

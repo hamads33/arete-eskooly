@@ -17,10 +17,10 @@ use Google\Service\Calendar\EventDateTime;
  * generates the conference asynchronously, so the caller (GoogleCalendarService) is responsible
  * for polling when conference_status comes back 'pending' (§17).
  *
- * The teaching employee is added as an attendee when the class has one, because the event lives on
- * the institute's calendar and Meet otherwise treats the teacher as an uninvited guest at their own
- * lesson. Students are still not attendees (§21): they are LMS participants, they may have no
- * Google address at all, and adding them would email every guardian's inbox on every edit.
+ * The class's teacher and its creator are added as attendees, because the event lives on the
+ * institute's calendar and Meet otherwise treats them as uninvited guests at their own lesson.
+ * Students are still not attendees (§21): they are LMS participants, they may have no Google
+ * address at all, and adding them would email every guardian's inbox on every edit.
  */
 final class GoogleCalendarClient implements CalendarClient
 {
@@ -103,15 +103,22 @@ final class GoogleCalendarClient implements CalendarClient
         }
         $google->setStart($this->when((string) $event['start'], (string) $event['timezone']));
         $google->setEnd($this->when((string) $event['end'], (string) $event['timezone']));
-        $host = trim((string) ($event['host_email'] ?? ''));
-        if ($host !== '') {
-            // The teacher must be on the invite list or Meet makes them knock at a room whose
-            // organiser — the institute account — is not there to let them in. Marked as an
-            // organiser-equivalent guest so they can admit students who arrive first.
+        // Staff must be on the invite list or Meet makes them knock at a room whose organiser — the
+        // institute account — is not there to let them in. Accepted on their behalf so the class
+        // simply appears on their calendar, and allowed to invite so they can admit a straggler.
+        $attendees = [];
+        foreach ($event['host_emails'] ?? [] as $email) {
+            $email = trim((string) $email);
+            if ($email === '') {
+                continue;
+            }
             $attendee = new EventAttendee();
-            $attendee->setEmail($host);
+            $attendee->setEmail($email);
             $attendee->setResponseStatus('accepted');
-            $google->setAttendees([$attendee]);
+            $attendees[] = $attendee;
+        }
+        if ($attendees !== []) {
+            $google->setAttendees($attendees);
             $google->setGuestsCanInviteOthers(true);
         }
         return $google;
