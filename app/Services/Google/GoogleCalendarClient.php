@@ -6,6 +6,7 @@ use Google\Service\Calendar\ConferenceData;
 use Google\Service\Calendar\ConferenceSolutionKey;
 use Google\Service\Calendar\CreateConferenceRequest;
 use Google\Service\Calendar\Event;
+use Google\Service\Calendar\EventAttendee;
 use Google\Service\Calendar\EventDateTime;
 
 /**
@@ -16,7 +17,9 @@ use Google\Service\Calendar\EventDateTime;
  * generates the conference asynchronously, so the caller (GoogleCalendarService) is responsible
  * for polling when conference_status comes back 'pending' (§17).
  *
- * Students are not added as Calendar attendees (§21): they are LMS participants, they may have no
+ * The teaching employee is added as an attendee when the class has one, because the event lives on
+ * the institute's calendar and Meet otherwise treats the teacher as an uninvited guest at their own
+ * lesson. Students are still not attendees (§21): they are LMS participants, they may have no
  * Google address at all, and adding them would email every guardian's inbox on every edit.
  */
 final class GoogleCalendarClient implements CalendarClient
@@ -28,7 +31,9 @@ final class GoogleCalendarClient implements CalendarClient
         return $this->call($connection, function (Calendar $service, string $calendarId) use ($event): array {
             $payload = $this->event($event);
             $payload->setConferenceData($this->conferenceRequest());
-            $created = $service->events->insert($calendarId, $payload, ['conferenceDataVersion' => 1]);
+            // sendUpdates=all so the teacher actually receives the invitation; attendee membership
+            // alone fixes Meet admission, but the invite is what puts the class on their calendar.
+            $created = $service->events->insert($calendarId, $payload, ['conferenceDataVersion' => 1, 'sendUpdates' => 'all']);
             return $this->describe($created, $calendarId);
         });
     }
@@ -38,7 +43,7 @@ final class GoogleCalendarClient implements CalendarClient
         return $this->call($connection, function (Calendar $service, string $calendarId) use ($eventId, $event): array {
             // Patch, never insert-over: a full update without the existing conferenceData would
             // drop the Meet conference and invalidate the link students already hold (§28).
-            $updated = $service->events->patch($calendarId, $eventId, $this->event($event), ['conferenceDataVersion' => 1]);
+            $updated = $service->events->patch($calendarId, $eventId, $this->event($event), ['conferenceDataVersion' => 1, 'sendUpdates' => 'all']);
             return $this->describe($updated, $calendarId);
         });
     }
@@ -98,6 +103,17 @@ final class GoogleCalendarClient implements CalendarClient
         }
         $google->setStart($this->when((string) $event['start'], (string) $event['timezone']));
         $google->setEnd($this->when((string) $event['end'], (string) $event['timezone']));
+        $host = trim((string) ($event['host_email'] ?? ''));
+        if ($host !== '') {
+            // The teacher must be on the invite list or Meet makes them knock at a room whose
+            // organiser — the institute account — is not there to let them in. Marked as an
+            // organiser-equivalent guest so they can admit students who arrive first.
+            $attendee = new EventAttendee();
+            $attendee->setEmail($host);
+            $attendee->setResponseStatus('accepted');
+            $google->setAttendees([$attendee]);
+            $google->setGuestsCanInviteOthers(true);
+        }
         return $google;
     }
 

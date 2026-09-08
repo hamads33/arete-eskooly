@@ -29,6 +29,20 @@ final class LiveClassRepository
         return is_array($row) ? $row : null;
     }
 
+    /**
+     * The teaching employee's address, used to invite them to their own Google event.
+     *
+     * Scoped by institute for the same reason every other read here is: a teacher id from one
+     * tenant must never resolve against another's employee row. Null when the employee has no
+     * address on file, which the caller treats as "no host to invite".
+     */
+    public function teacherEmail(int $teacherId, int $institute): ?string
+    {
+        $email = $this->db->query('SELECT email FROM employees WHERE id=:e AND institute_id=:i LIMIT 1', ['e' => $teacherId, 'i' => $institute])->fetchColumn();
+        $email = is_string($email) ? trim($email) : '';
+        return $email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : null;
+    }
+
     /** Every Google-backed meeting for the institute, newest window first. */
     public function forInstitute(int $institute, array $filters = []): array
     {

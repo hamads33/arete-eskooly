@@ -53,7 +53,8 @@ return static function (App $app): array {
     $subject = (int) $db->query('SELECT s.id FROM subjects s JOIN class_subjects cs ON cs.subject_id=s.id WHERE cs.class_id=:c', ['c' => $assigned])->fetchColumn();
     $foreignSubject = (int) $db->query('SELECT s.id FROM subjects s JOIN class_subjects cs ON cs.subject_id=s.id WHERE cs.class_id=:c', ['c' => $foreign])->fetchColumn();
 
-    $db->query('INSERT INTO employees(institute_id,employee_no,name,joining_date,role,monthly_salary,status,created_at,updated_at) VALUES(:i,:e,:n,:d,"Teacher",50000,"active",:x,:y)', ['i' => $institute, 'e' => 'LC-' . $suffix, 'n' => 'LC Teacher ' . $suffix, 'd' => date('Y-m-d'), 'x' => $now, 'y' => $now]);
+    $teacherEmail = 'lc.teacher.' . $suffix . '@example.test';
+    $db->query('INSERT INTO employees(institute_id,employee_no,name,email,joining_date,role,monthly_salary,status,created_at,updated_at) VALUES(:i,:e,:n,:m,:d,"Teacher",50000,"active",:x,:y)', ['i' => $institute, 'e' => 'LC-' . $suffix, 'n' => 'LC Teacher ' . $suffix, 'm' => $teacherEmail, 'd' => date('Y-m-d'), 'x' => $now, 'y' => $now]);
     $employee = (int) $pdo->lastInsertId();
     (new PakistanErpRepository($db))->saveAssignment($institute, $employee, $assigned, $subject, null, 'subject', $admin);
 
@@ -147,6 +148,8 @@ return static function (App $app): array {
     $sent = $fake->lastEvent();
     $check('google receives the institute timezone', ($sent['timezone'] ?? '') === $timezone);
     $check('google receives the entered wall clock', ($sent['start'] ?? '') === $startDate . ' 10:00:00');
+    // No teacher on this one, so nobody is invited — the institute account hosts it alone.
+    $check('a class with no teacher invites nobody', ($sent['host_email'] ?? null) === null);
     $localBack = (new DateTimeImmutable((string) $scheduled['start_time'], new DateTimeZone('UTC')))->setTimezone(new DateTimeZone($timezone))->format('Y-m-d H:i');
     $check('stored UTC converts back to the entered local time', $localBack === $startDate . ' 10:00');
 
@@ -209,6 +212,11 @@ return static function (App $app): array {
     $check('teacher can schedule for an assigned class', is_array($teacherMeeting));
     $check('teacher meeting records the teacher from the session', (int) ($teacherMeeting['teacher_id'] ?? 0) === $employee);
     $check('teacher meeting is attributed to the teacher role', ($teacherMeeting['created_by_role'] ?? '') === 'teacher');
+
+    // The event is created on the institute's calendar, so without an invite Google treats the
+    // teacher as an outsider and shows "Ask to join" at their own class, with no host to admit them.
+    $teacherSent = $teacherFake->lastEvent();
+    $check('teacher is invited to the event they created', ($teacherSent['host_email'] ?? null) === $teacherEmail);
 
     // §19: changing the POST to an unassigned class must not widen the teacher's reach.
     $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Teacher Leak ' . $suffix, 'class_id' => $foreign, 'subject_id' => $foreignSubject, 'audience_type' => 'SC', 'date' => $startDate, 'time' => '09:00', 'duration' => 45]);
