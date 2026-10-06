@@ -15,10 +15,16 @@ final class AuthService
     {
         $user = $this->users->findByEmail($email);
         if ($user === null || !password_verify($password, (string) $user['password_hash'])) return 'invalid';
-        if ($user['status'] !== 'active') return 'disabled';
+        // Re-apply the unpaid-fee rule first, so a student who has just paid gets straight back in.
+        (new AccountAccess(app()->database()))->evaluateUser((int) $user['id']);
+        $user = $this->users->findByEmail($email) ?? $user;
+        // Suspended accounts may sign in; every page then shows the restriction notice instead.
+        if (!in_array($user['status'], ['active', 'suspended'], true)) return 'disabled';
         $context = $this->users->findAuthContext((int) $user['id']);
         if ($context === null) return 'invalid';
         $roles=(array)$context['roles'];
+        // An inactive / suspended student or employee may be blocked from signing in (General Settings → Inactive & Suspended Rules).
+        if(!in_array('admin',$roles,true)&&!\App\Support\PersonStatus::loginAllowed(app()->database(),(int)$user['id']))return'inactive_person';
         if(!array_intersect(['admin','student','employee','parent'],$roles)&&!$this->users->hasLinkedIdentity((int)$user['id']))return'restricted';
         $this->users->updateLastLogin((int) $user['id']);
         $this->session->regenerate();

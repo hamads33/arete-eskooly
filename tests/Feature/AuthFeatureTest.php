@@ -8,6 +8,7 @@ use App\Middleware\AuthMiddleware;
 use App\Middleware\RoleMiddleware;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
+use App\Services\RememberMeService;
 
 return static function (\App\Core\App $app): array {
     $checks = [];
@@ -53,6 +54,14 @@ return static function (\App\Core\App $app): array {
     $checks['authorized permission is allowed'] = $allowed->status() === 200;
     $checks['authenticated admin route resolves'] = $app->run($request('GET', '/admin/dashboard'))->status() === 200;
     $checks['guest middleware redirects authenticated login page'] = $app->run($request('GET', '/login'))->status() === 302;
+
+    $remember=new RememberMeService($app->database(),$app->session(),(array)$app->config('session',[]));
+    $remember->issue((int)$adminContext['id']);
+    $auth->logout();
+    $checks['remember me securely restores a cleared session']=$remember->resume()&&check()&&user()['email']===$email;
+    $activeRememberSelector=explode(':',(string)($_COOKIE['arete_remember']??''),2)[0]??'';
+    $remember->revoke();
+    $checks['logout revokes persistent remember token']=$activeRememberSelector!==''&&(int)$app->database()->query('SELECT COUNT(*) FROM remember_tokens WHERE selector=:s',['s'=>$activeRememberSelector])->fetchColumn()===0;
 
     $auth->logout();
     $checks['logout clears authentication'] = guest();

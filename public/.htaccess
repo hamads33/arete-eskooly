@@ -1,5 +1,13 @@
 Options -Indexes
+AddType application/manifest+json .webmanifest
 RewriteEngine On
+
+<IfModule mod_headers.c>
+  <Files "sw.js">
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header set Service-Worker-Allowed "/"
+  </Files>
+</IfModule>
 
 # Serve real public files and directories without routing them through PHP.
 RewriteCond %{REQUEST_FILENAME} -f [OR]

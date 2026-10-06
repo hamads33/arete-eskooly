@@ -117,9 +117,9 @@
 .placeholder-panel .lucide { width: 34px; height: 34px; margin: 0 auto 11px; color: var(--primary); }
 .placeholder-panel h2 { font-size: 16px; }
 .placeholder-panel p { max-width: 480px; margin-top: 5px; color: var(--text-secondary); font-size: 12px; }
-.fee-structure-card{overflow:hidden}.fee-structure-card .table-scroll{overflow:visible}.fee-structure-table{width:100%;table-layout:fixed;min-width:0}.fee-structure-table th:nth-child(1){width:40%}.fee-structure-table th:nth-child(2){width:24%}.fee-structure-table th:nth-child(3){width:36%}.fee-structure-table th,.fee-structure-table td{padding:13px 16px;vertical-align:middle}.fee-amount-control{display:flex;align-items:center;width:100%;max-width:240px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft);overflow:hidden}.fee-amount-control>span{padding-left:14px;color:var(--text-secondary);font-weight:700;white-space:nowrap}.fee-amount-control .form-input{width:100%;border:0;background:transparent;box-shadow:none;min-width:0}.fee-structure-card .class-identity{display:flex;align-items:center;gap:11px}.fee-structure-card .class-identity__mark{display:grid;width:36px;height:36px;flex:0 0 36px;place-items:center;border-radius:10px;background:#faf0f3;color:var(--primary)}.fee-structure-card .class-identity__mark svg{width:17px}.fee-structure-card .class-identity span:last-child{display:flex;min-width:0;flex-direction:column}.fee-structure-card .class-identity strong{overflow-wrap:anywhere}.fee-structure-card .class-identity small{color:var(--text-secondary);font-size:11px;margin-top:2px}.settings-card__footer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.fee-structure-card .settings-card__footer .btn{margin-left:auto;flex:0 0 auto}@media(max-width:760px){.fee-structure-card .table-scroll{overflow:visible}.fee-structure-table,.fee-structure-table tbody{display:block}.fee-structure-table thead{display:none}.fee-structure-table tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;border-bottom:1px solid var(--border)}.fee-structure-table td{display:block;padding:0;border:0}.fee-structure-table td:first-child{grid-column:1/-1}.fee-amount-control{max-width:none}.fee-structure-card .settings-card__footer{align-items:stretch}.fee-structure-card .settings-card__footer .btn{width:100%;margin:0}}
+.fee-structure-card{overflow:hidden}.fee-structure-card .table-scroll{overflow:visible}.fee-structure-table{width:100%;table-layout:fixed;min-width:0}.fee-structure-table th:nth-child(1){width:40%}.fee-structure-table th:nth-child(2){width:24%}.fee-structure-table th:nth-child(3){width:36%}.fee-structure-table th,.fee-structure-table td{padding:13px 16px;vertical-align:middle}.fee-amount-control{display:flex;align-items:center;width:100%;max-width:240px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft);overflow:hidden}.fee-amount-control>span{padding-left:14px;color:var(--text-secondary);font-weight:700;white-space:nowrap}.fee-amount-control .form-input{width:100%;border:0;background:transparent;box-shadow:none;min-width:0}.fee-structure-card .class-identity{display:flex;align-items:center;gap:11px}.fee-structure-card .class-identity__mark{display:grid;width:36px;height:36px;flex:0 0 36px;place-items:center;border-radius:10px;background:#faf0f3;color:var(--primary)}.fee-structure-card .class-identity__mark svg{width:17px}.fee-structure-card .class-identity span:last-child{display:flex;min-width:0;flex-direction:column}.fee-structure-card .class-identity strong{overflow-wrap:anywhere}.fee-structure-card .class-identity small{color:var(--text-secondary);font-size:11px;margin-top:2px}.settings-card__footer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.fee-structure-card .settings-card__footer .btn{margin-left:auto;flex:0 0 auto}@media screen and (max-width:760px){.fee-structure-card .table-scroll{overflow:visible}.fee-structure-table,.fee-structure-table tbody{display:block}.fee-structure-table thead{display:none}.fee-structure-table tr{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;border-bottom:1px solid var(--border)}.fee-structure-table td{display:block;padding:0;border:0}.fee-structure-table td:first-child{grid-column:1/-1}.fee-amount-control{max-width:none}.fee-structure-card .settings-card__footer{align-items:stretch}.fee-structure-card .settings-card__footer .btn{width:100%;margin:0}}
 
-@media (max-width: 1000px) {
+@media screen and (max-width: 1000px) {
   .profile-layout { grid-template-columns: minmax(230px,.7fr) minmax(0,1.3fr); }
   .settings-grid--three { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
@@ -135,9 +135,9 @@
 .inline-info{display:flex;align-items:flex-start;gap:10px;margin-top:18px;padding:13px;border-radius:10px;background:rgba(151,31,46,.06);color:var(--text-muted);font-size:12px;line-height:1.6}
 .inline-info svg{width:18px;min-width:18px;color:#971f2e}
 .report-template-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
-@media(max-width:900px){.report-template-layout{grid-template-columns:1fr}.report-type-list{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.template-toggles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.report-type-list,.template-toggles{grid-template-columns:1fr}}
-@media (max-width: 800px) {
+@media screen and (max-width:900px){.report-template-layout{grid-template-columns:1fr}.report-type-list{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.template-toggles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media screen and (max-width:560px){.report-type-list,.template-toggles{grid-template-columns:1fr}}
+@media screen and (max-width: 800px) {
   .profile-layout, .bank-form-layout { grid-template-columns: minmax(0,1fr); }
   .brand-panel { position: static; }
   .brand-panel__top { min-height: 78px; }
@@ -148,7 +148,7 @@
   .configuration-divider { width: auto; height: 1px; margin: 0 22px; }
   .bank-logo-uploader { min-height: 180px; }
 }
-@media (max-width: 640px) {
+@media screen and (max-width: 640px) {
   .settings-page { gap: 14px; }
   .settings-page__header { align-items: stretch; flex-direction: column; }
   .settings-page__header > .btn { width: 100%; }

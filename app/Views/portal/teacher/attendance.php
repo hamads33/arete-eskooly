@@ -17,7 +17,7 @@
 <div class="table-scroll"><table class="data-table"><thead><tr><th>Registration</th><th>Student</th><th>Status</th><th>Remarks</th></tr></thead><tbody>
 <?php foreach($rows as $row): $cur=$row['attendance_status']??'Present'; ?><tr>
 <td><?=e($row['registration_no'])?></td>
-<td><?=e($row['student_name'])?></td>
+<td><?=e($row['student_name'])?><?php require BASE_PATH.'/app/Views/partials/person-status-tag.php'; ?></td>
 <td><select class="module-input" name="status[<?=(int)$row['id']?>]"><?php foreach(['Present','Absent','Late','Leave'] as $s):?><option value="<?=$s?>" <?=$cur===$s?'selected':''?>><?=$s?></option><?php endforeach?></select></td>
 <td><input class="module-input" type="text" maxlength="255" name="remarks[<?=(int)$row['id']?>]" value="<?=e($row['remarks']??'')?>"></td>
 </tr><?php endforeach?>

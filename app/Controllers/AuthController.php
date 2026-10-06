@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Core\{App,Controller,Request,Response,Validator};
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
+use App\Services\RememberMeService;
 use App\Support\Flash;
 
 final class AuthController extends Controller
@@ -28,17 +29,22 @@ final class AuthController extends Controller
     {
         $validator = new Validator();
         $data = ['email' => strtolower(trim((string) $request->input('email'))), 'password' => (string) $request->input('password')];
+        $remember = $request->input('remember') === '1';
         if (!$validator->validate($data, ['email' => 'required|email', 'password' => 'required|string'])) {
-            $this->app->session()->flash('_old', ['email' => $data['email']]);
+            $this->app->session()->flash('_old', ['email' => $data['email'], 'remember' => $remember ? '1' : '']);
             $this->app->session()->flash('_errors', $validator->errors());
             return Response::redirect(url('/login'));
         }
         $result = $this->auth->attempt($data['email'], $data['password']);
         if ($result !== 'authenticated') {
-            $message = $result==='restricted'?'This account has no portal access. Contact your institute administrator.':'Unable to sign in. Check your email and password.';
-            $this->app->session()->flash('_old', ['email' => $data['email']]);
+            // 'disabled' is only returned after the password was verified, so naming it leaks nothing.
+            $message = $result==='inactive_person'?'Your account is not active at the moment. Please contact the institute administration.':($result==='restricted'?'This account has no portal access. Contact your institute administrator.':($result==='disabled'?'This account has been blocked. Please contact the institute administration.':'Unable to sign in. Check your email and password.'));
+            $this->app->session()->flash('_old', ['email' => $data['email'], 'remember' => $remember ? '1' : '']);
             $this->app->session()->flash('_errors', ['email' => [$message]]);
             return Response::redirect(url('/login'));
+        }
+        if ($remember) {
+            (new RememberMeService($this->app->database(),$this->app->session(),(array)$this->app->config('session',[])))->issue((int)user()['id']);
         }
         Flash::add('success', 'Welcome back. You are now signed in.');
         return Response::redirect(url($this->landingRoute()));
@@ -50,26 +56,29 @@ final class AuthController extends Controller
      */
     private function landingRoute(): string
     {
-        // Staff granted dashboard/module permissions belong in the administration workspace.
-        // Check effective permission before the generic employee role, otherwise every linked
-        // employee is incorrectly redirected to self-service even after a staff role is granted.
-        if (hasRole('admin') || can('dashboard.view')) {
+        if (hasRole('admin')) {
             return '/admin/dashboard';
         }
         if (hasRole('student')) {
             return '/portal/student';
         }
-        if (hasRole('employee')) {
-            return '/portal/employee';
-        }
         if (hasRole('parent')) {
             return '/portal/parent';
         }
-        return '/login';
+        // Teachers work from their own, assignment-scoped portal rather than the admin area.
+        if (hasRole('teacher') && !can('*')) {
+            return '/portal/employee';
+        }
+        // Staff granted any admin module belong in the administration workspace, landing on the
+        // first page they may actually open. Resolving this per-permission rather than demanding
+        // dashboard.view is what lets a narrow grant stand on its own; admin_home() falls back to
+        // the employee portal for staff holding no admin module at all.
+        return check() ? admin_home() : '/login';
     }
 
     public function destroy(Request $request): Response
     {
+        (new RememberMeService($this->app->database(),$this->app->session(),(array)$this->app->config('session',[])))->revoke();
         $this->auth->logout();
         Flash::add('success', 'You have been signed out safely.');
         return Response::redirect(url('/login'));

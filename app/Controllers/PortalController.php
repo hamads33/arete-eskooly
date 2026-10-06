@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Request;
 use App\Core\Response;
 use App\Repositories\PortalRepository;
 
@@ -63,7 +64,7 @@ abstract class PortalController extends Controller
     protected function portalView(string $view, string $audience, array $data): Response
     {
         $instituteId = (int) ($data['instituteId'] ?? 0);
-        return $this->view($view, array_replace([
+        $defaults = [
             'institute' => $instituteId > 0 ? $this->repo()->institute($instituteId) : [],
             'navigation' => $this->navigation($audience),
             'audience' => $audience,
@@ -72,13 +73,24 @@ abstract class PortalController extends Controller
             // Same stack the admin shell loads, so the portal inherits the maroon theme.
             'styles' => [
                 'css/variables.css', 'css/reset.css', 'css/base.css', 'css/layout.css',
-                'css/components.css?v=6', 'css/account-settings.css?v=1', 'css/admin-pages.css?v=5',
-                'css/dashboard.css', 'css/portal.css', 'css/responsive.css',
+                'css/components.css?v=6', 'css/account-settings.css?v=1', 'css/admin-pages.css?v=9',
+                'css/dashboard.css', 'css/portal.css', 'css/responsive.css', 'css/print.css',
             ],
             'scripts' => [
                 'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=4', 'js/app.js',
             ],
-        ], $data), 'layouts/portal');
+        ];
+        $announcementAudience=$audience==='employee'&&hasRole('teacher')?'teacher':$audience;
+        $defaults['portalAnnouncements']=(new \App\Repositories\AnnouncementRepository($this->app->database()))->visible($instituteId,$announcementAudience,$this->announcementClassIds($audience));
+        $defaults['studentNotifications']=[];
+        if($audience==='student'&&($student=$data['student']??$this->repo()->studentByUser($this->userId()))){
+            try{$defaults['studentNotifications']=(new \App\Services\StudentNotifications($this->app->database()))->unread($this->userId(),$student,(string)($defaults['institute']['currency_symbol']??'Rs')?:'Rs');}
+            catch(\PDOException){/* notification table not migrated yet: the portal still renders */}
+        }
+        $payload = array_replace($defaults, $data);
+        $payload['styles'] = array_values(array_unique(array_merge($defaults['styles'], $data['styles'] ?? [])));
+        $payload['scripts'] = array_values(array_unique(array_merge($defaults['scripts'], $data['scripts'] ?? [])));
+        return $this->view($view, $payload, 'layouts/portal');
     }
 
     /** Portal sidebar. Mirrors config/navigation.php's shape so the shared sidebar renders it. */
@@ -90,13 +102,17 @@ abstract class PortalController extends Controller
         if ($audience === 'student') {
             return [
                 $item('Dashboard', 'portal-dashboard', 'layout-dashboard', '/portal/student'),
+                $item('My Courses', 'portal-courses', 'graduation-cap', '/portal/student/courses'),
+                $item('Announcements', 'portal-announcements', 'megaphone', '/portal/announcements'),
                 $item('My Profile', 'portal-profile', 'user-round', '/portal/student/profile'),
                 $item('My Attendance', 'portal-attendance', 'calendar-check', '/portal/student/attendance'),
                 $item('My Fees', 'portal-fees', 'badge-dollar-sign', '/portal/student/fees'),
                 $item('My Results', 'portal-results', 'graduation-cap', '/portal/student/results'),
+                $item('Online Tests', 'portal-online-tests', 'clipboard-check', '/portal/student/online-tests'),
                 $item('My Homework', 'portal-homework', 'book-open', '/portal/student/homework'),
                 $item('Live Classes', 'portal-live-classes', 'video', '/portal/student/live-classes'),
                 $item('Class Notes', 'portal-notes', 'notebook-tabs', '/portal/student/notes'),
+                $item('Recorded Lectures', 'portal-recorded-lectures', 'clapperboard', '/portal/student/recorded-lectures'),
                 $item('My Documents', 'portal-documents', 'file-text', '/portal/student/documents'),
                 $item('Messages', 'portal-messages', 'messages-square', '/portal/messages'),
                 $item('Account Settings', 'portal-account', 'settings-2', '/portal/account'),
@@ -106,6 +122,7 @@ abstract class PortalController extends Controller
         if ($audience === 'parent') {
             return [
                 $item('My Children', 'portal-dashboard', 'users-round', '/portal/parent'),
+                $item('Announcements', 'portal-announcements', 'megaphone', '/portal/announcements'),
                 $item('My Profile', 'portal-profile', 'user-round', '/portal/parent/profile'),
                 $item('Messages', 'portal-messages', 'messages-square', '/portal/messages'),
                 $item('Account Settings', 'portal-account', 'settings-2', '/portal/account'),
@@ -114,6 +131,7 @@ abstract class PortalController extends Controller
 
         $employeeNav = [
             $item('Dashboard', 'portal-dashboard', 'layout-dashboard', '/portal/employee'),
+            $item('Announcements', 'portal-announcements', 'megaphone', '/portal/announcements'),
             $item('My Profile', 'portal-profile', 'user-round', '/portal/employee/profile'),
             $item('My Attendance', 'portal-attendance', 'calendar-check', '/portal/employee/attendance'),
             $item('My Salary', 'portal-salary', 'badge-dollar-sign', '/portal/employee/salary'),
@@ -133,7 +151,10 @@ abstract class PortalController extends Controller
                 $item('Assign Homework', 'portal-teaching-homework', 'book-open', '/portal/employee/teaching/homework'),
                 $item('Class Notes', 'portal-teaching-notes', 'file-text', '/portal/employee/teaching/notes'),
                 $item('Class Tests', 'portal-teaching-tests', 'clipboard-list', '/portal/employee/teaching/tests'),
+                $item('Online Tests & Submissions', 'online-tests', 'clipboard-check', '/admin/online-tests'),
+                $item('Exam Marks', 'exam-marks', 'file-check-2', '/admin/exams/marks'),
                 $item('Live Classes', 'portal-teaching-live-classes', 'video', '/portal/employee/teaching/live-classes'),
+                $item('Announcements', 'portal-teaching-announcements', 'megaphone', '/portal/employee/teaching/announcements'),
             ]);
         } else {
             array_splice($employeeNav, 5, 0, [
@@ -179,5 +200,27 @@ abstract class PortalController extends Controller
     {
         $date = \DateTimeImmutable::createFromFormat('Y-m-d', $value);
         return $date !== false && $date->format('Y-m-d') === $value;
+    }
+
+    /** Dismisses student pop-up notifications. */
+    public function readNotifications(Request $request): Response
+    {
+        if (!$this->repo()->studentByUser($this->userId())) {
+            return Response::json(['ok' => false], 403);
+        }
+        (new \App\Services\StudentNotifications($this->app->database()))->markRead($this->userId(), (array) $request->input('keys', []));
+        return Response::json(['ok' => true]);
+    }
+
+    /** Classes whose class-targeted announcements this portal user should receive. */
+    protected function announcementClassIds(string $audience): array
+    {
+        if ($audience === 'student') {
+            return ($s = $this->repo()->studentByUser($this->userId())) ? [(int) $s['class_id']] : [];
+        }
+        if ($audience === 'parent') {
+            return array_map('intval', $this->app->database()->query('SELECT DISTINCT s.class_id FROM guardian_accounts ga JOIN guardian_students gs ON gs.guardian_id=ga.guardian_id JOIN students s ON s.id=gs.student_id WHERE ga.user_id=:u', ['u' => $this->userId()])->fetchAll(\PDO::FETCH_COLUMN));
+        }
+        return [];
     }
 }

@@ -15,7 +15,8 @@
   Chart.defaults.color = tickColor;
   Chart.defaults.animation.duration = 650;
 
-  const currency = (value) => "$" + Number(value).toLocaleString("en-US");
+  const currencySymbol = String(data.currencySymbol || "PKR");
+  const currency = (value) => currencySymbol + " " + Number(value).toLocaleString("en-US");
   const sharedScales = {
     x: { grid: { display: false }, border: { display: false }, ticks: { font: { size: 10 } } },
     y: { beginAtZero: true, grid: { color: gridColor, drawTicks: false }, border: { display: false }, ticks: { padding: 10, font: { size: 10 } } }
@@ -40,7 +41,7 @@
       options: {
         responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
         plugins: { legend: { display: false }, tooltip: { backgroundColor: "#3B0B18", padding: 11, displayColors: true, callbacks: { label: (item) => ` ${item.dataset.label}: ${currency(item.raw)}` } } },
-        scales: { x: sharedScales.x, y: { ...sharedScales.y, ticks: { ...sharedScales.y.ticks, callback: (value) => "$" + value / 1000 + "k" } } }
+        scales: { x: sharedScales.x, y: { ...sharedScales.y, ticks: { ...sharedScales.y.ticks, callback: (value) => currencySymbol + " " + value / 1000 + "k" } } }
       }
     });
   }

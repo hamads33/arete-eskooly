@@ -38,6 +38,9 @@ return static function (App $app): array {
     $db->query('INSERT INTO student_attendance(student_id,attendance_date,status,remarks,marked_by,created_at,updated_at) VALUES(:s,:d,"Absent","",:u,:x,:x2)', ['s' => $otherStudentId, 'd' => date('Y-m-d'), 'u' => $admin, 'x' => $now, 'x2' => $now]);
     $db->query('INSERT INTO fee_invoices(student_id,fee_month,invoice_no,subtotal,discount,previous_balance,total_amount,paid_amount,remaining_amount,status,created_by,created_at,updated_at) VALUES(:s,:m,:no,2500,0,0,2500,1000,1500,"partial",:u,:x,:x2)', ['s' => $studentId, 'm' => date('Y-m'), 'no' => 'PINV-' . $suffix, 'u' => $admin, 'x' => $now, 'x2' => $now]);
     $invoiceId = (int) $pdo->lastInsertId();
+    $db->query('INSERT INTO guardians(institute_id,name,relationship,mobile,status,created_at,updated_at) VALUES(:i,:n,"Guardian","03000000000","active",:x,:x2)',['i'=>$institute,'n'=>'Portal Guardian '.$suffix,'x'=>$now,'x2'=>$now]);
+    $guardianId=(int)$pdo->lastInsertId();
+    $db->query('INSERT INTO guardian_students(guardian_id,student_id,is_primary,created_at) VALUES(:g,:s,1,:x)',['g'=>$guardianId,'s'=>$studentId,'x'=>$now]);
     $db->query('INSERT INTO fee_invoices(student_id,fee_month,invoice_no,subtotal,discount,previous_balance,total_amount,paid_amount,remaining_amount,status,created_by,created_at,updated_at) VALUES(:s,:m,:no,9999,0,0,9999,0,9999,"unpaid",:u,:x,:x2)', ['s' => $otherStudentId, 'm' => date('Y-m'), 'no' => 'PINV-OTHER-' . $suffix, 'u' => $admin, 'x' => $now, 'x2' => $now]);
     $otherInvoiceId = (int) $pdo->lastInsertId();
     $db->query('INSERT INTO employee_attendance(employee_id,attendance_date,status,marked_by,created_at,updated_at) VALUES(:e,:d,"Present",:u,:x,:x2)', ['e' => $employeeId, 'd' => date('Y-m-d'), 'u' => $admin, 'x' => $now, 'x2' => $now]);
@@ -93,6 +96,12 @@ return static function (App $app): array {
     $dashboard = $get('/portal/student');
     $check('student dashboard renders', $dashboard->status() === 200 && str_contains($dashboard->content(), 'Portal Student'));
     $check('student dashboard shows own outstanding fee', str_contains($dashboard->content(), '1,500.00'));
+    $check('student dashboard shows fee reminder only while due', str_contains($dashboard->content(), 'data-fee-reminder'));
+    $check('linked parent receives reminder for child with dues',(new \App\Support\FeeReminder($db))->forGuardian($guardianId,$institute)!==null);
+    $db->query('UPDATE fee_invoices SET remaining_amount=0,status="paid" WHERE id=:id',['id'=>$invoiceId]);
+    $check('paid student dashboard hides fee reminder', !str_contains($get('/portal/student')->content(), 'data-fee-reminder'));
+    $check('linked parent reminder also clears after payment',(new \App\Support\FeeReminder($db))->forGuardian($guardianId,$institute)===null);
+    $db->query('UPDATE fee_invoices SET remaining_amount=1500,status="partial" WHERE id=:id',['id'=>$invoiceId]);
     $check('student fees page renders own invoice', str_contains($get('/portal/student/fees')->content(), 'PINV-' . $suffix));
     $check('student fees page hides other invoice', !str_contains($get('/portal/student/fees')->content(), 'PINV-OTHER-' . $suffix));
     $check('student attendance page renders', $get('/portal/student/attendance')->status() === 200);
@@ -113,7 +122,7 @@ return static function (App $app): array {
     $check('employee homework page renders', $get('/portal/employee/homework')->status() === 200);
     $check('employee profile page renders', str_contains($get('/portal/employee/profile')->content(), 'EMP-PORTAL-' . $suffix));
     $check('employee blocked from student portal', $get('/portal/student')->status() === 403);
-    $check('employee blocked from admin area', $get('/admin/dashboard')->status() === 403);
+    $check('permitted teacher can open restricted admin workspace', $get('/admin/dashboard')->status() === 200);
 
     // ---- eSkooly StudentPortal parity: documents, messaging, account ---------
     $db->query('INSERT INTO fee_payments(fee_invoice_id,student_id,receipt_no,payment_date,amount,payment_method,received_by,created_at) VALUES(:i,:s,:r,:d,1000,"Cash",:u,:x)', ['i' => $invoiceId, 's' => $studentId, 'r' => 'PRCP-' . $suffix, 'd' => date('Y-m-d'), 'u' => $admin, 'x' => $now]);
@@ -152,7 +161,12 @@ return static function (App $app): array {
     $check('account update persists new email', (string) $db->query('SELECT email FROM users WHERE id=:id', ['id' => $studentUser])->fetchColumn() === 'portal.renamed.' . $suffix . '@example.test');
     $check('account update clears stale credential cipher', $db->query('SELECT password_cipher FROM student_accounts WHERE user_id=:id', ['id' => $studentUser])->fetchColumn() === null);
 
-    // Messaging: a portal user may start a thread and reply, but not post into a foreign one.
+    // Messaging: a student may message their own class's teachers, reply, but not post into a foreign thread.
+    $token = \App\Core\CSRF::token();
+    $post('/portal/messages', ['_token' => $token, 'recipient_id' => $employeeUser, 'subject' => 'Unassigned ' . $suffix, 'body' => 'Hello']);
+    $check('student cannot message a teacher of another class', !$db->query('SELECT 1 FROM conversations WHERE subject=:s', ['s' => 'Unassigned ' . $suffix])->fetchColumn());
+    $db->query("INSERT INTO teacher_assignments(institute_id,employee_id,class_id,subject_id,section_id,assignment_type,status,created_by,created_at,updated_at) VALUES(:i,:e,:c,NULL,NULL,'whole_class','active',:u,:n,:n2)",
+        ['i' => $institute, 'e' => $employeeId, 'c' => $classId, 'u' => $admin, 'n' => $now, 'n2' => $now]);
     $token = \App\Core\CSRF::token();
     $post('/portal/messages', ['_token' => $token, 'recipient_id' => $employeeUser, 'subject' => 'Portal ' . $suffix, 'body' => 'Hello from the portal']);
     $threadId = (int) $db->query('SELECT id FROM conversations WHERE subject=:s', ['s' => 'Portal ' . $suffix])->fetchColumn();
@@ -191,7 +205,9 @@ return static function (App $app): array {
     $db->query('DELETE FROM user_roles WHERE user_id IN (:a,:b)', ['a' => $studentUser, 'b' => $employeeUser]);
     $db->query('DELETE FROM institute_users WHERE user_id IN (:a,:b)', ['a' => $studentUser, 'b' => $employeeUser]);
     $db->query('DELETE FROM users WHERE id IN (:a,:b)', ['a' => $studentUser, 'b' => $employeeUser]);
+    $db->query('DELETE FROM guardians WHERE id=:g',['g'=>$guardianId]);
     $db->query('DELETE FROM students WHERE id IN (:a,:b)', ['a' => $studentId, 'b' => $otherStudentId]);
+    $db->query('DELETE FROM teacher_assignments WHERE employee_id=:e', ['e' => $employeeId]);
     $db->query('DELETE FROM employees WHERE id=:e', ['e' => $employeeId]);
     $db->query('DELETE FROM classes WHERE id=:c', ['c' => $classId]);
 

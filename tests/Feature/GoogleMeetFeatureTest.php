@@ -138,7 +138,9 @@ return static function (App $app): array {
     $fake = new FakeCalendarClient();
     $useFake($fake);
     $check('admin live classes page renders', $get('/admin/live-classes')->status() === 200);
-    $check('admin schedule form renders', $get('/admin/live-classes/create')->status() === 200);
+    $adminCreateForm = $get('/admin/live-classes/create');
+    $check('admin schedule form renders', $adminCreateForm->status() === 200);
+    $check('admin schedule form offers multiple classes', str_contains($adminCreateForm->content(), 'name="class_ids[]"'));
     $check('admin live class create enforces CSRF', $post('/admin/live-classes', ['title' => 'x'])->status() === 419);
 
     $startDate = date('Y-m-d', strtotime('+1 day'));
@@ -161,6 +163,13 @@ return static function (App $app): array {
     $check('the event invites nobody', ($sent['host_emails'] ?? []) === []);
     $localBack = (new DateTimeImmutable((string) $scheduled['start_time'], new DateTimeZone('UTC')))->setTimezone(new DateTimeZone($timezone))->format('Y-m-d H:i');
     $check('stored UTC converts back to the entered local time', $localBack === $startDate . ' 10:00');
+
+    $adminEventsBeforeMulti = $fake->created;
+    $post('/admin/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Admin Multi ' . $suffix, 'class_ids' => [$assigned, $foreign], 'audience_type' => 'SC', 'date' => $startDate, 'time' => '12:15', 'duration' => 45]);
+    $adminMulti = $db->query('SELECT * FROM live_classes WHERE title=:t', ['t' => 'LC Admin Multi ' . $suffix])->fetch();
+    $check('admin can schedule one meeting for multiple classes', is_array($adminMulti));
+    $check('admin multi-class schedule creates one Google event', $fake->created === $adminEventsBeforeMulti + 1);
+    $check('admin multi-class targets are mapped', is_array($adminMulti) && $repository->classIds((int) $adminMulti['id']) === [$assigned, $foreign]);
 
     /* ------------------------------------------------- admin: instant */
 
@@ -228,6 +237,18 @@ return static function (App $app): array {
     $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Teacher Leak ' . $suffix, 'class_id' => $foreign, 'subject_id' => $foreignSubject, 'audience_type' => 'SC', 'date' => $startDate, 'time' => '09:00', 'duration' => 45]);
     $check('teacher cannot schedule for an unassigned class', (int) $db->query('SELECT COUNT(*) FROM live_classes WHERE title=:t', ['t' => 'LC Teacher Leak ' . $suffix])->fetchColumn() === 0);
 
+    // One shared Meet can target several classes, but every class must be assigned to the teacher.
+    (new PakistanErpRepository($db))->saveAssignment($institute, $employee, $foreign, null, null, 'whole_class', $admin);
+    $createdBeforeMulti = $teacherFake->created;
+    $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Teacher Multi ' . $suffix, 'class_ids' => [$assigned, $foreign], 'audience_type' => 'SC', 'date' => $startDate, 'time' => '12:00', 'duration' => 45]);
+    $multiMeeting = $db->query('SELECT * FROM live_classes WHERE title=:t', ['t' => 'LC Teacher Multi ' . $suffix])->fetch();
+    $check('teacher can schedule one meeting for multiple assigned classes', is_array($multiMeeting));
+    $check('multi-class schedule creates only one Google event', $teacherFake->created === $createdBeforeMulti + 1);
+    $check('multi-class targets are stored without duplicate meetings', is_array($multiMeeting) && $repository->classIds((int) $multiMeeting['id']) === [$assigned, $foreign]);
+
+    $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Teacher Multi Subject ' . $suffix, 'class_ids' => [$assigned, $foreign], 'subject_id' => $subject, 'audience_type' => 'SC', 'date' => $startDate, 'time' => '12:30', 'duration' => 45]);
+    $check('multi-class meeting rejects a class-specific subject', (int) $db->query('SELECT COUNT(*) FROM live_classes WHERE title=:t', ['t' => 'LC Teacher Multi Subject ' . $suffix])->fetchColumn() === 0);
+
     // A forged teacher_id must be ignored in favour of the session identity.
     $post('/portal/employee/teaching/live-classes', ['_token' => CSRF::token(), 'title' => 'LC Spoof ' . $suffix, 'class_id' => $assigned, 'subject_id' => $subject, 'audience_type' => 'SC', 'teacher_id' => 999999, 'date' => $startDate, 'time' => '15:00', 'duration' => 30]);
     $spoof = $db->query('SELECT teacher_id FROM live_classes WHERE title=:t', ['t' => 'LC Spoof ' . $suffix])->fetch();
@@ -277,9 +298,11 @@ return static function (App $app): array {
     $visible = $repository->forStudent($studentMine, $institute);
     $titles = array_column($visible, 'title');
     $check('student sees a meeting for their own class', in_array('LC Teacher OK ' . $suffix, $titles, true));
+    $check('first class sees the shared multi-class meeting', in_array('LC Teacher Multi ' . $suffix, $titles, true));
 
     $otherVisible = array_column($repository->forStudent($studentOther, $institute), 'title');
     $check('student does not see another class meeting', !in_array('LC Teacher OK ' . $suffix, $otherVisible, true));
+    $check('second class sees the same shared multi-class meeting', in_array('LC Teacher Multi ' . $suffix, $otherVisible, true));
     $check('student live classes page renders', $get('/portal/student/live-classes')->status() === 200);
     $check('student dashboard shows the live class tile', str_contains($get('/portal/student')->content(), 'Upcoming Live Classes'));
     // The Meet URL must not be in the student's HTML at all — only our join route.
@@ -363,6 +386,7 @@ return static function (App $app): array {
         $check('live_classes has ' . $column, in_array($column, $columns, true));
     }
     $check('participants table records join clicks', in_array('join_clicked_at', array_column($db->query('SHOW COLUMNS FROM live_class_participants')->fetchAll(), 'Field'), true));
+    $check('multi-class mapping table is installed', (int) $db->query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='live_class_classes'")->fetchColumn() === 1);
     $check('a foreign institute sees none of these meetings', $repository->forInstitute($institute + 100000) === []);
     $check('find is institute-scoped', $repository->find((int) $scheduled['id'], $institute + 100000) === null);
 

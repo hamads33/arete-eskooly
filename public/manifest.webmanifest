@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "Arete Coaching Center",
+  "short_name": "Arete",
+  "description": "One secure workspace for school administration, teachers, students and parents.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#7A1632",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {"src": "/assets/pwa/arete-icon-192-v2.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/assets/pwa/arete-icon-512-v2.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "/assets/pwa/arete-maskable-512-v2.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

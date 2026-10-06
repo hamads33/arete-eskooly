@@ -69,6 +69,39 @@ final class Request
         return $this->serverData[$key] ?? $default;
     }
 
+    /**
+     * The bearer token from the Authorization header. Some Apache/CGI setups drop that header,
+     * so the rewritten REDIRECT_HTTP_AUTHORIZATION copy and X-Device-Token are accepted too.
+     */
+    public function bearerToken(): ?string
+    {
+        $header = (string) ($this->serverData['HTTP_AUTHORIZATION'] ?? $this->serverData['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+        if (preg_match('/^Bearer\s+(\S+)$/i', trim($header), $m)) {
+            return $m[1];
+        }
+        $fallback = trim((string) $this->header('X-Device-Token', ''));
+        return $fallback !== '' ? $fallback : null;
+    }
+
+    /** A JSON request body as an array; form-encoded bodies (and tests) fall back to the parsed body. */
+    public function json(): array
+    {
+        if ($this->bodyData !== []) {
+            return $this->bodyData;
+        }
+        $raw = (string) ($this->serverData['__raw_body'] ?? file_get_contents('php://input'));
+        if ($raw === '' || strlen($raw) > 1048576) {
+            return [];
+        }
+        $data = json_decode($raw, true);
+        return is_array($data) ? $data : [];
+    }
+
+    public function ip(): string
+    {
+        return (string) ($this->serverData['REMOTE_ADDR'] ?? '0.0.0.0');
+    }
+
     public function setRouteParameters(array $parameters): void
     {
         $this->routeParameters = $parameters;

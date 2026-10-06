@@ -68,6 +68,9 @@ Google Meet attendance (§15), and the migration comments say so at the column.
 
 ## 4. Services
 
+`live_class_classes(live_class_id, class_id)` maps one Google event and Meet link to every selected
+class. Existing single-class rows are backfilled from `target_class_id`.
+
 | Service | Responsibility |
 |---|---|
 | `GoogleClientFactory` | The single place `Google\Client` is configured: env credentials, redirect URI, scopes, offline access. Restores the decrypted token, refreshes when expired, persists the refreshed token, and throws `GoogleReconnectRequired` on `invalid_grant`. |
@@ -129,6 +132,10 @@ the audience matches — `AS`, or `SC` where `target_class_id = students.class_i
 `section_id = students.section_id`, or `SS` targeting them, or `SEL` with a participant row.
 Guessing an id fails because the join *is* the filter — there is no "fetch, then check".
 
+For a multi-class `SC` meeting, the class match also uses `live_class_classes`. One local meeting
+maps to one Google event and one Meet link; it is not duplicated per class. Multi-class scheduling
+requires an active teacher assignment for every selected class and does not accept a subject.
+
 **Teacher** sees the meetings they created plus meetings on classes and subjects they hold an
 active assignment for. Mutation additionally requires ownership unless the actor holds
 `live-classes.manage-all`. `teacher_id` always comes from the session, never the form (§43).
@@ -160,6 +167,6 @@ Google agree and no one-hour drift can appear.
 `CalendarClient` is an interface and the suite injects `FakeCalendarClient`, which can be told to
 return a pending conference or to throw. Coverage: OAuth start restricted to admin, state
 validation, encrypted-token round trip, refresh success and failure, admin schedule / instant /
-edit / cancel / sync-failure, teacher authorized versus rejected class, student visibility and
+edit / cancel / sync-failure, teacher authorized versus rejected class, one-event multi-class scheduling, student visibility and
 isolation, join-window boundaries, cancelled and past denial, join-click logging, duplicate event
 mapping, institute isolation, timezone conversion, and CSRF on every mutation.

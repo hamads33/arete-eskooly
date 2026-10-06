@@ -10,7 +10,7 @@ use App\Core\{Request,Response};use App\Repositories\{WorkflowRepository,Setting
 final class ClassTestsController extends AdminPageController{
 private function i():int{return(int)(new SettingsRepository($this->app->database()))->institute()['id'];}
 private function repo():WorkflowRepository{return new WorkflowRepository($this->app->database());}
-private function data(int$class=0):array{$i=$this->i();return['classes'=>(new AcademicRepository($this->app->database()))->classes($i),'subjects'=>(new SupportRepository($this->app->database()))->subjects($i,$class),'students'=>(new StudentRepository($this->app->database()))->paginate($i,'',$class?:null,100),'selectedClass'=>$class];}
+private function data(int$class=0):array{$i=$this->i();return['classes'=>(new AcademicRepository($this->app->database()))->classes($i),'subjects'=>(new SupportRepository($this->app->database()))->subjects($i,$class),'students'=>(new StudentRepository($this->app->database()))->paginate($i,'',$class?:null),'selectedClass'=>$class];}
 
 /** Marks entry. Also lists every existing test so marks for any class or subject can be
      * opened directly, without funnelling through a class then subject filter. */

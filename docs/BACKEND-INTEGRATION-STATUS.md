@@ -133,3 +133,9 @@ Automated suite: 409 checks passing, Google mocked throughout (`tests/Feature/Go
 
 Remaining blocker: none in code. Deployment requires Google Cloud OAuth credentials and an institute
 Google account able to create Meet conferences.
+# Progressive Web App delivery
+
+The shared PHP application is now an installable, root-scoped PWA for all roles. It includes a
+manifest, branded any/maskable icons, safe static caching, network-only private navigations, a
+neutral offline page, restrained install/update/network status UI, and no offline mutation replay.
+Push notifications remain a separate future phase. See `docs/PWA.md`.

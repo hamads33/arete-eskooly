@@ -30,6 +30,7 @@ final class App
     public function run(Request $request): Response
     {
         try {
+            (new \App\Services\RememberMeService($this->database,$this->session,(array)$this->config('session',[])))->resume();
             return $this->router->dispatch($request, $this);
         } catch (Throwable $exception) {
             $this->logger->error('Unhandled application error', ['exception' => $exception::class, 'message' => $exception->getMessage()]);

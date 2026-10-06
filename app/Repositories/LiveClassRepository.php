@@ -16,7 +16,9 @@ final class LiveClassRepository
 {
     public function __construct(private readonly Database $db) {}
 
-    private const SELECT = 'SELECT lc.*, c.name AS class_name, s.name AS subject_name, sec.name AS section_name, e.name AS teacher_name
+    private const SELECT = 'SELECT lc.*,
+        COALESCE((SELECT GROUP_CONCAT(c2.name ORDER BY c2.name SEPARATOR \' / \') FROM live_class_classes lcc2 JOIN classes c2 ON c2.id=lcc2.class_id WHERE lcc2.live_class_id=lc.id),c.name) AS class_name,
+        s.name AS subject_name, sec.name AS section_name, e.name AS teacher_name
         FROM live_classes lc
         LEFT JOIN classes c ON c.id = lc.target_class_id
         LEFT JOIN subjects s ON s.id = lc.subject_id
@@ -85,7 +87,7 @@ final class LiveClassRepository
         return $this->db->query(
             self::SELECT . ' WHERE lc.institute_id=:i AND lc.provider=\'google_meet\' AND (lc.teacher_id=:t OR EXISTS(
                 SELECT 1 FROM teacher_assignments ta WHERE ta.employee_id=:t2 AND ta.institute_id=:i2 AND ta.status=\'active\'
-                  AND ta.class_id=lc.target_class_id
+                  AND (ta.class_id=lc.target_class_id OR EXISTS(SELECT 1 FROM live_class_classes lcc WHERE lcc.live_class_id=lc.id AND lcc.class_id=ta.class_id))
                   AND (ta.assignment_type IN (\'whole_class\',\'homeroom\') OR ta.subject_id=lc.subject_id)))
              ORDER BY lc.start_time DESC, lc.id DESC',
             ['i' => $institute, 't' => $employeeId, 't2' => $employeeId, 'i2' => $institute]
@@ -110,7 +112,9 @@ final class LiveClassRepository
             self::SELECT . ' JOIN students st ON st.id=:sid AND st.institute_id=:i AND st.status=\'active\'
              WHERE lc.institute_id=:i2 AND lc.provider=\'google_meet\' AND (
                 lc.audience_type=\'AS\'
-                OR (lc.audience_type=\'SC\' AND lc.target_class_id=st.class_id)
+                OR (lc.audience_type=\'SC\' AND (lc.target_class_id=st.class_id OR EXISTS(
+                    SELECT 1 FROM live_class_classes lcc WHERE lcc.live_class_id=lc.id AND lcc.class_id=st.class_id
+                )))
                 OR (lc.audience_type=\'SEC\' AND lc.section_id IS NOT NULL AND lc.section_id=st.section_id)
                 OR (lc.audience_type=\'SS\' AND lc.target_student_id=st.id)
                 OR (lc.audience_type=\'SEL\' AND EXISTS(SELECT 1 FROM live_class_participants p WHERE p.live_class_id=lc.id AND p.student_id=st.id))
@@ -138,6 +142,50 @@ final class LiveClassRepository
             $data + ['start_time2' => $data['start_time'], 'now' => date('Y-m-d H:i:s'), 'now2' => date('Y-m-d H:i:s')]
         );
         return (int) $this->db->connection()->lastInsertId();
+    }
+
+    /** Replaces the classes sharing one meeting, scoped through the owning institute. */
+    public function syncClasses(int $liveClassId, int $institute, array $classIds): void
+    {
+        $owned = (bool) $this->db->query(
+            'SELECT 1 FROM live_classes WHERE id=:l AND institute_id=:i LIMIT 1',
+            ['l' => $liveClassId, 'i' => $institute]
+        )->fetchColumn();
+        if (!$owned) {
+            throw new \DomainException('Live class not found.');
+        }
+
+        $ids = array_values(array_unique(array_filter(array_map('intval', $classIds), static fn (int $id): bool => $id > 0)));
+        if ($ids === []) {
+            throw new \DomainException('Choose at least one class.');
+        }
+        $valid = [];
+        foreach ($ids as $classId) {
+            if ($this->db->query('SELECT 1 FROM classes WHERE id=:c AND institute_id=:i', ['c' => $classId, 'i' => $institute])->fetchColumn()) {
+                $valid[] = $classId;
+            }
+        }
+        if (count($valid) !== count($ids)) {
+            throw new \DomainException('One of the selected classes is not available.');
+        }
+
+        $this->db->query('DELETE FROM live_class_classes WHERE live_class_id=:l', ['l' => $liveClassId]);
+        $now = date('Y-m-d H:i:s');
+        foreach ($valid as $classId) {
+            $this->db->query(
+                'INSERT INTO live_class_classes(live_class_id,class_id,created_at) VALUES(:l,:c,:n)',
+                ['l' => $liveClassId, 'c' => $classId, 'n' => $now]
+            );
+        }
+    }
+
+    /** @return int[] */
+    public function classIds(int $liveClassId): array
+    {
+        return array_map('intval', $this->db->query(
+            'SELECT class_id FROM live_class_classes WHERE live_class_id=:l ORDER BY class_id',
+            ['l' => $liveClassId]
+        )->fetchAll(\PDO::FETCH_COLUMN));
     }
 
     public function update(int $id, int $institute, array $data): void
@@ -221,7 +269,12 @@ final class LiveClassRepository
         if ($classId > 0) {
             return $this->db->query('SELECT s.id,s.name FROM subjects s JOIN class_subjects cs ON cs.subject_id=s.id WHERE cs.class_id=:c AND s.institute_id=:i ORDER BY s.name', ['c' => $classId, 'i' => $institute])->fetchAll();
         }
-        return $this->db->query('SELECT id,name FROM subjects WHERE institute_id=:i ORDER BY name', ['i' => $institute])->fetchAll();
+        return $this->db->query('SELECT s.id,s.name,cs.class_id FROM subjects s JOIN class_subjects cs ON cs.subject_id=s.id WHERE s.institute_id=:i ORDER BY s.name', ['i' => $institute])->fetchAll();
+    }
+
+    public function students(int $institute): array
+    {
+        return $this->db->query('SELECT id,class_id,student_name,registration_no FROM students WHERE institute_id=:i AND status=\'active\' ORDER BY student_name', ['i' => $institute])->fetchAll();
     }
 
     public function studentsInClass(int $institute, int $classId): array

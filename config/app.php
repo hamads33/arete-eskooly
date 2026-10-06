@@ -8,6 +8,7 @@ return [
     'debug' => filter_var(getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOL),
     'url' => rtrim(getenv('APP_URL') ?: 'http://127.0.0.1:8080', '/'),
     'timezone' => 'Asia/Karachi',
+    'pwa_enabled' => filter_var(getenv('PWA_ENABLED') ?: 'true', FILTER_VALIDATE_BOOL),
 
     /*
      * Live classes. The display timezone is the institute's own preference

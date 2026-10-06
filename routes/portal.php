@@ -10,6 +10,9 @@ use App\Controllers\ParentPortalController;
 use App\Controllers\StudentPortalController;
 use App\Controllers\TeacherLiveClassController;
 use App\Controllers\TeacherWorkspaceController;
+use App\Controllers\StudentOnlineTestsController;
+use App\Controllers\AttachmentPreviewController;
+use App\Controllers\PortalAnnouncementsController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\PortalMiddleware;
 use App\Middleware\VerifyCsrfToken;
@@ -33,7 +36,23 @@ $router->get('/portal/student/fees/{id}', [StudentPortalController::class, 'invo
 $router->get('/portal/student/results', [StudentPortalController::class, 'results'], name: 'portal.student.results');
 $router->get('/portal/student/homework', [StudentPortalController::class, 'homework'], name: 'portal.student.homework');
 $router->get('/portal/student/notes', [StudentPortalController::class, 'notes'], name: 'portal.student.notes');
+$router->get('/portal/student/courses', [StudentPortalController::class, 'courses'], name: 'portal.student.courses');
+$router->get('/portal/student/recorded-lectures', [StudentPortalController::class, 'recordedLectures'], name: 'portal.student.recorded-lectures');
+$router->get('/portal/student/recorded-lectures/{id}', [StudentPortalController::class, 'recordedLecture']);
+$router->get('/portal/student/recorded-lectures/{id}/video', [StudentPortalController::class, 'recordedLectureVideo']);
 $router->get('/portal/student/documents', [StudentPortalController::class, 'documents'], name: 'portal.student.documents');
+$router->get('/portal/student/online-tests', [StudentOnlineTestsController::class, 'index'], name: 'portal.student.online-tests');
+$router->get('/portal/student/online-tests/{id}', [StudentOnlineTestsController::class, 'show'], name: 'portal.student.online-test');
+$router->post('/portal/student/online-tests/{id}', [StudentOnlineTestsController::class, 'submit'], [VerifyCsrfToken::class]);
+$router->get('/portal/student/online-tests/{id}/result', [StudentOnlineTestsController::class, 'result'], name: 'portal.student.online-test-result');
+$router->get('/attachments/notes/{id}', [AttachmentPreviewController::class, 'note'], [AuthMiddleware::class]);
+$router->get('/attachments/test-questions/{id}', [AttachmentPreviewController::class, 'question'], [AuthMiddleware::class]);
+$router->get('/attachments/test-answers/{id}', [AttachmentPreviewController::class, 'answer'], [AuthMiddleware::class]);
+$router->get('/attachments/test-answers/{id}/{index}', [AttachmentPreviewController::class, 'answer'], [AuthMiddleware::class]);
+$router->get('/attachments/test-papers/{id}/{index}', [AttachmentPreviewController::class, 'paper'], [AuthMiddleware::class]);
+$router->get('/attachments/test-marked/{id}/{index}', [AttachmentPreviewController::class, 'markedPaper'], [AuthMiddleware::class]);
+$router->get('/attachments/announcements/{id}', [AttachmentPreviewController::class, 'announcement'], [AuthMiddleware::class]);
+$router->get('/portal/announcements', [PortalAnnouncementsController::class, 'index'], name: 'portal.announcements');
 // Live classes. The list renders no Meet URL: the join route re-checks audience, window and
 // cancellation server-side before redirecting to Google (§24).
 $router->get('/portal/student/live-classes', [StudentPortalController::class, 'liveClasses'], name: 'portal.student.live-classes');
@@ -67,6 +86,7 @@ $router->post('/portal/messages', [PortalMessagesController::class, 'start'], [V
 $router->post('/portal/messages/{id}', [PortalMessagesController::class, 'reply'], [VerifyCsrfToken::class]);
 $router->get('/portal/account', [PortalAccountController::class, 'edit'], name: 'portal.account');
 $router->post('/portal/account', [PortalAccountController::class, 'update'], [VerifyCsrfToken::class]);
+$router->post('/portal/notifications/read', [StudentPortalController::class, 'readNotifications'], [VerifyCsrfToken::class]);
 
 
 // ---- teacher workspace (write access, scoped by teacher_assignments) --------
@@ -86,6 +106,9 @@ $router->post('/portal/employee/teaching/tests/{id}/marks', [TeacherWorkspaceCon
 // Teacher-hosted Google Meet classes. The teacher holds no Google credentials: every call runs
 // against the institute connection an administrator authorised, and the class/subject is
 // re-checked against teacher_assignments on each write.
+$router->get('/portal/employee/teaching/announcements', [TeacherWorkspaceController::class, 'announcements'], name: 'portal.teaching.announcements');
+$router->post('/portal/employee/teaching/announcements', [TeacherWorkspaceController::class, 'storeAnnouncement'], [VerifyCsrfToken::class]);
+$router->post('/portal/employee/teaching/announcements/{id}/delete', [TeacherWorkspaceController::class, 'deleteAnnouncement'], [VerifyCsrfToken::class]);
 $router->get('/portal/employee/teaching/live-classes', [TeacherLiveClassController::class, 'index'], name: 'portal.teaching.live-classes');
 $router->post('/portal/employee/teaching/live-classes', [TeacherLiveClassController::class, 'store'], [VerifyCsrfToken::class]);
 $router->post('/portal/employee/teaching/live-classes/instant', [TeacherLiveClassController::class, 'instant'], [VerifyCsrfToken::class]);
@@ -94,3 +117,6 @@ $router->post('/portal/employee/teaching/live-classes/{id}/cancel', [TeacherLive
 
 $router->middlewarePrefix('/portal', AuthMiddleware::class);
 $router->middlewarePrefix('/portal', PortalMiddleware::class);
+// Suspended accounts: every page shows the restriction notice (students keep read-only fee pages).
+$router->middlewarePrefix('/portal', \App\Middleware\AccountRestrictionMiddleware::class);
+$router->middlewarePrefix('/attachments', \App\Middleware\AccountRestrictionMiddleware::class);

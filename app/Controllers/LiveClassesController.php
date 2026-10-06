@@ -56,10 +56,11 @@ final class LiveClassesController extends AdminPageController
             'connection' => $this->googleConnections()->safe($institute),
             'timezone' => $this->liveClassService()->timezone($institute),
             'classes' => $this->liveClassRepository()->classes($institute),
-            'sections' => $this->liveClassRepository()->sections($institute, $classId),
-            'subjects' => $this->liveClassRepository()->subjects($institute, $classId),
-            'students' => $classId > 0 ? $this->liveClassRepository()->studentsInClass($institute, $classId) : [],
+            'sections' => $this->liveClassRepository()->sections($institute),
+            'subjects' => $this->liveClassRepository()->subjects($institute),
+            'students' => $this->liveClassRepository()->students($institute),
             'selectedClass' => $classId,
+            'selectedClassIds' => $classId > 0 ? [$classId] : [],
             'meeting' => null,
         ]);
     }
@@ -90,10 +91,11 @@ final class LiveClassesController extends AdminPageController
             'connection' => $this->googleConnections()->safe($institute),
             'timezone' => $timezone,
             'classes' => $this->liveClassRepository()->classes($institute),
-            'sections' => $this->liveClassRepository()->sections($institute, $classId),
-            'subjects' => $this->liveClassRepository()->subjects($institute, $classId),
-            'students' => $this->liveClassRepository()->studentsInClass($institute, $classId),
+            'sections' => $this->liveClassRepository()->sections($institute),
+            'subjects' => $this->liveClassRepository()->subjects($institute),
+            'students' => $this->liveClassRepository()->students($institute),
             'selectedClass' => $classId,
+            'selectedClassIds' => $this->liveClassRepository()->classIds((int) $meeting['id']),
             'participants' => $this->liveClassRepository()->participantIds((int) $meeting['id']),
             'meeting' => $meeting,
         ]);
@@ -213,7 +215,7 @@ final class LiveClassesController extends AdminPageController
             'activeMenu' => 'live-classes',
             'activeSubmenu' => 'live-classes',
             'styles' => ['css/live-classes.css?v=1'],
-            'scripts' => ['js/live-classes.js?v=1'],
+            'scripts' => ['js/live-classes.js?v=2'],
             'institute' => (new \App\Repositories\SettingsRepository($this->app->database()))->institute(),
         ], $data));
     }

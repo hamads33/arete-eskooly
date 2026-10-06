@@ -75,13 +75,29 @@ final class LiveClassService
     public function normalise(array $input, int $institute, string $timezone, bool $instant): array
     {
         $title = trim((string) ($input['title'] ?? ''));
-        $classId = (int) ($input['class_id'] ?? 0);
+        $submittedClasses = $input['class_ids'] ?? [$input['class_id'] ?? 0];
+        if (!is_array($submittedClasses)) {
+            $submittedClasses = [$submittedClasses];
+        }
+        $classIds = array_values(array_unique(array_filter(array_map('intval', $submittedClasses), static fn (int $id): bool => $id > 0)));
+        $classId = $classIds[0] ?? 0;
         $subjectId = (int) ($input['subject_id'] ?? 0) ?: null;
         $sectionId = (int) ($input['section_id'] ?? 0) ?: null;
         $audience = (string) ($input['audience_type'] ?? 'SC');
 
-        if ($classId <= 0 || !$this->authorization->classBelongsToInstitute($classId, $institute)) {
-            throw new DomainException('Choose a class for this live class.');
+        if ($classIds === []) {
+            throw new DomainException('Choose at least one class for this live class.');
+        }
+        foreach ($classIds as $selectedClassId) {
+            if (!$this->authorization->classBelongsToInstitute($selectedClassId, $institute)) {
+                throw new DomainException('One of the selected classes is not available.');
+            }
+        }
+        if (count($classIds) > 1 && $subjectId !== null) {
+            throw new DomainException('Choose no specific subject when scheduling for multiple classes.');
+        }
+        if (count($classIds) > 1 && $audience !== 'SC') {
+            throw new DomainException('Multiple classes require the whole-class audience.');
         }
         if ($subjectId !== null && !$this->authorization->subjectBelongsToClass($subjectId, $classId, $institute)) {
             throw new DomainException('That subject is not taught in the selected class.');
@@ -144,6 +160,7 @@ final class LiveClassService
             'description' => trim((string) ($input['description'] ?? '')) ?: null,
             'audience_type' => $audience,
             'target_class_id' => $classId,
+            'target_class_ids' => $classIds,
             'subject_id' => $subjectId,
             'section_id' => $sectionId,
             'target_student_id' => null,
@@ -174,7 +191,9 @@ final class LiveClassService
         ]);
 
         $pending = ($result['meet_link'] ?? null) === null;
+        $pdo = $this->db->connection();
         try {
+            $pdo->beginTransaction();
             $id = $this->repository->create([
                 'institute_id' => $institute,
                 'title' => $normalised['title'],
@@ -199,10 +218,15 @@ final class LiveClassService
                 'created_by' => $userId,
                 'created_by_role' => $role,
             ]);
+            $this->repository->syncClasses($id, $institute, $normalised['target_class_ids'] ?? [$normalised['target_class_id']]);
             if ($normalised['audience_type'] === 'SEL') {
                 $this->repository->syncParticipants($id, $institute, $normalised['students']);
             }
+            $pdo->commit();
         } catch (\Throwable $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             // Compensation (§31): the event exists on Google but we have no row pointing at it,
             // so remove it rather than leaving an orphan on the institute's calendar.
             $this->compensate($institute, (string) $result['event_id'], $exception);
@@ -263,6 +287,7 @@ final class LiveClassService
             'google_sync_status' => $syncStatus,
             'last_google_error' => $error,
         ]);
+        $this->repository->syncClasses((int) $meeting['id'], $institute, $normalised['target_class_ids'] ?? [$normalised['target_class_id']]);
         if ($normalised['audience_type'] === 'SEL') {
             $this->repository->syncParticipants((int) $meeting['id'], $institute, $normalised['students']);
         }

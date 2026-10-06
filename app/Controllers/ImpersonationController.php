@@ -16,7 +16,7 @@ final class ImpersonationController extends Controller
         $admin = user();
         $targetId = (int) $request->route('id');
         $target = (new UserRepository($this->app->database()))->findAuthContext($targetId);
-        if (!$target || $target['status'] !== 'active' || $targetId === (int) $admin['id']
+        if (!$target || !in_array($target['status'], ['active', 'suspended'], true) || $targetId === (int) $admin['id']
             || (int) $target['institute_id'] !== (int) $admin['institute_id'] || in_array('admin', (array) $target['roles'], true)) {
             return Response::html('Account not available for impersonation.', 404);
         }
@@ -49,12 +49,12 @@ final class ImpersonationController extends Controller
         return Response::redirect(url('/admin/roles'));
     }
 
+    /** Called after the session already holds $target, so admin_home() resolves against them. */
     private function landingRoute(array $target): string
     {
         if (in_array('student', (array) $target['roles'], true)) return '/portal/student';
         if (in_array('parent', (array) $target['roles'], true)) return '/portal/parent';
-        if (in_array('dashboard.view', (array) $target['permissions'], true)) return '/admin/dashboard';
-        return '/portal/employee';
+        return admin_home();
     }
 
     private function audit(int $instituteId, int $adminId, string $action, int $targetId): void

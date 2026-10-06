@@ -1,0 +1,80 @@
+.install-secondary--full {
+  width: 100%;
+}
+
+.install-state__icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 10px;
+  place-items: center;
+  border-radius: 15px;
+  background: #f3e5ea;
+  color: var(--install-maroon);
+}
+
+.install-state__icon svg {
+  width: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.install-state__intro {
+  max-width: 360px;
+  margin: 0 auto !important;
+  text-align: center;
+}
+
+.install-state--guide[data-install-state="unavailable"] {
+  text-align: center;
+}
+
+@media screen and (max-width: 480px) {
+  .install-main {
+    padding-top: calc(12px + env(safe-area-inset-top));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+
+  .install-card {
+    padding: 20px 16px;
+  }
+
+  .install-brand__mark {
+    width: 72px;
+    height: 72px;
+  }
+
+  .install-brand img {
+    width: 60px;
+    height: 60px;
+  }
+
+  .install-copy {
+    margin: 18px auto;
+  }
+
+  .install-copy h1 {
+    font-size: 1.72rem;
+  }
+
+  .install-state--guide {
+    padding: 17px 15px;
+  }
+
+  .install-primary,
+  .install-secondary {
+    min-height: 50px;
+  }
+
+  .install-benefits {
+    margin-top: 19px;
+    padding-top: 17px;
+  }
+
+  .install-footnote {
+    margin-top: 12px;
+  }
+}

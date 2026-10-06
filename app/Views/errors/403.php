@@ -1,1 +1,1 @@
-<main class="error-card"><span>403</span><h1>Access denied</h1><p>Your account does not have permission to view this page.</p><a href="<?= e(url('/admin/dashboard')) ?>">Return to dashboard</a></main>
+<main class="error-card"><span>403</span><h1>Access denied</h1><p>Your account does not have permission to view this page. If you need it, ask your institute administrator to grant it to your role.</p><a href="<?= e(url(admin_home())) ?>">Go to my workspace</a></main>

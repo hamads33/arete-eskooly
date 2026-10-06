@@ -25,7 +25,7 @@
 <td><?=e($n['publish_date'])?></td><td><?=e($n['class_name'])?></td><td><?=e($n['subject_name']??'—')?></td>
 <td><?=e($n['title'])?></td><td><?=e($n['chapter']?:'—')?></td>
 <td><span class="status-badge"><?=e(ucfirst((string)$n['status']))?></span></td>
-<td><?php if(!empty($n['attachment_path'])):?><a href="<?=e(asset((string)$n['attachment_path']))?>" target="_blank" rel="noopener">Open</a><?php else:?>—<?php endif?></td>
+<td><?php if(!empty($n['attachment_path'])):?><a href="<?=e(url('/attachments/notes/'.$n['id']))?>" target="_blank" rel="noopener">Open preview</a><?php else:?>—<?php endif?></td>
 </tr><?php endforeach?>
 <?php if(!$rows):?><tr><td colspan="7"><div class="compact-empty"><h3>No Notes</h3><p>Notes you upload will appear here.</p></div></td></tr><?php endif?>
 </tbody></table></div></div></section>

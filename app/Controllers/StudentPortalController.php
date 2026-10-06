@@ -7,7 +7,9 @@ namespace App\Controllers;
 use App\Controllers\Concerns\ResolvesLiveClasses;
 use App\Core\Request;
 use App\Core\Response;
+use App\Repositories\RecordedLectureRepository;
 use App\Support\Flash;
+use App\Support\FeeReminder;
 
 /**
  * Read-only self-service portal for students. Every query is scoped to the student record
@@ -26,6 +28,7 @@ final class StudentPortalController extends PortalController
         $instituteId = (int) $student['institute_id'];
         $attendance = $this->repo()->studentAttendanceSummary($studentId, date('Y-01-01'), date('Y-m-d'));
         $results = $this->repo()->studentExamResults($studentId, $instituteId);
+        $tests = (new \App\Repositories\OnlineTestRepository($this->app->database()))->available($student);
 
         return $this->portalView('portal/student/dashboard', 'student', [
             'pageTitle' => 'My Dashboard',
@@ -34,14 +37,18 @@ final class StudentPortalController extends PortalController
             'student' => $student,
             'attendance' => $attendance,
             'fees' => $this->repo()->studentFeeTotals($studentId),
+            'feeReminder' => (new FeeReminder($this->app->database()))->forStudent($studentId, $instituteId),
             'invoices' => array_slice($this->repo()->studentInvoices($studentId, 5), 0, 5),
-            'homework' => array_slice($this->repo()->studentHomework((int) $student['class_id'], $instituteId, 5), 0, 5),
+            'homework' => array_slice($this->repo()->studentHomework((int) $student['class_id'], $instituteId, 5,(int)$student['id']), 0, 5),
             'latestExam' => $this->latestExam($results),
+            'onlineTests' => array_slice($tests, 0, 4),
+            'submittedTestIds' => array_column(array_filter($tests, static fn($t) => in_array($t['attempt_status'] ?? '', ['submitted', 'marked'], true)), 'id'),
             // Upcoming Live Classes tile (§22). Only classes that have not finished, so the
             // dashboard shows what the student can act on rather than a history list.
             'liveClasses' => $this->upcomingLiveClasses($studentId, $instituteId, 4),
             'joinWindowMinutes' => $this->joinWindowMinutes(),
-            'styles' => ['css/live-classes.css?v=1'],
+            'styles' => ['css/live-classes.css?v=1', 'css/online-tests.css?v=2', 'css/dashboard-tests.css?v=1', 'css/fee-reminder.css?v=1', 'css/submission-pages.css?v=1'],
+            'scripts' => ['js/fee-reminder.js?v=1', 'js/submission-pages.js?v=1'],
         ]);
     }
 
@@ -143,6 +150,7 @@ final class StudentPortalController extends PortalController
             'student' => $student,
             'exams' => $exams,
             'tests' => $this->repo()->studentClassTests($studentId, $instituteId),
+            'onlineTests' => (new \App\Repositories\OnlineTestRepository($this->app->database()))->resultsForStudent($student),
             'certificates' => $this->repo()->studentCertificates($studentId, $instituteId),
         ]);
     }
@@ -157,14 +165,80 @@ final class StudentPortalController extends PortalController
             'activeMenu' => 'portal-homework',
             'instituteId' => (int) $student['institute_id'],
             'student' => $student,
-            'homework' => $this->repo()->studentHomework((int) $student['class_id'], (int) $student['institute_id']),
+            'homework' => $this->repo()->studentHomework((int) $student['class_id'], (int) $student['institute_id'],60,(int)$student['id']),
         ]);
     }
 
     public function notes(Request$request):Response
     {
         if(!$student=$this->repo()->studentByUser($this->userId()))return$this->forbidden();
-        return $this->portalView('portal/student/notes','student',['pageTitle'=>'Class Notes','activeMenu'=>'portal-notes','instituteId'=>(int)$student['institute_id'],'student'=>$student,'notes'=>$this->repo()->studentNotes((int)$student['class_id'],(int)$student['institute_id'])]);
+        return $this->portalView('portal/student/notes','student',['pageTitle'=>'Class Notes','activeMenu'=>'portal-notes','instituteId'=>(int)$student['institute_id'],'student'=>$student,'notes'=>$this->repo()->studentNotes((int)$student['class_id'],(int)$student['institute_id'],60,(int)$student['id'])]);
+    }
+
+    /** One card per subject of the student's class, with its teacher and what has been shared in it. */
+    public function courses(Request $request): Response
+    {
+        if (!$student = $this->repo()->studentByUser($this->userId())) {
+            return $this->forbidden();
+        }
+        $instituteId = (int) $student['institute_id'];
+        $courses = (new \App\Repositories\StudentCourseRepository($this->app->database()))->courses($student);
+        // A live or about-to-start class lights up its course; same join rules as the Live Classes page.
+        $live = [];
+        try {
+            $service = $this->liveClassService();
+            foreach ($this->liveClassRepository()->forStudent((int) $student['id'], $instituteId) as $meeting) {
+                $state = $service->state($meeting, $this->joinWindowMinutes());
+                if (in_array($state['state'], ['live', 'starting'], true) && !empty($meeting['subject_id'])) {
+                    $live[(int) $meeting['subject_id']] ??= ['id' => (int) $meeting['id'], 'title' => (string) $meeting['title'], 'state' => $state];
+                }
+            }
+        } catch (\Throwable) {
+            // Live classes unavailable in this deployment: courses still render.
+        }
+        foreach ($courses as &$course) {
+            $course['live'] = $live[$course['id']] ?? null;
+        }
+        unset($course);
+        return $this->portalView('portal/student/courses', 'student', [
+            'pageTitle' => 'My Courses', 'activeMenu' => 'portal-courses', 'instituteId' => $instituteId,
+            'student' => $student, 'courses' => $courses, 'styles' => ['css/courses.css?v=1'],
+        ]);
+    }
+
+    public function recordedLectures(Request$request):Response
+    {
+        if(!$student=$this->repo()->studentByUser($this->userId()))return$this->forbidden();
+        $repo=new RecordedLectureRepository($this->app->database());
+        $lectures=$repo->forStudent((int)$student['institute_id'],(int)$student['class_id'],(int)$student['id']);
+        // One folder per subject assigned to the class, created even while empty. Lectures with no
+        // subject, or a subject outside the class (e.g. sent to this student directly), go to their
+        // own folder so nothing is hidden.
+        $folders=[];
+        foreach($repo->classSubjects((int)$student['class_id'])as$sub)$folders[(string)$sub['id']]=['key'=>(string)$sub['id'],'name'=>$sub['name'],'lectures'=>[]];
+        foreach($lectures as$l){$key=$l['subject_id']?(string)$l['subject_id']:'general';$folders[$key]??=['key'=>$key,'name'=>$key==='general'?'General':$l['subject'],'lectures'=>[]];$folders[$key]['lectures'][]=$l;}
+        $selected=(string)$request->query('subject','');
+        $folder=$selected!==''&&isset($folders[$selected])?$folders[$selected]:null;
+        return $this->portalView('portal/student/recorded-lectures','student',['pageTitle'=>$folder?$folder['name'].' Lectures':'Recorded Lectures','activeMenu'=>'portal-recorded-lectures','instituteId'=>(int)$student['institute_id'],'student'=>$student,'folders'=>array_values($folders),'folder'=>$folder,'styles'=>['css/lectures.css?v=3']]);
+    }
+
+    /** On-site watch page; the lecture must be one published to this student. */
+    public function recordedLecture(Request$request):Response
+    {
+        if(!$student=$this->repo()->studentByUser($this->userId()))return$this->forbidden();
+        $lectures=(new RecordedLectureRepository($this->app->database()))->forStudent((int)$student['institute_id'],(int)$student['class_id'],(int)$student['id']);
+        $id=(int)$request->route('id');$lecture=null;foreach($lectures as$l)if((int)$l['id']===$id)$lecture=$l;
+        if(!$lecture)return Response::redirect(url('/portal/student/recorded-lectures'));
+        // The side queue stays inside the lecture's own subject folder.
+        $lectures=array_values(array_filter($lectures,static fn($l)=>(int)$l['subject_id']===(int)$lecture['subject_id']));
+        return $this->portalView('portal/student/recorded-lecture','student',['pageTitle'=>$lecture['title'],'activeMenu'=>'portal-recorded-lectures','instituteId'=>(int)$student['institute_id'],'student'=>$student,'lecture'=>$lecture,'lectures'=>$lectures,'styles'=>['css/lectures.css?v=3']]);
+    }
+
+    /** Streams an uploaded lecture only if it is published to this student. */
+    public function recordedLectureVideo(Request$request):Response
+    {
+        if(!$student=$this->repo()->studentByUser($this->userId()))return$this->forbidden();
+        return RecordedLecturesController::stream((new RecordedLectureRepository($this->app->database()))->studentVideo((int)$request->route('id'),(int)$student['institute_id'],(int)$student['class_id'],(int)$student['id']),$request);
     }
 
     /** Official documents the student can generate for themselves. */

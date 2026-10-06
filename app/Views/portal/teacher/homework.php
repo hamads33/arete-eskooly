@@ -23,7 +23,7 @@
 <?php foreach($rows as $h):?><tr>
 <td><?=e($h['homework_date'])?></td><td><?=e($h['class_name'])?></td><td><?=e($h['subject_name']??'—')?></td>
 <td><?=e($h['homework_text'])?></td>
-<td><?php if(!empty($h['attachment_path'])):?><a href="<?=e(asset((string)$h['attachment_path']))?>" target="_blank" rel="noopener">Open</a><?php else:?>—<?php endif?></td>
+<td><?php if(!empty($h['attachment_path'])):?><a href="<?=e(url('/'.ltrim((string)$h['attachment_path'],'/')))?>" target="_blank" rel="noopener">Open</a><?php else:?>—<?php endif?></td>
 <td><form method="post" action="<?=e(url('/portal/employee/teaching/homework/'.(int)$h['id'].'/delete'))?>" class="inline-form"><?=csrf_field()?><button class="text-button" type="submit" onclick="return confirm('Delete this homework?')">Delete</button></form></td>
 </tr><?php endforeach?>
 <?php if(!$rows):?><tr><td colspan="6"><div class="compact-empty"><h3>No Homework</h3><p>Homework you publish will appear here.</p></div></td></tr><?php endif?>

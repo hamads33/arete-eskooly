@@ -22,7 +22,15 @@ Use a least-privilege MySQL account scoped to one database. It needs normal DML 
 5. Run `php tests/run.php`, then lint PHP and changed JavaScript.
 6. Restart PHP workers so opcode caches and environment values refresh, then end maintenance mode.
 
+### PWA web-server requirements
+
+Production must use HTTPS. Serve `/manifest.webmanifest` as `application/manifest+json` and serve
+root `/sw.js` with `Cache-Control: no-cache, must-revalidate` and `Service-Worker-Allowed: /`.
+Versioned `/assets/` files may use long-lived static caching, but dynamic PHP responses and private
+downloads must retain `Cache-Control: no-store, private`. Confirm `APP_URL` is the canonical HTTPS
+origin and the reverse proxy forwards the original scheme. Verify `/offline.html` and all three
+`/assets/pwa/` icons are public. Bump the service-worker `VERSION` for cache-affecting releases.
+
 ## Security and operations
 
 Configure cookies as Secure, HttpOnly and SameSite=Lax (or Strict where compatible), use short idle timeouts, rotate the session ID at authentication, and terminate sessions when accounts are disabled. Keep `display_errors` off; send PHP errors and application logs to protected, rotated storage. Monitor authentication failures, HTTP 5xx responses, failed migrations, disk space, database capacity, and backup age. SMS sending remains disabled until a real `SmsProviderInterface` adapter is selected and configured.
-

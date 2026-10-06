@@ -1,0 +1,25 @@
+/* Online Tests → Edit test. */
+.test-edit-page{max-width:1080px}
+.test-edit-note{display:flex;align-items:flex-start;gap:10px;margin:0 0 18px;padding:14px 16px;border:1px solid #f0d9a8;border-radius:14px;background:#fff8e8;color:#5c3d07;font-size:14px;line-height:1.5}
+.test-edit-note svg{flex:none;width:18px;height:18px;margin-top:2px}
+.test-edit-fixed{display:flex;align-items:center;min-height:44px;padding:0 14px;border:1px dashed var(--border-strong);border-radius:10px;background:var(--surface-soft);color:var(--text-secondary);font-weight:700}
+.test-edit-questions{display:grid;gap:14px}
+.test-edit-question{display:grid;gap:12px;padding:16px;border:1px solid var(--border-strong);border-radius:16px;background:#fff}
+.test-edit-question.is-new{border-style:dashed;background:var(--primary-50)}
+.test-edit-question.is-removed{opacity:.5;background:#fdf1f2}
+.test-edit-question>header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.test-edit-question>header small{color:var(--text-secondary);font-weight:700}
+.test-edit-question>header .module-select{width:auto;min-width:170px}
+.test-edit-remove{margin-left:auto;display:inline-flex;align-items:center;gap:6px;color:#a3202c;font-weight:700;font-size:13px;cursor:pointer}
+.test-edit-question [data-discard-new]{margin-left:auto}
+.test-edit-question__row{display:grid;grid-template-columns:minmax(0,180px) minmax(0,1fr);gap:14px;align-items:start}
+.test-edit-file{display:grid;gap:8px;justify-items:start}
+.test-edit-file small{color:var(--text-secondary);font-size:12px}
+.test-edit-file input[type=file]{width:100%;padding:8px}
+.test-edit-check{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary)}
+.test-edit-options{display:grid;gap:8px;margin:0;padding:0;border:0}
+.test-edit-options legend{margin-bottom:6px;font-size:12px;font-weight:800;color:var(--text-secondary)}
+.test-edit-options[hidden]{display:none}
+.test-edit-options .mcq-option{display:grid;grid-template-columns:auto 28px minmax(0,1fr);align-items:center;gap:10px}
+.test-edit-page [data-add-edit-question]{margin-top:14px}
+@media screen and (max-width:700px){.test-edit-question__row{grid-template-columns:1fr}.test-edit-remove{margin-left:0}}

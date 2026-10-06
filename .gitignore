@@ -16,3 +16,4 @@
 *.tar.gz
 *.pem
 .playwright-mcp/
+/storage/sessions/

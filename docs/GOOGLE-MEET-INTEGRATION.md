@@ -102,6 +102,11 @@ classes and subjects they are actively assigned. The class and subject are re-ch
 manage their own meetings; managing another teacher's requires `live-classes.manage-all`, which the
 teacher role does not hold.
 
+A teacher may select two or more assigned classes for one shared session. The LMS creates one
+Google Calendar event and one Meet link, then exposes that same meeting to active students in every
+selected class. Multi-class meetings use the whole-class audience and cannot be tied to one
+class-specific subject. Every selected class is re-checked against the teacher's active assignments.
+
 ### Student
 
 **Live Classes**, plus an Upcoming Live Classes tile on the dashboard. Each card shows title,
@@ -199,7 +204,7 @@ pending conference, a revoked token, and an unreachable API. Covered: token encr
 and tamper rejection, connect / reconnect / refresh-failure state, OAuth restricted to
 administrators, forged-state rejection, admin schedule / instant / edit / cancel / retry-sync,
 pending-conference handling and bounded polling, Google-outage compensation, teacher scope
-enforcement and `teacher_id` spoofing, student visibility and cross-class isolation, selected-student
+enforcement and `teacher_id` spoofing, shared multi-class meetings, student visibility and cross-class isolation, selected-student
 audiences, every join-window boundary, cancelled and past refusal, join-click recording, Meet-URL
 redirect validation, duplicate event mapping, tenant isolation, timezone round trip, and CSRF on
 every mutation.

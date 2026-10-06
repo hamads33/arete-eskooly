@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feature Tour</title>
+<style>
+:root{--bg:#f7f4f5;--card:#fff;--ink:#211a1d;--mute:#6f6569;--line:#eadde2;--brand:#7a1632;--soft:#f9eef1}
+@media(prefers-color-scheme:dark){:root{--bg:#161214;--card:#211a1d;--ink:#f3eef0;--mute:#a99ea3;--line:#372d31;--brand:#e8748f;--soft:#2b2024}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,Segoe UI,Roboto,sans-serif}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 64px}
+h1{margin:0 0 4px;font-size:26px}h2{margin:34px 0 10px;font-size:19px;color:var(--brand)}
+p.lead{color:var(--mute);margin:0 0 18px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+tr:last-child td{border-bottom:0}
+a{color:var(--brand);font-weight:600;text-decoration:none;word-break:break-all}a:hover{text-decoration:underline}
+code{background:var(--soft);padding:1px 6px;border-radius:5px;font-size:13px}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--brand);font-size:12px;font-weight:700;white-space:nowrap}
+.warn{border-left:4px solid #d9a441;background:#fff8e8;color:#4a3a10;padding:10px 14px;border-radius:8px;margin:12px 0;font-size:14px}
+@media(prefers-color-scheme:dark){.warn{background:#2c2410;color:#e7d6a8}}
+.feat td:first-child{width:34%}.feat td:nth-child(2){width:26%}
+@media(max-width:700px){.feat td:first-child,.feat td:nth-child(2){width:auto}th{display:none}tr{display:block;padding:8px 0;border-bottom:1px solid var(--line)}td{display:block;border:0;padding:2px 10px}}
+</style>
+</head>
+<body><main>
+<h1>Feature Tour</h1>
+<p class="lead">Every feature built in this release, with a direct link and the account to use. Links open on your local server: <code>http://127.0.0.1:8090</code>.</p>
+
+<div class="warn"><strong>Start the app first:</strong> <code>php -S 127.0.0.1:8090 -t public public/router.php</code> from the project folder. Local demo data comes from <code>php database/seed_showcase.php --seed</code>. Local only; never run it on the live server.</div>
+
+<h2>Sign in</h2>
+<div class="box"><table>
+<tr><th>Role</th><th>Email</th><th>Password</th><th>What it shows</th></tr>
+<tr><td>Administrator</td><td><code>admin@greenfield.local</code></td><td><code>DEV_ADMIN_PASSWORD</code> in <code>.env</code></td><td>Everything</td></tr>
+<tr><td>Student (active)</td><td><code>student.showcase@arete.local</code></td><td><code>Showcase#2026</code></td><td>My Courses, lecture folders, notification pop-up</td></tr>
+<tr><td>Student (suspended)</td><td><code>suspended.showcase@arete.local</code></td><td><code>Showcase#2026</code></td><td>Signs in, sees only the "submit your fee" notice</td></tr>
+<tr><td>Student (blocked)</td><td><code>blocked.showcase@arete.local</code></td><td><code>Showcase#2026</code></td><td>Cannot sign in</td></tr>
+<tr><td>Teacher (Maths and Physics)</td><td><code>teacher.showcase@arete.local</code></td><td><code>Showcase#2026</code></td><td>Sees only assigned classes and subjects</td></tr>
+<tr><td>Teacher (English)</td><td><code>english.showcase@arete.local</code></td><td><code>Showcase#2026</code></td><td>Second teacher, for comparison</td></tr>
+<tr><td>Class teacher</td><td><code>classteacher.showcase@arete.local</code></td><td><code>Showcase#2026</code></td><td>Whole-class assignment</td></tr>
+<tr><td>Parent</td><td><code>parent.showcase@arete.local</code></td><td><code>Showcase#2026</code></td><td>Parent portal</td></tr>
+</table></div>
+<p><a href="http://127.0.0.1:8090/login">Open the login page</a>. Use a private window per role, or sign out between roles.</p>
+
+<h2>1. Login access: suspend, block, edit, delete <span class="tag">Admin</span></h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>Student logins: Manage menu (Activate, Suspend, Block, Edit record, Delete Login, edit email or password)</td><td><a href="http://127.0.0.1:8090/admin/students/logins">/admin/students/logins</a></td><td>Click <b>Manage</b> on any row. Suspended and blocked show a badge and the reason.</td></tr>
+<tr><td>Employee / teacher logins: same controls</td><td><a href="http://127.0.0.1:8090/admin/employees/logins">/admin/employees/logins</a></td><td>Same Manage menu.</td></tr>
+<tr><td>Parent logins: same controls</td><td><a href="http://127.0.0.1:8090/admin/guardians">/admin/guardians</a></td><td>Login column has the Manage menu.</td></tr>
+<tr><td>Automatic unpaid-fee rule (suspend after X months, block after Y months)</td><td><a href="http://127.0.0.1:8090/admin/fees/automation">/admin/fees/automation</a></td><td>Set the two month fields and save. Students are updated immediately; paying restores access.</td></tr>
+<tr><td>What a suspended student sees (fee amount pending)</td><td><a href="http://127.0.0.1:8090/account/restricted">/account/restricted</a></td><td>Sign in as the <b>suspended</b> student. Every page shows the notice; fee details stay readable.</td></tr>
+<tr><td>Blocked student cannot sign in</td><td><a href="http://127.0.0.1:8090/login">/login</a></td><td>Sign in as the <b>blocked</b> student.</td></tr>
+</table></div>
+
+<h2>2. Student portal <span class="tag">Student</span></h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>My Courses: one card per subject, teacher name, photo or initials, lecture count, badges for new items, Live Class icon lights up when a class is on air</td><td><a href="http://127.0.0.1:8090/portal/student/courses">/portal/student/courses</a></td><td>Sign in as the active student. Physics is live now.</td></tr>
+<tr><td>Recorded lectures in subject folders, arranged by date, with search, month and sort filters</td><td><a href="http://127.0.0.1:8090/portal/student/recorded-lectures">/portal/student/recorded-lectures</a></td><td>Open a subject folder, for example Mathematics.</td></tr>
+<tr><td>Pop-up notifications for new lectures, homework and unpaid fees</td><td><a href="http://127.0.0.1:8090/portal/student">/portal/student</a></td><td>Appears on sign-in. "Got it" dismisses it; an unpaid fee returns the next day.</td></tr>
+<tr><td>School and Teacher announcements, shown separately</td><td><a href="http://127.0.0.1:8090/portal/announcements">/portal/announcements</a></td><td>Two sections.</td></tr>
+<tr><td>Messages: a student can only message their own class teachers and the administration</td><td><a href="http://127.0.0.1:8090/portal/messages">/portal/messages</a></td><td>The recipient list contains only people connected to the class.</td></tr>
+</table></div>
+
+<h2>3. Teacher workspace <span class="tag">Teacher</span></h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>A teacher lands in their own portal, not the institute dashboard</td><td><a href="http://127.0.0.1:8090/portal/employee">/portal/employee</a></td><td>Sign in as a teacher.</td></tr>
+<tr><td>My Teaching: assigned classes and subjects only</td><td><a href="http://127.0.0.1:8090/portal/employee/teaching">/portal/employee/teaching</a></td><td>Only the assigned class and subjects appear.</td></tr>
+<tr><td>Teacher announcements to their own classes</td><td><a href="http://127.0.0.1:8090/portal/employee/teaching/announcements">/portal/employee/teaching/announcements</a></td><td>Class dropdown lists only assigned classes.</td></tr>
+<tr><td>Exam marks limited to assigned class and subject</td><td><a href="http://127.0.0.1:8090/admin/exams/marks">/admin/exams/marks</a></td><td>Other classes are missing; saving for another class is refused.</td></tr>
+<tr><td>Blocked from institute-wide data</td><td><a href="http://127.0.0.1:8090/admin/students">/admin/students</a></td><td>Opens a "no access" page for a teacher.</td></tr>
+</table></div>
+
+<h2>4. SMS Center <span class="tag">Admin</span></h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>Dashboard: totals, recent activity, quick actions</td><td><a href="http://127.0.0.1:8090/admin/sms">/admin/sms</a></td><td>Two demo messages are queued.</td></tr>
+<tr><td>Compose SMS: recipient search, phone auto-fill, character and segment count, preview, schedule</td><td><a href="http://127.0.0.1:8090/admin/sms/compose">/admin/sms/compose</a></td><td>Choose "Parent / Guardian", type <code>Ayesha</code>, pick her, write a message, and Send to Queue.</td></tr>
+<tr><td>Bulk SMS: recipient count, skipped list, sample messages, confirmation</td><td><a href="http://127.0.0.1:8090/admin/sms/bulk">/admin/sms/bulk</a></td><td>Pick a class, write a message, Preview Recipients.</td></tr>
+<tr><td>Templates with variables and live preview</td><td><a href="http://127.0.0.1:8090/admin/sms/templates">/admin/sms/templates</a></td><td>Edit a built-in template; try an unknown <code>{{variable}}</code>.</td></tr>
+<tr><td>Queue, Sent, Failed, Scheduled lists</td><td><a href="http://127.0.0.1:8090/admin/sms/queue">/admin/sms/queue</a></td><td>Filter, view, cancel, retry, delete.</td></tr>
+<tr><td>Automations</td><td><a href="http://127.0.0.1:8090/admin/sms/automations">/admin/sms/automations</a></td><td>Turn on the attendance alert, then mark a student absent under Attendance.</td></tr>
+<tr><td>Gateway devices: register, pairing code, token, disable</td><td><a href="http://127.0.0.1:8090/admin/sms/devices">/admin/sms/devices</a></td><td>Register a device; the code is shown once.</td></tr>
+<tr><td>Settings: limits, quiet hours, retries</td><td><a href="http://127.0.0.1:8090/admin/sms/settings">/admin/sms/settings</a></td><td>Save; the change appears in Logs.</td></tr>
+<tr><td>Logs and audit trail</td><td><a href="http://127.0.0.1:8090/admin/sms/logs">/admin/sms/logs</a></td><td>Every queue and device event.</td></tr>
+<tr><td>Also send via SMS on announcements</td><td><a href="http://127.0.0.1:8090/admin/announcements">/admin/announcements</a></td><td>Tick the box, and the recipient count appears.</td></tr>
+<tr><td>Android bridge API (JSON)</td><td><a href="http://127.0.0.1:8090/api/sms-gateway/v1/config">/api/sms-gateway/v1/config</a></td><td>Answers 401 without a device token, as intended. Contract in <code>docs/android-sms-gateway.md</code>.</td></tr>
+</table></div>
+
+<h2>5. Exam / Online Test Portal <span class="tag">Admin, Teacher, Student, Parent</span></h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>Build a test: type questions (written or MCQ), or attach a PDF/image per question; choose "answer on screen" (typed/MCQ/file-per-question) or "upload solved paper only" as the whole class's answer mode</td><td><a href="http://127.0.0.1:8090/admin/online-tests">/admin/online-tests</a></td><td>Create a test, add a written and an MCQ question, save as draft, then Publish.</td></tr>
+<tr><td>Submissions list: status, score, publish state, per-student "Open &amp; mark"</td><td><a href="http://127.0.0.1:8090/admin/online-tests">/admin/online-tests</a> → Submissions</td><td>After a student submits, open Submissions on that test.</td></tr>
+<tr><td>Mark a paper: per-question score (clamped to the question's max) and feedback, download the student's typed/uploaded answers, upload a marked/annotated paper back, publish immediately or later</td><td>Submissions → Open &amp; mark</td><td>Enter scores, optionally attach a marked PDF, tick "Publish this result now" or leave it for later.</td></tr>
+<tr><td>Publish control: release a result to students only, parents only, or both — nothing is visible to anyone until published; results can be withdrawn again</td><td>Submissions list</td><td>Use the "Publish marked results" bar, or Withdraw next to a published row.</td></tr>
+<tr><td>Student: take a test (typed / MCQ / upload, per admin's choice), see status, and once published, view marks and feedback per question plus the teacher's marked paper</td><td><a href="http://127.0.0.1:8090/portal/student/online-tests">/portal/student/online-tests</a></td><td>Log in as a student in the assigned class; "My Results" also lists published online tests.</td></tr>
+<tr><td>Parent: sees a child's published online test scores</td><td><a href="http://127.0.0.1:8090/portal/parent">/portal/parent</a> → a child</td><td>Only shows once a result is published with visibility "parent" or "both".</td></tr>
+<tr><td>Reflected in the student report</td><td><a href="http://127.0.0.1:8090/admin/reports/progress">/admin/reports/progress</a></td><td>Pick the student; see the "Online Tests" card (published results only).</td></tr>
+</table></div>
+
+<h2>6. Salary and Accounts <span class="tag">Admin</span></h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>Pay Salary: separate Bonus, Deduction and Advance Recovery fields</td><td><a href="http://127.0.0.1:8090/admin/salary/pay">/admin/salary/pay</a></td><td>Pick an employee with an outstanding advance; the "Outstanding advance" hint and the max on Advance Recovery update.</td></tr>
+<tr><td>Salary Pending: active employees not yet paid for the chosen month</td><td><a href="http://127.0.0.1:8090/admin/salary/pay">/admin/salary/pay</a></td><td>Change the Month field on the Pending section; already-paid employees drop off.</td></tr>
+<tr><td>Advance Salary: give an advance, see balance, write off</td><td><a href="http://127.0.0.1:8090/admin/salary/advances">/admin/salary/advances</a></td><td>Give an advance, then pay salary with an Advance Recovery amount and watch the balance drop (oldest advance first).</td></tr>
+<tr><td>Salary slip shows Deduction and Advance Recovered separately</td><td><a href="http://127.0.0.1:8090/admin/salary/receipt">/admin/salary/receipt</a></td><td>Open a recent slip.</td></tr>
+<tr><td>Expense Report: From/To date range, account head and search filters, quick-month chips</td><td><a href="http://127.0.0.1:8090/admin/accounts/expense-report">/admin/accounts/expense-report</a></td><td>Change From/To to any custom range, or click a quick-month chip; filter by head or search a description.</td></tr>
+</table></div>
+
+<h2>7. Announcements, dashboard, permissions <span class="tag">Admin</span></h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>Announcements: school and teacher separately, post in a teacher's name, limit to a class</td><td><a href="http://127.0.0.1:8090/admin/announcements">/admin/announcements</a></td><td>See "Post as" and "Class".</td></tr>
+<tr><td>Dashboard stats hidden by default, eye button to show</td><td><a href="http://127.0.0.1:8090/admin/dashboard">/admin/dashboard</a></td><td>Click "Show stats".</td></tr>
+<tr><td>Recorded lectures admin filters</td><td><a href="http://127.0.0.1:8090/admin/recorded-lectures">/admin/recorded-lectures</a></td><td>Search, subject, class and month filters.</td></tr>
+<tr><td>Roles &amp; Permissions with the SMS Center group</td><td><a href="http://127.0.0.1:8090/admin/roles">/admin/roles</a></td><td>Edit a role and open "SMS Center".</td></tr>
+<tr><td>Certificates removed from the sidebar</td><td><a href="http://127.0.0.1:8090/admin/dashboard">sidebar</a></td><td>No Certificates entry.</td></tr>
+</table></div>
+
+<h2>8. Reports and printing <span class="tag">Admin</span></h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>Employee attendance PDF: header fixed (logo no longer huge)</td><td><a href="http://127.0.0.1:8090/admin/reports/attendance/employees/pdf?from=2026-09-01&amp;to=2026-09-30">/admin/reports/attendance/employees/pdf</a></td><td>Compare with your screenshot.</td></tr>
+<tr><td>Fee collection report and Print</td><td><a href="http://127.0.0.1:8090/admin/reports/fee-collection">/admin/reports/fee-collection</a></td><td>Press the browser Print button.</td></tr>
+<tr><td>Student attendance report</td><td><a href="http://127.0.0.1:8090/admin/reports/student-attendance">/admin/reports/student-attendance</a></td><td>Wide reports print landscape.</td></tr>
+<tr><td>Admissions, contacts, salary, families reports</td><td><a href="http://127.0.0.1:8090/admin/reports/admissions">/admin/reports/admissions</a></td><td>Print preview; the other reports are in the sidebar.</td></tr>
+</table></div>
+
+<h2>9. Installing the app</h2>
+<div class="box"><table class="feat">
+<tr><th>Feature</th><th>Link</th><th>How to try it</th></tr>
+<tr><td>Install page: shows "Already installed" instead of "Install prompt unavailable"</td><td><a href="http://127.0.0.1:8090/install">/install</a></td><td>Most useful on the live site with the app already installed.</td></tr>
+</table></div>
+</main></body>
+</html>

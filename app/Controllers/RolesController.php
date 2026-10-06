@@ -64,6 +64,8 @@ final class RolesController extends AdminPageController
             'activeMenu' => 'roles',
             'activeSubmenu' => 'roles',
             'breadcrumb' => ['Dashboard', 'Roles & Permissions', $role['name']],
+            'styles' => ['css/roles.css?v=1'],
+            'scripts' => ['js/role-permissions.js?v=1'],
             'role' => $role,
             'groups' => $this->repo()->permissionGroups(),
             'granted' => $this->repo()->permissionIds((int) $role['id']),

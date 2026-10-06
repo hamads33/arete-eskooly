@@ -1,0 +1,247 @@
+.fee-collection-page{max-width:1180px;margin:auto}
+.fee-collection-page:not(.has-student) .fee-student-picker{max-width:760px;width:100%;margin:20px auto}
+.fee-student-picker>.module-card__header{text-align:center;justify-content:center;border-bottom:0;padding:28px 24px 12px}
+.fee-picker-icon{display:grid;place-items:center;width:46px;height:46px;margin:0 auto 12px;border-radius:14px;color:var(--primary);background:var(--primary-50)}
+.fee-student-picker .module-card__header h2{font-size:23px;letter-spacing:-.03em}
+.fee-student-picker .module-card__body{padding:12px 28px 28px}
+.fee-mode-nav{display:flex;justify-content:center;gap:4px;margin:0 auto 24px;padding:5px;border-radius:12px;background:var(--surface-soft);max-width:360px}
+.fee-mode-nav>a,.fee-mode-nav>span{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;padding:10px 12px;font-size:12px;font-weight:700;border-radius:9px;color:var(--text-secondary);text-decoration:none}
+.fee-mode-nav .is-active{color:var(--primary);background:var(--surface);box-shadow:0 2px 6px #211a1d0d}
+.fee-mode-nav svg{width:16px;height:16px}
+.fee-collection-page .fee-search-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 170px auto;gap:12px;align-items:end}
+.fee-collection-page .fee-search-toolbar .module-field{min-width:0}
+.fee-search-toolbar .fee-search-field{grid-column:1 / 3}
+.fee-search-field .input-with-icon{position:relative}
+.fee-search-field .input-with-icon>svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:17px;height:17px;color:var(--text-secondary);pointer-events:none}
+.fee-search-field .input-with-icon>.module-input{padding-left:40px;width:100%}
+.fee-search-toolbar .fee-search-field+.module-field{grid-column:3;grid-row:1}
+.fee-search-toolbar>.btn{grid-column:3;grid-row:2}
+.fee-search-options{grid-column:1 / 3;align-self:center;font-size:12px}
+.fee-search-options summary{display:flex;align-items:center;gap:7px;cursor:pointer;color:var(--text-secondary);padding:10px 0;list-style:none;font-weight:600}
+.fee-search-options summary svg{width:16px;height:16px}
+.fee-search-options__body{display:flex;align-items:end;gap:12px;padding:8px 0}
+.fee-search-options__body>.module-field{flex:1}
+.fee-search-status{font-size:12px;color:var(--text-secondary);margin-top:12px;min-height:18px}
+.fee-collection-page [hidden]{display:none!important}
+.fee-collection-page .fee-student-results{max-height:350px;overflow-y:auto;padding:2px}
+.fee-collection-page .fee-student-result{box-shadow:none}
+.has-student .fee-student-picker>.module-card__header{display:none}
+.has-student .fee-student-picker>.module-card__body{padding:18px 22px}
+.has-student .fee-mode-nav{display:none}
+.fee-month-switch{display:flex;align-items:center;gap:8px;font-size:12px}
+.fee-month-switch input{max-width:165px;min-width:0;flex:1}
+.fee-month-switch .btn{flex:0 0 auto}
+.fee-invoice-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:24px}
+.fee-invoice-layout>*{min-width:0}
+.fee-invoice-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.fee-invoice-heading h3{margin:4px 0 0;font-size:16px}
+.fee-invoice-status{border:1px solid var(--border);padding:5px 10px;border-radius:20px;background:var(--surface-soft);font-size:11px;font-weight:700;color:var(--primary)}
+.fee-collection-page .fee-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.fee-collection-page .fee-metrics .metric-card{padding:14px;box-shadow:none;min-height:0}
+.fee-collection-page .fee-metrics strong{font-size:18px}
+.fee-invoice-detail>.filter-actions{flex-wrap:wrap;margin-bottom:18px}
+.fee-invoice-detail .data-table{min-width:0!important}
+.fee-invoice-detail .data-table th:last-child,.fee-invoice-detail .data-table td:last-child{text-align:right;white-space:nowrap;width:36%}
+.fee-selected-student .class-identity{min-width:0}
+.fee-selected-student>.module-card__header{flex-wrap:wrap;gap:12px}
+.fee-selected-student .class-identity h2{overflow-wrap:anywhere}
+.fee-payment-panel{padding:22px;border:1px solid var(--border);background:var(--surface-soft);border-radius:14px;align-self:start}
+.fee-balance-label{margin:12px 0 4px;color:var(--text-secondary);font-size:12px}
+.fee-balance-amount{display:block;font-size:30px;letter-spacing:-.04em;color:var(--primary);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.fee-collection-page .fee-payment-form{margin-top:20px;padding-top:20px}
+.fee-payment-form .module-form-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.fee-payment-form h3{margin-bottom:6px;font-size:15px}
+.fee-payment-help{font-size:12px;line-height:1.5;color:var(--text-secondary);margin-bottom:16px}
+.fee-payment-form .fee-pay-full{font-size:12px;min-height:32px;margin-top:4px;padding:6px 0}
+.fee-payment-preview{display:flex;justify-content:space-between;gap:10px;padding:14px 0;margin:6px 0 12px;border-top:1px solid var(--border);font-size:12px;color:var(--text-secondary)}
+.fee-payment-preview strong{color:var(--text-primary)}
+.fee-payment-form>.btn--primary{width:100%;justify-content:center}
+.fee-collection-page .fee-arrears-banner{margin-bottom:0}
+.fee-voucher-page{max-width:1120px;margin:auto}
+.fee-voucher-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.fee-voucher-form .filter-actions,.fee-voucher-form .fee-guidance{grid-column:1/-1}
+.fee-voucher-form .fee-guidance{margin:0}
+.fee-voucher-page [hidden]{display:none!important}
+.fee-voucher-modes{display:flex;gap:5px;grid-column:1/-1;background:var(--surface-soft);padding:5px;border-radius:12px;margin-bottom:6px}
+.fee-voucher-modes .btn{flex:1;justify-content:center;border:0;background:transparent;color:var(--text-secondary);box-shadow:none}
+.fee-voucher-modes .btn.is-active{background:var(--surface);color:var(--primary);box-shadow:0 2px 6px #211a1d0d}
+@media screen and (max-width:480px){.fee-voucher-modes{flex-direction:column}.fee-voucher-modes .btn{width:100%}}
+@media screen and (max-width:480px){.fee-collection-page .fee-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media screen and (max-width:900px){.fee-collection-page>.module-page__header,.fee-voucher-page>.module-page__header{flex-direction:column;align-items:stretch}.fee-collection-page>.module-page__header>div,.fee-voucher-page>.module-page__header>div{width:100%}.fee-collection-page>.module-page__header>.btn,.fee-voucher-page>.module-page__header>.btn{width:100%;justify-content:center}}
+@media screen and (max-width:1100px){.fee-invoice-layout{grid-template-columns:minmax(0,1fr) 290px}.fee-month-switch label{display:none}}
+@media screen and (max-width:800px){.fee-invoice-layout{grid-template-columns:minmax(0,1fr)}.fee-month-switch{flex-wrap:nowrap}.fee-selected-student>.module-card__header{flex-wrap:wrap;gap:16px}.fee-voucher-form{grid-template-columns:1fr}}
+@media screen and (max-width:600px){.fee-collection-page .fee-search-toolbar{grid-template-columns:1fr}.fee-search-toolbar .fee-search-field,.fee-search-toolbar .fee-search-field+.module-field,.fee-search-toolbar>.btn,.fee-search-options{grid-column:1;grid-row:auto}.fee-search-options__body{flex-direction:column;align-items:stretch}.fee-student-picker .module-card__body{padding:12px 18px 22px}.fee-mode-nav{margin-bottom:18px}.fee-collection-page .fee-metrics strong{font-size:16px}.fee-collection-page:not(.has-student) .fee-student-picker{margin:4px auto}.fee-student-balance{grid-column:2}.fee-month-switch{width:100%}.fee-month-switch input{max-width:none;flex:1}.fee-payment-panel{padding:18px}}
+
+/* ---- eSkooly-style Collect Fees (2026-10) ---------------------------------------------- */
+.ek-fees{gap:18px}
+.ek-crumbs{display:flex;align-items:center;gap:8px;padding:14px 18px;border:1px solid var(--border);border-radius:12px;background:var(--surface,#fff);font-size:13px;color:var(--text-secondary)}
+.ek-crumbs a{display:inline-flex;align-items:center;gap:6px;font-weight:700;color:var(--primary);text-decoration:none}.ek-crumbs svg{width:15px;height:15px}.ek-crumbs em{margin-left:auto;font-style:normal;font-size:12px}
+.ek-card{width:100%;max-width:820px;margin:0 auto;padding:26px 28px;border:1px solid var(--border);border-radius:16px;background:var(--surface,#fff);box-shadow:0 6px 24px rgba(40,18,26,.05)}
+.ek-card--narrow{max-width:720px}.ek-wide{max-width:820px;width:100%;margin:0 auto}
+.ek-card__head{position:relative;text-align:center;margin-bottom:20px}.ek-card__head h1{margin:0;font-size:22px;color:var(--primary-dark,var(--primary))}.ek-card__head h2{margin:0;font-size:17px}.ek-card__head p{margin:4px 0 0;font-size:13px;color:var(--text-secondary)}
+.ek-card__head--left{text-align:left}.ek-change{position:absolute;top:0;right:0}
+.ek-tabs{display:flex;justify-content:center;gap:4px;width:max-content;max-width:100%;margin:0 auto 22px;padding:5px;border-radius:12px;background:#f4f0f2}
+.ek-tabs>*{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:700;color:#6b5a61;text-decoration:none;white-space:nowrap}
+.ek-tabs>.is-active{background:#fff;color:var(--primary);box-shadow:0 2px 8px rgba(40,18,26,.08)}.ek-tabs>a:hover{color:var(--primary)}.ek-tabs svg{width:15px;height:15px}
+.ek-search{display:grid!important;grid-template-columns:1fr 180px;gap:12px 14px;align-items:end}
+.ek-search .fee-search-field{grid-column:auto}.ek-search label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}.ek-search label svg{width:13px;height:13px}
+.ek-search .fee-search-field .module-input{min-height:48px;font-size:15px}
+.ek-search .fee-search-options{grid-column:1/2;align-self:center}.ek-search__actions{display:flex;gap:8px;justify-content:flex-end}
+.ek-results{display:grid;gap:6px;max-height:360px;overflow:auto;margin-top:6px;padding:6px;border:1px solid var(--border);border-radius:12px}
+.ek-results .fee-student-result{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:9px;border:0;color:inherit;text-decoration:none}
+.ek-results .fee-student-result:hover,.ek-results .fee-student-result:focus{background:#f7f1f3;outline:none}.ek-results .fee-student-copy{flex:1;min-width:0}.ek-results .fee-student-copy strong{font-weight:600;font-size:14px;overflow-wrap:anywhere}
+.ek-results .fee-student-balance{text-align:right;font-size:12px}.ek-results .fee-student-balance small{display:block;color:var(--text-secondary)}.ek-results .fee-student-balance.is-due strong{color:#c0263f}.ek-results svg{width:16px;color:#b9a7ae}
+.ek-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.ek-tile{padding:12px 14px;border:1px solid #ece4e7;border-radius:11px;background:#faf7f8;min-width:0}.ek-tile span{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}.ek-tile svg{width:12px;height:12px}.ek-tile strong{display:block;margin-top:4px;font-size:14px;color:var(--primary-dark,#3b0b18);overflow-wrap:anywhere}
+.ek-month{margin-bottom:12px}
+.ek-month label,.ek-date label,.ek-total>label,.ek-total>span{display:flex;align-items:center;justify-content:inherit;gap:6px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}.ek-month label svg,.ek-date label svg{width:13px;height:13px}
+.ek-pay{display:grid;gap:14px}
+.ek-month-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.ek-month{margin:0}@media screen and (max-width:520px){.ek-month-row{grid-template-columns:1fr}}
+.ek-invoice-ref{display:flex;align-items:center;gap:6px;margin:0;font-size:12px;color:var(--text-secondary)}.ek-invoice-ref svg{width:14px}
+.ek-table-wrap{border:1px solid #ece4e7;border-radius:12px;overflow:hidden}
+.ek-table{width:100%;border-collapse:collapse;font-size:13px}.ek-table th{padding:11px 14px;background:#f4eff1;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#5d4b52;text-align:left}.ek-table th:last-child,.ek-table td:last-child{text-align:right;width:150px}.ek-table th:first-child,.ek-table td:first-child{width:52px;color:#8a7a80}
+.ek-table td{padding:7px 14px;border-top:1px solid #f1eaed;font-weight:600;color:#3b2a31}
+.ek-amount{width:130px;max-width:100%;min-height:36px;padding:6px 10px;border:1px solid #e2d8dc;border-radius:8px;text-align:right;font:inherit;font-weight:700;color:var(--primary-dark,#3b0b18);background:#fff}.ek-amount:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(122,22,50,.1)}
+.ek-fixed{display:inline-block;padding:6px 10px;font-weight:700}.ek-row-muted td{background:#fcfafb}.ek-row-paid td{color:#2f7a4a}
+.ek-note{display:flex;gap:6px;align-items:flex-start;margin:0;font-size:12px;color:var(--text-secondary)}.ek-note svg{width:14px;flex:none;margin-top:1px}
+.ek-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:4px}
+.ek-total{display:grid;justify-items:center;align-content:center;gap:8px;min-height:96px;padding:14px;border:1px solid #ece4e7;border-radius:12px;background:#faf7f8;text-align:center;justify-content:center}
+.ek-total strong{font-size:24px;font-weight:800;color:var(--primary-dark,#3b0b18)}.ek-total--deposit{background:#f6eef1;border-color:#e3d1d8}.ek-total--deposit input{width:100%;max-width:200px;min-height:44px;text-align:center;font-size:18px;font-weight:800}
+.ek-total--due strong{color:#c0263f}.ek-total--due strong.is-clear{color:#2f7a4a}.ek-paid{color:#2f7a4a!important;font-size:18px!important}
+.ek-link{border:0;background:none;padding:0;font-size:12px;font-weight:700;color:var(--primary);cursor:pointer;text-decoration:underline}
+.ek-more{border:1px dashed #e0d3d8;border-radius:11px;padding:10px 14px}.ek-more summary{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:13px;font-weight:700;color:#5d4b52}.ek-more summary svg{width:15px}.ek-more[open] summary{margin-bottom:12px}
+.ek-submit{display:flex;justify-content:center}.ek-submit .btn{min-width:200px;justify-content:center}
+.ek-extras{justify-content:center;margin-top:18px;padding-top:16px;border-top:1px solid #f1eaed;flex-wrap:wrap}.ek-extras form{margin:0}
+.ek-fees .fee-arrears-banner{max-width:820px;width:100%;margin:0 auto}
+@media screen and (max-width:767px){
+  .ek-card{padding:18px 15px;border-radius:14px}.ek-card__head{text-align:left;padding-right:120px}.ek-card--narrow .ek-card__head{padding-right:0}
+  .ek-tabs{width:100%}.ek-tabs>*{flex:1;justify-content:center;padding:9px 6px;font-size:12px}
+  .ek-search{grid-template-columns:1fr}.ek-search .fee-search-options{grid-column:auto}.ek-search__actions .btn{flex:1;justify-content:center}
+  .ek-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ek-tile{padding:10px 11px}
+  .ek-table th:last-child,.ek-table td:last-child{width:120px}.ek-table th:first-child,.ek-table td:first-child{width:34px;padding-right:4px}.ek-table td,.ek-table th{padding-left:10px;padding-right:10px}.ek-amount{width:108px;font-size:16px}
+  .ek-totals{grid-template-columns:1fr 1fr}.ek-total--deposit{grid-column:1/-1;order:-1}.ek-total strong{font-size:20px}.ek-total--deposit input{max-width:none;font-size:20px}
+  .ek-submit .btn{width:100%}.ek-extras .btn{flex:1 1 calc(50% - 8px);justify-content:center}
+}
+/* Fees Paid Receipt (eSkooly layout) */
+.ek-status{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:11px;font-weight:700;font-size:14px}.ek-status svg{width:17px}
+.ek-status--partial{background:#fff7e6;border:1px solid #f6dfa8;color:#8a5a00}.ek-status--paid{background:#e9f7ee;border:1px solid #bfe3cb;color:#22663b}.ek-status--reversed{background:#fdecee;border:1px solid #f3c2ca;color:#9b1c31}
+.ek-print{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin:16px 0 6px}.ek-print form{margin:0}
+.ek-receipt h1{margin:6px 0 4px;font-size:22px;color:var(--primary-dark,#3b0b18);text-align:left}.ek-receipt-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:0 0 18px;font-size:13px;color:var(--text-secondary)}.ek-receipt-meta strong{color:#3b2a31}
+.ek-receipt .ek-total strong{font-size:22px}.ek-receipt .ek-total--deposit strong{color:#2f7a4a}
+.ek-receipt-detail{margin-top:18px}.ek-receipt-detail>summary{cursor:pointer;font-weight:700;font-size:13px;color:#5d4b52;margin-bottom:10px}
+.ek-receipt-next{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid #f1eaed}
+@media screen and (max-width:767px){.ek-receipt .ek-totals{grid-template-columns:1fr}.ek-print{justify-content:stretch}.ek-print>*{flex:1 1 calc(50% - 8px)}.ek-print .btn{width:100%;justify-content:center}}
+@media print{.ek-crumbs,.ek-print,.ek-receipt-next,.ek-extras{display:none!important}.ek-card{box-shadow:none;border:0;max-width:none}}
+.ek-mini-slip{display:none}
+@media print{body.ek-print-mini *{visibility:hidden}body.ek-print-mini .ek-mini-slip,body.ek-print-mini .ek-mini-slip *{visibility:visible}body.ek-print-mini .ek-mini-slip{display:block;position:absolute;left:0;top:0;width:76mm;padding:4mm;font:11px/1.45 Arial,sans-serif;color:#000}.ek-mini-slip h2{margin:0;font-size:14px;text-align:center}.ek-mini-slip>p{text-align:center;margin:2px 0 6px}.ek-mini-slip dl{display:grid;grid-template-columns:auto 1fr;gap:2px 6px;margin:0}.ek-mini-slip dt{font-weight:bold}.ek-mini-slip dd{margin:0;text-align:right}.ek-mini-sign{margin-top:10px;border-top:1px dashed #000;padding-top:4px}}
+
+/* Generate Fees Invoice (eSkooly layout) */
+.ek-voucher{display:grid;gap:16px}.ek-voucher .ek-tabs{margin-bottom:4px}.ek-voucher .ek-tabs button{border:0;background:none;cursor:pointer;font:inherit;font-size:13px;font-weight:700}
+.ek-step{display:flex;align-items:center;gap:10px;margin:4px 0 0;padding-bottom:12px;border-bottom:1px solid #f1eaed;font-size:16px}.ek-step span{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--primary-dark,#3b0b18);color:#fff;font-size:12px}
+.ek-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.ek-grid .module-field label{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}.ek-grid small{font-size:11px;color:var(--text-secondary)}
+.ek-span2{grid-column:span 2}[data-student-select]{margin-top:6px;min-height:auto;height:auto;padding:4px}[data-student-select] option{padding:6px 8px;border-radius:6px}
+.ek-copies{display:flex;flex-wrap:wrap;gap:10px 28px;margin:0;padding:0;border:0}.ek-copies legend{width:100%;margin-bottom:8px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}
+.ek-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;font-weight:600;font-size:14px}.ek-switch input{position:absolute;opacity:0;width:1px;height:1px}
+.ek-switch span{position:relative;width:38px;height:22px;border-radius:999px;background:#d9cfd3;transition:background .15s}.ek-switch span::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .15s}
+.ek-switch input:checked+span{background:var(--primary)}.ek-switch input:checked+span::after{transform:translateX(16px)}.ek-switch input:focus-visible+span{outline:2px solid var(--primary);outline-offset:2px}
+.ek-submit--row{flex-wrap:wrap;gap:10px}
+@media screen and (max-width:767px){.ek-grid{grid-template-columns:1fr}.ek-span2{grid-column:auto}.ek-copies{flex-direction:column;gap:12px}.ek-submit--row .btn{width:100%;justify-content:center}.ek-voucher .ek-tabs button{flex:1;justify-content:center;padding:9px 4px;font-size:12px}}
+
+.ek-fees [data-fee-results] .fee-results-count{display:none}
+.ek-print .whatsapp-missing,.ek-extras .whatsapp-missing{display:none}
+.ek-discount{display:inline-flex;align-items:center;gap:4px;justify-content:flex-end}.ek-discount select{min-height:36px;padding:0 6px;border:1px solid #e2d8dc;border-radius:8px;background:#f8f3f5;font:inherit;font-weight:700;color:var(--primary)}.ek-discount .ek-amount{width:100px}.ek-discount-calc{display:block;font-size:11px;color:var(--text-secondary);font-weight:600}
+@media screen and (max-width:767px){.ek-discount .ek-amount{width:80px}}
+.ek-discount-default{display:block;font-size:11px;font-weight:600;color:var(--text-secondary)}
+.ek-extras-charges{margin:0;padding:12px 14px;border:1px dashed #e0d3d8;border-radius:12px}.ek-extras-charges legend{padding:0 4px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}.ek-extras-charges legend small{text-transform:none;letter-spacing:0;font-weight:600}.ek-charge-rows{display:grid;gap:8px;margin-bottom:8px}.ek-charge{display:grid;grid-template-columns:1fr 160px;gap:8px}@media screen and (max-width:767px){.ek-charge{grid-template-columns:1fr 110px}}
+.ek-howto{margin:4px 0 8px;font-size:13px}.ek-howto summary{cursor:pointer;font-weight:700;color:var(--primary)}.ek-howto ol{margin:8px 0 0;padding-left:20px;display:grid;gap:4px;color:#4d4247}
+
+/* ---- Shared summary tiles (also used by Salary Sheet) ------------------------------------ */
+.ss-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.ss-tile{padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--surface,#fff);min-width:0}
+.ss-tile span{display:block;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}
+.ss-tile strong{display:block;margin-top:6px;font-size:19px;color:var(--primary-dark,#3b0b18);overflow-wrap:anywhere}
+.ss-tile small{display:block;margin-top:2px;font-size:11.5px;color:var(--text-secondary)}
+.ss-tile--good strong{color:#2f7a4a}.ss-tile--warn strong{color:#b45309}.fd-tile--danger strong{color:#c0263f}
+.ss-muted{color:#a3949a;font-size:12px}
+.print-only{display:none}
+
+/* ---- Fee Defaulters -------------------------------------------------------------------- */
+.fd-page{gap:16px}
+.fd-filters{display:grid;grid-template-columns:minmax(220px,2fr) repeat(5,minmax(130px,1fr));gap:12px 14px;align-items:end;padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--surface,#fff)}
+.fd-filters label{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}
+.fd-filters small{font-size:10.5px;color:var(--text-secondary)}
+.fd-filters__search{grid-column:span 2}
+.fd-toggle{display:flex;align-items:center;gap:8px;grid-column:span 3;font-size:13px;font-weight:600;color:#4d4247;cursor:pointer}
+.fd-toggle input{width:18px;height:18px;accent-color:var(--primary)}.fd-toggle input:disabled+span{opacity:.5}
+.fd-filters__actions{display:flex;gap:8px;justify-content:flex-end;grid-column:span 3}
+.fd-table-wrap{overflow-x:auto}
+.fd-table{width:100%;border-collapse:collapse;font-size:13px}
+.fd-table th{padding:10px 12px;background:#f4eff1;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#5d4b52;text-align:left;white-space:nowrap}
+.fd-table td{padding:11px 12px;border-top:1px solid #f1eaed;vertical-align:top}
+.fd-table td small{display:block;margin-top:3px;font-size:11.5px;color:var(--text-secondary)}
+.fd-table td small a{color:var(--primary);font-weight:700;text-decoration:none}
+.fd-sr{width:34px;color:#a3949a}
+.fd-student strong{font-size:13.5px;color:#2b1a21}
+.fd-num{text-align:right!important;white-space:nowrap}
+.fd-due strong{font-size:15px;color:#c0263f}
+.fd-months{min-width:220px}
+.fd-month{display:inline-flex;align-items:center;gap:5px;margin:0 6px 6px 0;padding:4px 9px;border:1px solid #efd9df;border-radius:999px;background:#fff7f9;font-size:11.5px;font-weight:600;color:#5d4b52;white-space:nowrap}
+.fd-month b{color:#3b2a31}.fd-month em{font-style:normal;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
+.fd-month.is-overdue{border-color:#f3b9c4;background:#fdecee;color:#9b1c31}.fd-month.is-overdue em{color:#c0263f}
+.fd-month.is-unbilled{border-style:dashed;background:#fff;color:#8a7a80}
+.fd-actions__row{display:flex;flex-wrap:wrap;gap:6px}.fd-actions__row form{margin:0}
+.fd-table tfoot td{padding:12px;border-top:2px solid #eadfe3;background:#fbf8f9}
+@media screen and (max-width:1100px){.fd-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.fd-filters__search{grid-column:1/-1}.fd-toggle,.fd-filters__actions{grid-column:1/-1}}
+@media screen and (max-width:767px){
+  .ss-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ss-tile{padding:11px 12px}.ss-tile strong{font-size:16px}
+  .fd-filters{grid-template-columns:1fr 1fr;padding:12px}.fd-filters__actions .btn{flex:1;justify-content:center}
+  .fd-table-wrap{overflow:visible}
+  .fd-table,.fd-table tbody,.fd-table tr,.fd-table td{display:block;width:100%}
+  .fd-table thead{display:none}
+  .fd-table tbody tr{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin:0 0 12px;padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff}
+  .fd-table tbody td{padding:0;border:0;min-width:0;text-align:left!important;white-space:normal}
+  .fd-table tbody td::before{content:attr(data-label);display:block;margin-bottom:4px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}
+  .fd-table td.fd-sr{position:absolute;top:12px;right:14px;width:auto}.fd-table td.fd-sr::before{display:none}
+  .fd-table td.fd-student{grid-column:1/-1;padding-right:30px}.fd-table td.fd-student::before{display:none}
+  .fd-table td.fd-months,.fd-table td.fd-actions{grid-column:1/-1}
+  .fd-actions__row .btn,.fd-actions__row form{flex:1 1 30%}.fd-actions__row form .btn{width:100%}.fd-actions__row .btn{justify-content:center}
+  .fd-table tfoot{display:block}.fd-table tfoot tr{display:flex;justify-content:space-between;padding:12px;border-radius:12px;background:#fbf8f9}.fd-table tfoot td{display:block;padding:0;border:0;background:none}.fd-table tfoot td:empty{display:none}
+}
+@media print{
+  .fd-filters,.no-print{display:none!important}.print-only{display:inline!important}p.print-only,div.print-only{display:block!important}td.print-only,th.print-only{display:table-cell!important}
+  .fd-page .ss-tiles{grid-template-columns:repeat(5,1fr);gap:6px}.fd-page .ss-tile{padding:6px 8px;border-radius:6px}.fd-page .ss-tile strong{font-size:12px}.fd-page .ss-tile small{display:none}
+  .fd-card{border:0;box-shadow:none}
+  .fd-table{font-size:10px}.fd-table th{padding:5px 6px;font-size:8.5px}.fd-table td{padding:5px 6px}
+  .fd-month{padding:1px 5px;font-size:8.5px;border-radius:4px}
+  .fd-table tr{break-inside:avoid}
+}
+
+/* ---- Fees Paid Slip ------------------------------------------------------------------ */
+.ps-filters{grid-template-columns:minmax(240px,2fr) repeat(5,minmax(120px,1fr))}
+.ps-quick{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;grid-column:span 3;font-size:12px;color:var(--text-secondary)}
+.ps-quick a{padding:5px 10px;border:1px solid #eadfe3;border-radius:999px;color:var(--primary);font-weight:700;text-decoration:none}.ps-quick a:hover{background:#fbeef2}
+.ps-receipt a{color:var(--primary);text-decoration:none}.ps-receipt strong{font-size:12.5px}
+.ps-amount{color:#2f7a4a;font-size:14.5px}
+.ps-reversed td{opacity:.6}.ps-reversed .ps-amount{text-decoration:line-through;color:#9b1c31}
+.ps-rev-tag{display:inline-block!important;margin-top:4px;padding:1px 7px;border-radius:999px;background:#fdecee;color:#9b1c31!important;font-weight:700}
+[data-ps-results][aria-busy=true]{opacity:.55;transition:opacity .15s}
+@media screen and (max-width:1100px){.ps-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.ps-quick{grid-column:1/-1}}
+@media screen and (max-width:767px){.ps-filters{grid-template-columns:1fr 1fr}.ps-quick{grid-column:1/-1}.ps-table td.ps-receipt{grid-column:1/-1}}
+
+/* defaulters / paid slip polish */
+.fd-filters .fd-toggle{text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;color:#4d4247}
+.fd-filters .fd-toggle{grid-column:span 3;align-self:center}
+.fd-filters .fd-filters__actions{grid-column:span 2;align-self:end}
+.fd-actions{min-width:250px}
+.fd-actions__row{flex-wrap:nowrap}.fd-actions__row .btn{min-height:34px;padding:6px 10px;font-size:12.5px;white-space:nowrap}
+.fd-actions__row .btn svg{width:15px;height:15px}
+@media screen and (max-width:1100px){.fd-filters .fd-toggle,.fd-filters .fd-filters__actions{grid-column:1/-1}.fd-actions__row{flex-wrap:wrap}}
+@media screen and (max-width:767px){.fd-actions{min-width:0}.fd-actions__row{flex-wrap:wrap}}
+
+/* Tile amounts stay on one line and scale to the tile width (screen only — print has its own size). */
+@media screen{.ss-tile{container-type:inline-size}.ss-tile strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(14px,12cqi,20px);font-variant-numeric:tabular-nums}}
+
+.fd-print-note{margin:0 0 8px;font-size:12px;color:#4d4247}
+
+.ek-sms-state{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border-radius:10px;background:#f6f1f3;color:#6f6569;font-weight:700;font-size:13px}
+.ek-sms-state svg{width:16px;height:16px}.ek-sms-state--sent{background:#e8f5ec;color:#2f7a4a}

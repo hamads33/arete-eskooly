@@ -33,6 +33,11 @@
 <?php if(!$progress['tests']):?><tr><td colspan="3"><div class="compact-empty"><h3>No Class Tests</h3><p>No test marks recorded for this student.</p></div></td></tr><?php endif?>
 </tbody></table></div></div></section>
 
+<section class="module-card"><header class="module-card__header"><div><h2>Online Tests</h2></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Published Results</th><th>Average Percentage</th></tr></thead><tbody>
+<?php if($onlineTests&&$onlineTests['tests']>0):?><tr><td><?=(int)$onlineTests['tests']?></td><td><?=e((string)$onlineTests['average_percentage'])?>%</td></tr>
+<?php else:?><tr><td colspan="2"><div class="compact-empty"><h3>No Published Online Tests</h3><p>No online test results have been published for this student.</p></div></td></tr><?php endif?>
+</tbody></table></div></div></section>
+
 <section class="module-card"><header class="module-card__header"><div><h2>Behaviour &amp; Skills</h2></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Domain</th><th>Traits Rated</th><th>Average Rating</th></tr></thead><tbody>
 <?php foreach($progress['behaviour'] as $b):?><tr><td><?=e(ucfirst((string)$b['domain']))?></td><td><?=(int)$b['rated']?></td><td><?=e((string)$b['average_rating'])?> / 5</td></tr><?php endforeach?>
 <?php if(!$progress['behaviour']):?><tr><td colspan="3"><div class="compact-empty"><h3>No Ratings</h3><p>No behaviour or skills ratings recorded for this student.</p></div></td></tr><?php endif?>

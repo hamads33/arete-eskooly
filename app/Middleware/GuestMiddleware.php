@@ -23,12 +23,6 @@ final class GuestMiddleware
         if (hasRole('admin')) {
             return Response::redirect(url('/admin/dashboard'));
         }
-        if (hasRole('student')) {
-            return Response::redirect(url('/portal/student'));
-        }
-        if (hasRole('employee')) {
-            return Response::redirect(url('/portal/employee'));
-        }
-        return Response::redirect(url('/admin/dashboard'));
+        return Response::redirect(url(admin_home()));
     }
 }

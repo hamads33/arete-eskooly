@@ -1,0 +1,85 @@
+/*
+ * Application-wide UI polish. Loaded last by the admin and portal layouts so these rules settle
+ * conflicts between the older page stylesheets without editing each one.
+ */
+
+/* ---- interaction ------------------------------------------------------------------------- */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.btn { transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, transform .08s ease; }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled, .btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; }
+::selection { background: var(--primary-100); color: var(--primary-deep); }
+
+/* ---- tables ------------------------------------------------------------------------------ */
+.data-table td, .data-table th { font-variant-numeric: tabular-nums; }
+.table-scroll { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+.table-scroll, .lecture-queue__list { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+.table-scroll::-webkit-scrollbar { height: 8px; }
+.table-scroll::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
+/* Grid/flex children default to min-width:auto, which lets a wide table push its card past the
+   screen instead of scrolling inside it. */
+.module-card, .module-card__body, .settings-card, .settings-card__body, .module-page, .settings-page,
+.module-form-grid > *, .form-grid > *, .dashboard-grid > *, .activity-grid > * { min-width: 0; }
+
+/* ---- phones ------------------------------------------------------------------------------ */
+@media screen and (max-width: 767px) {
+  /* The stacked action bar made each button's 140px flex-basis apply to its height. */
+  .filter-actions { flex-direction: column; align-items: stretch; }
+  .filter-actions > .btn, .filter-actions > a.btn, .filter-actions > form > .btn,
+  .filter-actions .btn { flex: 0 0 auto; height: auto; min-height: 44px; width: 100%; }
+  .filter-actions > form { width: 100%; }
+  .module-page__header > .filter-actions { margin-top: 4px; }
+
+  /* Tables that were not wrapped in .table-scroll scroll inside their card instead of the page. */
+  .module-card__body > .data-table, .settings-card__body > .data-table, main :not(.table-scroll) > table.data-table {
+    display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .table-scroll .data-table { display: table; }
+
+  /* Comfortable tap targets. */
+  .btn, .module-input, .module-select, .form-input, .form-select { min-height: 44px; }
+  .class-action-button { min-width: 38px; min-height: 38px; }
+  input[type="checkbox"], input[type="radio"] { width: 18px; height: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+
+/* ---- dashboard --------------------------------------------------------------------------- */
+/* The accent sat on the right edge and read as a scrollbar; match the left accent used on fee cards. */
+#dashboard .kpi-card::after { left: 0; right: auto; border-radius: 0 3px 3px 0; opacity: .55; }
+
+/* ---- student directory ------------------------------------------------------------------- */
+.import-actions { align-self: start; align-items: center; }
+@media (min-width: 768px) { .import-actions { padding-top: 26px; } }
+@media screen and (max-width: 767px) {
+  /* The row checkbox is pinned top-right on stacked cards; keep the name clear of it. */
+  .class-table tbody td.class-check-col + td { padding-right: 34px; }
+  .student-toolbar .student-filter { flex: 1 1 100%; min-height: 44px; }
+  .student-toolbar .class-toolbar__button { flex: 1 1 100%; min-height: 44px; border: 1px solid var(--border-strong); background: var(--surface); font-size: 13px; }
+}
+
+/* ---- card headers with a single "View all" style link ------------------------------------- */
+/* The portal stacked these and stretched the link across the card, wasting a full row. */
+.portal-shell .module-page .module-card__header:has(> a.btn:only-of-type):not(:has(> form)) { flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; }
+.portal-shell .module-page .module-card__header:has(> a.btn:only-of-type):not(:has(> form)) > a.btn {
+  width: auto; flex: 0 0 auto; min-height: 36px; padding: 0 14px; border: 1px solid var(--border-strong); border-radius: 999px; font-size: 12.5px; white-space: nowrap;
+}
+
+/* ---- empty rows inside scrolling tables -------------------------------------------------- */
+/* A colspan cell spans the full (wide) table, so centred empty text landed off-screen on phones. */
+@media screen and (max-width: 767px) {
+  .table-scroll td[colspan] > * { position: sticky; left: 0; max-width: calc(100vw - 72px); }
+}
+
+/* ---- stat tiles on phones ---------------------------------------------------------------- */
+/* Two per row instead of one: four full-width tiles pushed the useful content below the fold. */
+@media screen and (max-width: 767px) {
+  .portal-shell .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; }
+  .portal-shell .metric-grid .metric-card { padding: 14px 14px 14px 16px; min-width: 0; }
+  .portal-shell .metric-grid .metric-card strong { font-size: 19px; overflow-wrap: anywhere; }
+}

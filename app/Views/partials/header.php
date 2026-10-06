@@ -22,6 +22,7 @@ $currentUserInitials = strtoupper(implode('', array_map(static fn (string $part)
 
         <div class="topbar-context" aria-hidden="true"><strong><?= e($pageTitle ?? 'Dashboard') ?></strong><span><?= e($currentUserRole) ?></span></div>
 
+<?php if (can('students.view')): ?>
         <div class="search" id="studentSearch">
           <button class="icon-button mobile-search-toggle" id="mobileSearchToggle" type="button" aria-label="Search students" aria-expanded="false">
             <i data-lucide="search"></i>
@@ -34,6 +35,7 @@ $currentUserInitials = strtoupper(implode('', array_map(static fn (string $part)
           </div>
           <div class="dropdown-menu search-results" id="studentSearchResults" role="listbox" aria-label="Student search results"></div>
         </div>
+<?php endif; ?>
 
         <div class="header-spacer"></div>
         <div class="header-actions">
@@ -41,7 +43,9 @@ $currentUserInitials = strtoupper(implode('', array_map(static fn (string $part)
             <i data-lucide="maximize"></i>
           </button>
 
+<?php if (can_open('/admin/communication/messaging')): ?>
           <a class="icon-button" href="<?= url('/admin/communication/messaging') ?>" aria-label="Open messaging" title="Messaging"><i data-lucide="messages-square"></i></a>
+<?php endif; ?>
 
           <div class="dropdown" data-dropdown>
             <button class="profile-trigger" type="button" aria-expanded="false" data-dropdown-trigger>
@@ -53,8 +57,11 @@ $currentUserInitials = strtoupper(implode('', array_map(static fn (string $part)
             </button>
             <div class="dropdown-menu profile-menu" role="menu">
               <div class="profile-summary"><span class="avatar"><?= e($currentUserInitials ?: 'A') ?></span><span><strong><?= e($currentUserName) ?></strong><span><?= e($currentUser['email'] ?? '') ?></span></span></div>
+<?php if (can_open('/admin/settings/account')): ?>
               <a class="profile-link" href="<?= url('/admin/settings/account') ?>" role="menuitem"><i data-lucide="settings"></i>Account Settings</a>
               <a class="profile-link" href="<?= url('/admin/settings/institute-profile') ?>" role="menuitem"><i data-lucide="user-round"></i>Profile</a>
+<?php endif; ?>
+              <a class="profile-link" href="<?= e(url('/install')) ?>" role="menuitem"><i data-lucide="download"></i>Install App</a>
               <form method="post" action="<?= e(url('/logout')) ?>"><?= csrf_field() ?><button class="profile-link profile-link--danger" type="submit" role="menuitem"><i data-lucide="log-out"></i>Logout</button></form>
             </div>
           </div>

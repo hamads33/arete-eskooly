@@ -54,13 +54,15 @@ $row = static function (array $m): void { ?>
       <?php
       // Both forms share the same picker markup; only the action and the date/time fields differ.
       $picker = static function (array $scope): void { ?>
-        <label class="field"><span>Class <em>*</em></span>
-          <select class="form-select" name="class_id" required>
-            <?php foreach($scope as $c):?><option value="<?= e($c['id']) ?>"><?= e($c['name']) ?></option><?php endforeach?>
-          </select>
-        </label>
-        <label class="field"><span>Subject</span>
-          <select class="form-select" name="subject_id">
+        <fieldset class="field live-class-picker" data-live-class-picker>
+          <legend>Classes <em>*</em></legend>
+          <span class="live-class-picker__hint">Select one or more classes. They will share the same Meet link.</span>
+          <div class="live-class-picker__options">
+            <?php foreach($scope as $c):?><label><input type="checkbox" name="class_ids[]" value="<?= e($c['id']) ?>" data-live-class-check><span><?= e($c['name']) ?></span></label><?php endforeach?>
+          </div>
+        </fieldset>
+        <label class="field"><span>Subject <em>(one class only)</em></span>
+          <select class="form-select" name="subject_id" data-live-subject>
             <option value="">No specific subject</option>
             <?php foreach($scope as $c):foreach($c['subjects'] as $id=>$name):?><option value="<?= e($id) ?>"><?= e($c['name']) ?> · <?= e($name) ?></option><?php endforeach;endforeach?>
           </select>

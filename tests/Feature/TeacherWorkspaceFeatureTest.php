@@ -113,7 +113,8 @@ return static function (App $app): array {
     $check('staff role without generic employee role can authenticate', $loginResult === 'authenticated');
     $app->session()->forget('auth_user');
     $loginResponse = $post('/login', ['_token' => CSRF::token(), 'email' => 'tw.' . $suffix . '@example.test', 'password' => 'TeacherPass#' . $suffix]);
-    $check('staff with dashboard permission lands in admin workspace', ($loginResponse->headers()['Location'] ?? '') === url('/admin/dashboard'));
+    // Teachers see only their own assignments, so they land in their portal, not the institute dashboard.
+    $check('teacher lands in the teacher portal', ($loginResponse->headers()['Location'] ?? '') === url('/portal/employee'));
     $check('teacher-only role can still open the employee portal', $get('/portal/employee')->status() === 200);
     $check('teacher-only role can still open the teaching workspace', $get('/portal/employee/teaching')->status() === 200);
 

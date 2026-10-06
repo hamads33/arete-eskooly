@@ -12,11 +12,11 @@
 }
 
 @media print {
+    .no-print { display: none !important; }
     @page {
         size: A4;
         margin: 14mm 12mm 16mm;
     }
-    @page wide-report-page { size: A4 landscape; margin: 10mm 9mm 15mm; }
 
     /* Screen-only chrome. */
     .sidebar,
@@ -190,7 +190,9 @@
         page-break-inside: avoid;
     }
     table.data-table tbody tr:nth-child(even) td,table.responsive-table tbody tr:nth-child(even) td{background:#faf8f9!important}
-    .wide-report { page: wide-report-page; }
+    /* The report's .main owns the landscape page. Assigning another named page to the
+       nested table makes Chromium insert a blank transition page before the table. */
+    .wide-report { page: auto; }
 
     /* Metric tiles print as a compact summary strip. */
     .metric-grid {
@@ -240,4 +242,215 @@
         color: #000 !important;
         text-decoration: none !important;
     }
+}
+
+/*
+ * Screen table rules (fixed 52-56px row heights, 680-1500px minimum widths) must not reach paper:
+ * they tripled page counts and forced Chrome to shrink wide reports into unreadable type.
+ * Wide reports print on landscape A4 instead. `page` is set on .main because Chrome ignores
+ * named pages on <body>.
+ */
+@media print {
+    .no-print { display: none !important; }
+    table.data-table td,
+    table.data-table th,
+    table.responsive-table td,
+    table.responsive-table th {
+        height: auto !important;
+        min-height: 0 !important;
+        vertical-align: top !important;
+    }
+    table.data-table,
+    table.responsive-table,
+    .wide-report .data-table {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+    .table-scroll,
+    .table-wrap,
+    .table-responsive {
+        overflow: visible !important;
+        min-width: 0 !important;
+    }
+    .report-landscape .main {
+        page: report-landscape;
+    }
+    /* Report pages render their own masthead inside .main. The legacy letterhead sits before
+       .main, so leaving it visible creates an otherwise blank portrait page before landscape. */
+    .report-screen .print-letterhead {
+        display: none !important;
+    }
+    .main__inner,
+    .module-page {
+        min-width: 0 !important;
+    }
+    /* Row controls (checkboxes, action buttons) are meaningless on paper. */
+    table.data-table form,
+    table.data-table input[type="checkbox"],
+    .class-action-button {
+        display: none !important;
+    }
+    .pwa-install-banner {
+        display: none !important;
+    }
+    .print-footer__page::after {
+        content: none;
+    }
+}
+@page report-landscape {
+    size: A4 landscape;
+    margin: 10mm 9mm 14mm;
+}
+@media print {
+    .no-print { display: none !important; }
+    /* Break only between words, never mid-ID: narrow columns were printing one letter per line. */
+    table.data-table td,
+    table.data-table th,
+    .report-screen table.data-table td {
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
+    }
+    /* A pinned footer overlaid the last row of every page, and unpinned it lands above the
+       content (it precedes it in the markup). The letterhead already carries the institute and
+       generated date, so browser printouts go without it. */
+    .print-footer {
+        display: none !important;
+    }
+}
+
+/*
+ * Print layouts (2026-10-05). The admin chooses one each time they print (js/print-options.js, remembered
+ * per report):
+ *   html[data-print-mode="portrait"]  — the classic detailed report: letterhead, summary tiles, roomy rows.
+ *   html[data-print-mode="landscape"] — the compact list: one tight line per record, most rows per page.
+ * The page size itself comes from <style id="printPageSize"> in the layout, so there is never a mid-document
+ * page switch (that made Chrome's print dialog add a blank page).
+ */
+
+/* ---- both layouts: screen controls never print, and nothing may add blank pages ---- */
+@media print {
+    .table-filter-bar,
+    .table-filter-count,
+    .compact-empty .btn,
+    .ss-suggest,
+    .ss-actions,
+    .pagination,
+    .student-toolbar,
+    .class-toolbar,
+    #bulk-student-import,
+    .toast,
+    .print-choice { display: none !important; }
+    /* selection and row-action columns */
+    .main table .class-check-col,
+    .main table .class-actions-col,
+    .main table th.ss-check,
+    .main table td.ss-check { display: none !important; }
+    /* typed values (salary sheet bonus/deduction) print as values, sized to their content */
+    .main table input:not([type=checkbox]):not([type=radio]) {
+        field-sizing: content;
+        min-width: 0 !important;
+        max-width: 12ch !important;
+        width: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: none !important;
+        box-shadow: none !important;
+        color: #000 !important;
+    }
+    .ss-att { min-width: 0 !important; }
+    /* .main is at least one screen tall on screen; on paper that added a blank last page */
+    .app-shell, .main, .main__inner { min-height: 0 !important; height: auto !important; }
+    /* anything outside the app shell (even the empty dialog container) started a blank page */
+    body:has(> #appShell) > *:not(#appShell),
+    #globalModalRoot { display: none !important; }
+    /* no named pages: orientation is set for the whole document */
+    .report-landscape, .report-landscape .main, #appShell, .main { page: auto !important; }
+}
+
+/* ---- landscape: compact, spreadsheet-style list ---- */
+@media print {
+    html[data-print-mode="landscape"] body:not(.ek-print-mini) .main table th,
+    html[data-print-mode="landscape"] body:not(.ek-print-mini) .main table td {
+        padding: 1.5px 4px !important;
+        font-size: 7.6pt !important;
+        line-height: 1.2 !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+    html[data-print-mode="landscape"] body:not(.ek-print-mini) .main table thead th {
+        font-size: 6.8pt !important;
+        letter-spacing: .02em !important;
+        padding-top: 2.5px !important;
+        padding-bottom: 2.5px !important;
+    }
+    /* second lines inside a cell continue on the same line */
+    html[data-print-mode="landscape"] body:not(.ek-print-mini) .main table td small,
+    html[data-print-mode="landscape"] body:not(.ek-print-mini) .main table td .muted {
+        display: inline !important;
+        margin: 0 0 0 4px !important;
+        font-size: 6.9pt !important;
+        color: #555 !important;
+    }
+    html[data-print-mode="landscape"] body:not(.ek-print-mini) .main table td strong,
+    html[data-print-mode="landscape"] body:not(.ek-print-mini) .main table td b {
+        display: inline !important;
+        font-size: inherit !important;
+        line-height: inherit !important;
+        font-weight: 600;
+    }
+    /* chips and badges as plain text */
+    html[data-print-mode="landscape"] .main table .fd-month,
+    html[data-print-mode="landscape"] .main table .ss-chip,
+    html[data-print-mode="landscape"] .main table .ss-badge,
+    html[data-print-mode="landscape"] .main table .status-badge,
+    html[data-print-mode="landscape"] .main table .person-status-tag,
+    html[data-print-mode="landscape"] .main table .subject-badge,
+    html[data-print-mode="landscape"] .main table .student-status,
+    html[data-print-mode="landscape"] .main table .tuition-value {
+        display: inline !important;
+        padding: 0 !important;
+        margin: 0 5px 0 0 !important;
+        border: 0 !important;
+        background: none !important;
+        font-size: 7pt !important;
+        white-space: nowrap;
+    }
+    html[data-print-mode="landscape"] .main table .ss-input,
+    html[data-print-mode="landscape"] .main table .fd-due,
+    html[data-print-mode="landscape"] .main table .ps-amount { font-size: 7.6pt !important; }
+    html[data-print-mode="landscape"] .main table td svg,
+    html[data-print-mode="landscape"] .main table td .lucide,
+    html[data-print-mode="landscape"] .main table td img { display: none !important; }
+    html[data-print-mode="landscape"] .main table .class-identity,
+    html[data-print-mode="landscape"] .main table .class-identity > span { display: inline !important; }
+    html[data-print-mode="landscape"] .module-card__header p { display: none !important; }
+    html[data-print-mode="landscape"] .module-card__header { padding-bottom: 2px !important; }
+    html[data-print-mode="landscape"] .module-card__header h2 { font-size: 9.5pt !important; }
+    html[data-print-mode="landscape"] .module-card { margin-bottom: 6px !important; }
+    /* one slim letterhead band */
+    html[data-print-mode="landscape"] .print-letterhead { padding-bottom: 4px !important; margin-bottom: 6px !important; border-bottom-width: 1.5px !important; }
+    html[data-print-mode="landscape"] .print-letterhead__logo { width: 30px !important; height: 30px !important; }
+    html[data-print-mode="landscape"] .print-letterhead__name { font-size: 12pt !important; }
+    html[data-print-mode="landscape"] .print-letterhead__meta { font-size: 7pt !important; margin-top: 0 !important; }
+    html[data-print-mode="landscape"] .print-letterhead__title { margin-top: 3px !important; font-size: 10pt !important; }
+    /* summary tiles as one short strip */
+    html[data-print-mode="landscape"] .metric-grid,
+    html[data-print-mode="landscape"] .ss-tiles,
+    html[data-print-mode="landscape"] .kpi-grid,
+    html[data-print-mode="landscape"] .student-summary { display: flex !important; flex-wrap: wrap; gap: 4px !important; margin-bottom: 5px !important; }
+    html[data-print-mode="landscape"] .metric-card,
+    html[data-print-mode="landscape"] .ss-tile,
+    html[data-print-mode="landscape"] .student-summary > * { padding: 3px 7px !important; border-radius: 4px !important; min-height: 0 !important; box-shadow: none !important; }
+    html[data-print-mode="landscape"] .metric-card span,
+    html[data-print-mode="landscape"] .ss-tile span,
+    html[data-print-mode="landscape"] .student-summary span { font-size: 6.5pt !important; }
+    html[data-print-mode="landscape"] .metric-card strong,
+    html[data-print-mode="landscape"] .ss-tile strong,
+    html[data-print-mode="landscape"] .student-summary strong { font-size: 8.5pt !important; margin-top: 0 !important; }
+    html[data-print-mode="landscape"] .metric-card small,
+    html[data-print-mode="landscape"] .ss-tile small,
+    html[data-print-mode="landscape"] .student-summary small { display: none !important; }
+    html[data-print-mode="landscape"] h1 { font-size: 11.5pt !important; }
 }

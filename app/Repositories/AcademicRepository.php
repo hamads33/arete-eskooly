@@ -32,7 +32,7 @@ final class AcademicRepository
     public function deleteClass(int $id,int $instituteId): string
     {
         if (!$this->classExists($id,$instituteId)) return 'missing';
-        $references=(int)$this->db->query('SELECT (SELECT COUNT(*) FROM students WHERE class_id=:students_class) + (SELECT COUNT(*) FROM exam_subjects WHERE class_id=:exam_class) + (SELECT COUNT(*) FROM class_tests WHERE class_id=:test_class) + (SELECT COUNT(*) FROM homework WHERE class_id=:homework_class) + (SELECT COUNT(*) FROM student_promotions WHERE from_class_id=:promotion_from OR to_class_id=:promotion_to) + (SELECT COUNT(*) FROM live_classes WHERE target_class_id=:live_class)',['students_class'=>$id,'exam_class'=>$id,'test_class'=>$id,'homework_class'=>$id,'promotion_from'=>$id,'promotion_to'=>$id,'live_class'=>$id])->fetchColumn();
+        $references=(int)$this->db->query('SELECT (SELECT COUNT(*) FROM students WHERE class_id=:students_class) + (SELECT COUNT(*) FROM exam_subjects WHERE class_id=:exam_class) + (SELECT COUNT(*) FROM class_tests WHERE class_id=:test_class) + (SELECT COUNT(*) FROM homework WHERE class_id=:homework_class) + (SELECT COUNT(*) FROM student_promotions WHERE from_class_id=:promotion_from OR to_class_id=:promotion_to) + (SELECT COUNT(*) FROM live_classes WHERE target_class_id=:live_class) + (SELECT COUNT(*) FROM live_class_classes WHERE class_id=:shared_live_class)',['students_class'=>$id,'exam_class'=>$id,'test_class'=>$id,'homework_class'=>$id,'promotion_from'=>$id,'promotion_to'=>$id,'live_class'=>$id,'shared_live_class'=>$id])->fetchColumn();
         if ($references > 0) return 'in_use';
         $this->db->query('DELETE FROM classes WHERE id=:id AND institute_id=:institute',['id'=>$id,'institute'=>$instituteId]);
         return 'deleted';

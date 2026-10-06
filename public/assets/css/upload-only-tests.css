@@ -1,0 +1,16 @@
+.answer-mode-choice{border:0;padding:0;margin:0}.answer-mode-choice legend{margin-bottom:9px;font-size:12px;font-weight:700}.answer-mode-choice>label{display:flex;align-items:flex-start;gap:10px;padding:14px;margin-bottom:9px;border:1px solid #ded3d7;border-radius:12px;cursor:pointer}.answer-mode-choice>label:has(input:checked){border-color:var(--primary);background:#fbf5f7;box-shadow:0 0 0 2px rgba(122,22,50,.07)}.answer-mode-choice>label span{display:grid;gap:3px}.answer-mode-choice small{color:var(--text-secondary);font-weight:400}.answer-mode-choice input{margin-top:3px;accent-color:var(--primary)}
+.question-mode-section{border:0;padding:0;margin:0}
+.paper-upload-card{display:grid;gap:16px}
+.paper-upload-body{display:grid;gap:14px;max-width:520px}
+.file-drop--lg{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 20px;text-align:center;border:2px dashed #ded3d7;border-radius:14px;background:var(--surface-soft);cursor:pointer;transition:border-color .15s ease,background .15s ease}
+.file-drop--lg:hover{border-color:var(--primary);background:#fbf5f7}
+.file-drop--lg .lucide{width:28px;height:28px;color:var(--primary)}
+.file-drop--lg strong{font-size:14px}
+.file-drop--lg small{color:var(--text-secondary);font-size:12px}
+.file-drop--lg input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.paper-upload-filename{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1px solid var(--border);border-radius:10px;background:#fff;font-size:13px}
+.paper-upload-filename .lucide{width:16px;color:var(--primary);flex:0 0 auto}
+.paper-upload-filename span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.paper-upload-filename button{display:grid;place-items:center;width:24px;height:24px;flex:0 0 auto;border:0;border-radius:50%;background:var(--surface-soft);color:var(--text-secondary);cursor:pointer}
+.paper-upload-filename button:hover{background:#f3dfe5;color:var(--primary)}
+@media screen and (max-width:600px){.file-drop--lg{padding:24px 16px}}

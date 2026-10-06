@@ -46,7 +46,7 @@ $filterTeacher = (int) ($filterTeacher ?? 0);
     <div class="module-field"><label for="editClass">Class</label><select class="module-input" id="editClass" name="hwclass" required><?php foreach ($classes as $c): ?><option value="<?= (int) $c['id'] ?>" <?= (int) $editing['class_id'] === (int) $c['id'] ? 'selected' : '' ?>><?= e($c['name']) ?></option><?php endforeach ?></select></div>
     <div class="module-field"><label for="editSubject">Subject</label><select class="module-input" id="editSubject" name="hwsubject" required data-subject-filter="#editClass"><?php foreach ($subjects as $s): ?><option value="<?= (int) $s['id'] ?>" data-class="<?= (int) $s['class_id'] ?>" <?= (int) $editing['subject_id'] === (int) $s['id'] ? 'selected' : '' ?>><?= e($s['name']) ?></option><?php endforeach ?></select></div>
     <div class="module-field field--wide"><label for="editText">Homework</label><textarea class="module-input" id="editText" name="homework" rows="3" required><?= e($editing['homework_text']) ?></textarea></div>
-    <div class="module-field"><label for="editFile">Replace attachment</label><input class="module-input" id="editFile" type="file" name="hwattachment" accept=".pdf,.jpg,.jpeg,.png"><?php if ($editing['attachment_path']): ?><small><a href="<?= e(asset((string) $editing['attachment_path'])) ?>" target="_blank" rel="noopener">Current attachment</a></small><?php endif ?></div>
+    <div class="module-field"><label for="editFile">Replace attachment</label><input class="module-input" id="editFile" type="file" name="hwattachment" accept=".pdf,.jpg,.jpeg,.png"><?php if ($editing['attachment_path']): ?><small><a href="<?= e(url('/' . ltrim((string) $editing['attachment_path'], '/'))) ?>" target="_blank" rel="noopener">Current attachment</a></small><?php endif ?></div>
   </div>
   <div class="filter-actions"><button class="btn btn--primary" type="submit">Update Homework</button></div>
 </form>
@@ -64,8 +64,8 @@ $filterTeacher = (int) ($filterTeacher ?? 0);
     <?php else: ?>
       <div class="module-field"><label for="addTeacher">Teacher</label><select class="module-input" id="addTeacher" name="hwteacher" required><?php foreach ($teachers as $t): ?><option value="<?= (int) $t['id'] ?>"><?= e($t['name']) ?></option><?php endforeach ?></select></div>
     <?php endif ?>
-    <div class="module-field"><label for="hwClass">Class</label><select class="module-input" id="hwClass" name="hwclass" required><option value="">-- Select a class --</option><?php foreach ($classes as $c): ?><option value="<?= (int) $c['id'] ?>"><?= e($c['name']) ?></option><?php endforeach ?></select></div>
-    <div class="module-field"><label for="hwSubject">Subject</label><select class="module-input" id="hwSubject" name="hwsubject" required data-subject-filter="#hwClass"><option value="">-- Select a subject --</option><?php foreach ($subjects as $s): ?><option value="<?= (int) $s['id'] ?>" data-class="<?= (int) $s['class_id'] ?>"><?= e($s['name']) ?></option><?php endforeach ?></select></div>
+    <?php if($pinnedTeacher):?><div class="module-field"><label for="hwClass">Class</label><select class="module-input" id="hwClass" name="hwclass" required><option value="">-- Select a class --</option><?php foreach ($classes as $c): ?><option value="<?= (int) $c['id'] ?>"><?= e($c['name']) ?></option><?php endforeach ?></select></div><?php else:?><div class="module-field"><label>Audience</label><select class="module-select" id="homeworkAudience" name="audience_type"><option value="class">One or more classes</option><option value="all">All students</option><option value="student">Specific student</option></select></div><fieldset class="module-field field--wide" data-homework-classes><legend>Select classes</legend><div class="live-class-picker__options"><?php foreach($classes as$c):?><label class="live-class-picker__option"><input type="checkbox" name="class_ids[]" value="<?=$c['id']?>"><span><?=e($c['name'])?></span></label><?php endforeach?></div></fieldset><div class="module-field" data-homework-student hidden><label>Student</label><select class="module-select" name="student_id"><option value="">-- Select student --</option><?php foreach($students as$s):?><option value="<?=$s['id']?>"><?=e($s['student_name'].' · '.$s['registration_no'].' · '.$s['class_name'])?></option><?php endforeach?></select></div><?php endif?>
+    <div class="module-field"><label for="hwSubject">Subject <small><?=!$pinnedTeacher?'(optional)':''?></small></label><select class="module-input" id="hwSubject" name="hwsubject" <?=$pinnedTeacher?'required data-subject-filter="#hwClass"':''?>><option value="">General</option><?php $seenSubjects=[];foreach($subjects as$s):if(!$pinnedTeacher&&isset($seenSubjects[$s['id']]))continue;$seenSubjects[$s['id']]=true;?><option value="<?= (int) $s['id'] ?>" data-class="<?= (int) $s['class_id'] ?>"><?= e($s['name']) ?></option><?php endforeach ?></select></div>
     <div class="module-field field--wide"><label for="hwText">Homework</label><textarea class="module-input" id="hwText" name="homework" rows="3" required></textarea></div>
     <div class="module-field"><label for="hwFile">Attachment</label><input class="module-input" id="hwFile" type="file" name="hwattachment" accept=".pdf,.jpg,.jpeg,.png"><small>PDF, JPG or PNG up to 5 MB.</small></div>
   </div>
@@ -76,16 +76,17 @@ $filterTeacher = (int) ($filterTeacher ?? 0);
 <section class="module-card"><header class="module-card__header"><div><h2>Assigned Homework</h2><p><?= count($rows) ?> record(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Class</th><th>Subject</th><th>Teacher</th><th>Homework</th><th>Attachment</th><th>Actions</th></tr></thead><tbody>
 <?php foreach ($rows as $h): ?><tr>
   <td><?= e($h['homework_date']) ?></td>
-  <td><?= e($h['class_name']) ?></td>
+  <td><?=e(($h['audience_type']??'class')==='all'?'All students':(($h['audience_type']??'class')==='student'?($h['student_name']??'Student'):($h['class_names']??$h['class_name']??'Class')))?></td>
   <td><?= e($h['subject_name'] ?? '—') ?></td>
   <td><?= e($h['teacher'] ?? '—') ?></td>
   <td><?= e($h['homework_text']) ?></td>
-  <td><?php if ($h['attachment_path']): ?><a href="<?= e(asset((string) $h['attachment_path'])) ?>" target="_blank" rel="noopener">Open</a><?php else: ?>—<?php endif ?></td>
+  <td><?php if ($h['attachment_path']): ?><a href="<?= e(url('/' . ltrim((string) $h['attachment_path'], '/'))) ?>" target="_blank" rel="noopener">Open</a><?php else: ?>—<?php endif ?></td>
   <td>
-    <a class="text-button" href="<?= e(url('/admin/homework?edit=' . (int) $h['id'])) ?>">Edit</a>
+    <?php if(($h['audience_type']??'class')==='class'&&count(explode(',',(string)($h['class_names']??'')))===1):?><a class="text-button" href="<?= e(url('/admin/homework?edit=' . (int) $h['id'])) ?>">Edit</a><?php endif?>
     <form method="post" action="<?= e(url('/admin/homework/' . (int) $h['id'] . '/delete')) ?>" class="inline-form"><?= csrf_field() ?><button class="text-button" type="submit" onclick="return confirm('Delete this homework?')">Delete</button></form>
   </td>
 </tr><?php endforeach ?>
 <?php if (!$rows): ?><tr><td colspan="7"><div class="compact-empty"><h3>No Homework</h3><p>No assignments match these filters.</p></div></td></tr><?php endif ?>
 </tbody></table></div></div></section>
 </div></div></main>
+<?php if(!$pinnedTeacher):?><script>document.addEventListener('DOMContentLoaded',()=>{const a=document.getElementById('homeworkAudience'),c=document.querySelector('[data-homework-classes]'),s=document.querySelector('[data-homework-student]');const sync=()=>{c.hidden=a.value!=='class';s.hidden=a.value!=='student';s.querySelector('select').required=a.value==='student'};a.addEventListener('change',sync);sync()});</script><?php endif?>

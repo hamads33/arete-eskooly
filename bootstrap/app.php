@@ -30,5 +30,6 @@ $app = new App($router, $session, $database, $logger, $config);
 require BASE_PATH . '/routes/web.php';
 require BASE_PATH . '/routes/portal.php';
 require BASE_PATH . '/routes/auth.php';
+require BASE_PATH . '/routes/api.php';
 
 return $app;

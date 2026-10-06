@@ -476,4 +476,65 @@ final class TeacherWorkspaceController extends PortalController
         $date = \DateTimeImmutable::createFromFormat('Y-m-d', $value);
         return $date !== false && $date->format('Y-m-d') === $value;
     }
+
+    /** Announcements the teacher sends to the students and parents of their assigned classes. */
+    public function announcements(Request $request): Response
+    {
+        if (!$teacher = $this->teacher()) {
+            return $this->forbidden();
+        }
+        [$employeeId, $instituteId] = $teacher;
+        return $this->portalView('portal/teacher/announcements', 'employee', [
+            'pageTitle' => 'My Announcements',
+            'activeMenu' => 'portal-teaching-announcements',
+            'instituteId' => $instituteId,
+            'classes' => $this->scope($employeeId, $instituteId),
+            'announcements' => (new \App\Repositories\AnnouncementRepository($this->app->database()))->forTeacher($instituteId, $employeeId),
+        ]);
+    }
+
+    public function storeAnnouncement(Request $request): Response
+    {
+        if (!$teacher = $this->teacher()) {
+            return $this->forbidden();
+        }
+        [$employeeId, $instituteId] = $teacher;
+        $classId = (int) $request->input('class_id');
+        try {
+            // Only a class this teacher is assigned to; teacher_id is never taken from the form.
+            if (!isset($this->scope($employeeId, $instituteId)[$classId])) {
+                throw new DomainException('You are not assigned to that class.');
+            }
+            $image = \App\Support\SecureAttachment::storeImage($request->file('image'), 'announcements');
+            (new \App\Repositories\AnnouncementRepository($this->app->database()))->create($instituteId, [
+                'title' => $request->input('title'),
+                'message' => $request->input('message'),
+                'audience' => $request->input('audience'),
+                'teacher_id' => $employeeId,
+                'class_id' => $classId,
+                'image_path' => $image,
+                'show_popup' => $request->input('show_popup'),
+                'status' => 'published',
+                'expires_at' => $request->input('expires_at'),
+            ], $this->userId());
+            Flash::add('success', 'Announcement sent.');
+        } catch (DomainException $e) {
+            Flash::add('error', $e->getMessage());
+        }
+        return Response::redirect(url('/portal/employee/teaching/announcements'));
+    }
+
+    public function deleteAnnouncement(Request $request): Response
+    {
+        if (!$teacher = $this->teacher()) {
+            return $this->forbidden();
+        }
+        [$employeeId, $instituteId] = $teacher;
+        $path = (new \App\Repositories\AnnouncementRepository($this->app->database()))->delete($instituteId, (int) $request->route('id'), $employeeId);
+        if ($path && is_file(BASE_PATH . '/' . $path)) {
+            @unlink(BASE_PATH . '/' . $path);
+        }
+        Flash::add('success', 'Announcement deleted.');
+        return Response::redirect(url('/portal/employee/teaching/announcements'));
+    }
 }

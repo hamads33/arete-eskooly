@@ -130,7 +130,7 @@ final class AcademicStructureController extends AdminPageController
             'classes' => (new AcademicRepository($this->app->database()))->classes($institute),
             'selectedClass' => $classId,
             'students' => $classId > 0
-                ? (new StudentRepository($this->app->database()))->paginate($institute, '', $classId, 300)
+                ? (new StudentRepository($this->app->database()))->paginate($institute, '', $classId)
                 : [],
             'sections' => $classId > 0 ? $this->repo()->sectionOptions($institute, $classId) : [],
             'streams' => $this->repo()->streamOptions($institute),

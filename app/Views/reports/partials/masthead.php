@@ -1,6 +1,7 @@
 <?php
 $reportInstitute = $institute ?? [];
-$reportLogo = ($reportInstitute['logo_path'] ?? '') !== '' ? (string) $reportInstitute['logo_path'] : 'images/arete-logo.png';
+// Uploaded logos live under public/uploads, not public/assets, so only the bundled default goes through asset().
+$reportLogo = ($reportInstitute['logo_path'] ?? '') !== '' ? url('/' . ltrim((string) $reportInstitute['logo_path'], '/')) : asset('images/arete-logo.png');
 $reportContact = array_values(array_filter([$reportInstitute['address'] ?? null, $reportInstitute['phone'] ?? null, $reportInstitute['website'] ?? null]));
 $reportFilters = [];
 $reportAddFilter = static function (string $label, mixed $value) use (&$reportFilters): void {
@@ -27,7 +28,7 @@ if (isset($student) && is_array($student)) {
   <button class="btn btn--primary" type="button" onclick="window.print()">Print report</button>
 </nav>
 <section class="report-masthead" aria-label="Report identification">
-  <div class="report-masthead__brand"><img src="<?= e(asset($reportLogo)) ?>" alt="<?= e($reportInstitute['name'] ?? 'Institute') ?> logo"><div><strong><?= e($reportInstitute['name'] ?? 'Arete Coaching Center') ?></strong><?php if($reportContact):?><span><?= e(implode(' | ', $reportContact)) ?></span><?php endif?></div></div>
+  <div class="report-masthead__brand"><img src="<?= e($reportLogo) ?>" alt="<?= e($reportInstitute['name'] ?? 'Institute') ?> logo"><div><strong><?= e($reportInstitute['name'] ?? 'Arete Coaching Center') ?></strong><?php if($reportContact):?><span><?= e(implode(' | ', $reportContact)) ?></span><?php endif?></div></div>
   <dl class="report-masthead__meta"><div><dt>Generated</dt><dd><?= e(date('d M Y, h:i A')) ?></dd></div><?php if(!empty($reportInstitute['academic_session'])):?><div><dt>Academic Session</dt><dd><?=e($reportInstitute['academic_session'])?></dd></div><?php endif?></dl>
 </section>
 <section class="report-heading"><p>Official institutional report</p><h1><?= e(strip_tags((string)($pageTitle ?? 'Report'))) ?></h1><?php if(trim((string)($pageDescription ?? ''))!==''):?><div><?=e(strip_tags((string)$pageDescription))?></div><?php endif?></section>

@@ -12,6 +12,7 @@ $audience = $editing ? (string) $meeting['audience_type'] : 'SC';
 $startDate = $editing ? date('Y-m-d', strtotime((string) $meeting['local_start'])) : date('Y-m-d');
 $startTime = $editing ? date('H:i', strtotime((string) $meeting['local_start'])) : '';
 $participants = $participants ?? [];
+$selectedClassIds = array_map('intval', $selectedClassIds ?? ($selectedClass ? [$selectedClass] : []));
 ?>
 <main class="main"><div class="main__inner"><div class="admin-page">
   <header class="admin-page__header">
@@ -33,17 +34,18 @@ $participants = $participants ?? [];
         <textarea class="form-input" name="description" rows="3"><?= e(old('description', $editing?($meeting['description']??''):'')) ?></textarea>
       </label>
 
-      <label class="field"><span>Class <em>*</em></span>
-        <select class="form-select" name="class_id" required data-class-source data-reload-url="<?= url('/admin/live-classes/create') ?>">
-          <option value="">Select class</option>
-          <?php foreach($classes as $c):?><option value="<?= e($c['id']) ?>" <?= (int)old('class_id',$selectedClass)===(int)$c['id']?'selected':'' ?>><?= e($c['name']) ?></option><?php endforeach?>
-        </select>
-      </label>
+      <fieldset class="field field--wide live-class-picker" data-live-class-picker>
+        <legend>Classes <em>*</em></legend>
+        <small class="live-class-picker__hint">Select one class for subject, section or selected-student options; select several to share one Meet with whole classes.</small>
+        <div class="live-class-picker__options">
+          <?php foreach($classes as $c):?><label><input type="checkbox" name="class_ids[]" value="<?= e($c['id']) ?>" data-live-class-check <?= in_array((int)$c['id'],$selectedClassIds,true)?'checked':'' ?>><span><?= e($c['name']) ?></span></label><?php endforeach?>
+        </div>
+      </fieldset>
 
       <label class="field"><span>Subject</span>
-        <select class="form-select" name="subject_id">
+        <select class="form-select" name="subject_id" data-live-subject>
           <option value="">No specific subject</option>
-          <?php foreach($subjects as $s):?><option value="<?= e($s['id']) ?>" <?= $editing&&(int)$meeting['subject_id']===(int)$s['id']?'selected':'' ?>><?= e($s['name']) ?></option><?php endforeach?>
+          <?php foreach($subjects as $s):?><option value="<?= e($s['id']) ?>" data-class="<?= e($s['class_id'] ?? '') ?>" <?= $editing&&(int)$meeting['subject_id']===(int)$s['id']?'selected':'' ?>><?= e($s['name']) ?></option><?php endforeach?>
         </select>
       </label>
 
@@ -58,7 +60,7 @@ $participants = $participants ?? [];
       <label class="field" data-audience-field="SEC"><span>Section</span>
         <select class="form-select" name="section_id">
           <option value="">Select section</option>
-          <?php foreach($sections as $s):?><option value="<?= e($s['id']) ?>" <?= $editing&&(int)$meeting['section_id']===(int)$s['id']?'selected':'' ?>><?= e($s['name']) ?></option><?php endforeach?>
+          <?php foreach($sections as $s):?><option value="<?= e($s['id']) ?>" data-class="<?= e($s['class_id']) ?>" <?= $editing&&(int)$meeting['section_id']===(int)$s['id']?'selected':'' ?>><?= e($s['name']) ?></option><?php endforeach?>
         </select>
       </label>
 
@@ -67,7 +69,7 @@ $participants = $participants ?? [];
         <?php if(!$students):?><p class="field__hint">Choose a class first to list its students.</p>
         <?php else:?><div class="live-student-picker">
           <?php foreach($students as $s):?>
-            <label class="live-student-picker__item"><input type="checkbox" name="students[]" value="<?= e($s['id']) ?>" <?= in_array((int)$s['id'],$participants,true)?'checked':'' ?>><span><?= e($s['student_name']) ?> <em><?= e($s['registration_no']) ?></em></span></label>
+            <label class="live-student-picker__item" data-class="<?= e($s['class_id']) ?>"><input type="checkbox" name="students[]" value="<?= e($s['id']) ?>" <?= in_array((int)$s['id'],$participants,true)?'checked':'' ?>><span><?= e($s['student_name']) ?> <em><?= e($s['registration_no']) ?></em></span></label>
           <?php endforeach?>
         </div><?php endif?>
       </fieldset>

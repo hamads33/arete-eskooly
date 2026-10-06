@@ -176,6 +176,8 @@ final class PortalPdfController extends PortalController
                 'Salary Month' => $payment['salary_month'],
                 'Base Salary' => $this->money($payment['base_salary'], $institute),
                 'Adjustment' => $this->money($payment['adjustment_amount'], $institute),
+                'Deduction' => $this->money($payment['deduction_amount'] ?? 0, $institute),
+                'Advance Recovered' => $this->money($payment['advance_recovered'] ?? 0, $institute),
                 'Paid Amount' => $this->money($payment['paid_amount'], $institute),
                 'Payment Date' => $payment['payment_date'],
                 'Reference' => $payment['reference'] ?: '-',

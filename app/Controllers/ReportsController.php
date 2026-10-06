@@ -13,7 +13,7 @@ final class ReportsController extends AdminPageController
     private function i():int{return(int)(new SettingsRepository($this->app->database()))->institute()['id'];}
     private function reporting():ReportingRepository{return new ReportingRepository($this->app->database());}
     private function classes():array{return(new AcademicRepository($this->app->database()))->classes($this->i());}
-    private function data(Request$r):array{$i=$this->i();$q=trim((string)$r->query('search',''));$class=(int)$r->query('class',0);$data=(new SupportRepository($this->app->database()))->students($i,$q,$class,(int)$r->query('page',1));return$data+['classes'=>$this->classes(),'search'=>$q,'selectedClass'=>$class];}
+    private function data(Request$r):array{$i=$this->i();$q=trim((string)$r->query('search',''));$class=(int)$r->query('class',0);$data=(new SupportRepository($this->app->database()))->students($i,$q,$class,(int)$r->query('page',1),2000);return$data+['classes'=>$this->classes(),'search'=>$q,'selectedClass'=>$class];}
 
     /** YYYY-MM, defaulting to the current month. */
     private function period(Request$r):string{$p=(string)$r->query('period',date('Y-m'));return preg_match('/^\d{4}-(0[1-9]|1[0-2])$/',$p)?$p:date('Y-m');}
@@ -58,6 +58,8 @@ final class ReportsController extends AdminPageController
         return$this->renderPage('report-accounts',[
             'from'=>$from,'to'=>$to,
             'rows'=>$this->reporting()->accountsSummary($this->i(),$from,$to),
+            'feeCharges'=>(new \App\Repositories\AccountRepository($this->app->database()))->feeChargesBilled($this->i(),substr($from,0,7),substr($to,0,7)),
+            'feeCollected'=>(float)$this->app->database()->query('SELECT COALESCE(SUM(p.amount),0) FROM fee_payments p JOIN students s ON s.id=p.student_id WHERE s.institute_id=:i AND p.reversed_at IS NULL AND p.payment_date BETWEEN :f AND :t',['i'=>$this->i(),'f'=>$from,'t'=>$to])->fetchColumn(),
             'institute'=>(new SettingsRepository($this->app->database()))->institute(),
         ]);
     }
@@ -79,10 +81,11 @@ final class ReportsController extends AdminPageController
         $student=$studentId>0?(new StudentRepository($this->app->database()))->find($studentId,$i):null;
         return$this->renderPage('report-progress',[
             'classes'=>$this->classes(),
-            'students'=>(new StudentRepository($this->app->database()))->paginate($i,'',((int)$r->query('class',0))?:null,300),
+            'students'=>(new StudentRepository($this->app->database()))->paginate($i,'',((int)$r->query('class',0))?:null),
             'selectedClass'=>(int)$r->query('class',0),
             'student'=>$student,
             'progress'=>$student?$this->reporting()->studentProgress($i,(int)$student['id']):null,
+            'onlineTests'=>$student?(new \App\Repositories\OnlineTestRepository($this->app->database()))->progressSummary($i,(int)$student['id']):null,
         ]);
     }
 
@@ -103,7 +106,7 @@ final class ReportsController extends AdminPageController
         $student=$studentId>0?(new StudentRepository($this->app->database()))->find($studentId,$i):null;
         return$this->renderPage('report-test-history',[
             'classes'=>$this->classes(),'selectedClass'=>$class,
-            'students'=>(new StudentRepository($this->app->database()))->paginate($i,'',$class?:null,300),
+            'students'=>(new StudentRepository($this->app->database()))->paginate($i,'',$class?:null),
             'student'=>$student,'from'=>$from,'to'=>$to,
             'rows'=>$student?$this->reporting()->studentTestHistory($i,(int)$student['id'],$from,$to):[],
         ]);

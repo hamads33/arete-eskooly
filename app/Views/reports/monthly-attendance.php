@@ -16,6 +16,7 @@ $mark = static function (?string $status): string {
 <div class="filter-actions"><button class="btn btn--primary">Apply</button></div>
 </form>
 
+<?php $sumP=array_sum(array_column($rows,'present'));$sumA=array_sum(array_column($rows,'absent'));$sumL=array_sum(array_column($rows,'leave'));$sumT=array_sum(array_column($rows,'total'));?><div class="metric-grid"><div class="metric-card"><span><?=$isEmployee?'Staff':'Students'?></span><strong><?=count($rows)?></strong></div><div class="metric-card"><span>Present</span><strong><?=(int)$sumP?></strong></div><div class="metric-card"><span>Absent / Leave</span><strong><?=(int)$sumA?> / <?=(int)$sumL?></strong></div><div class="metric-card"><span>Average attendance</span><strong><?=$sumT>0?e((string)round($sumP/$sumT*100,1)):'0'?>%</strong></div></div>
 <section class="module-card"><header class="module-card__header"><div><h2><?=e($title)?></h2><p><?=count($rows)?> record(s) · <?=e($period)?> · P present, A absent, L leave, · not marked.</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr>
 <th><?=$isEmployee?'Employee No':'Registration'?></th><th>Name</th><th><?=$isEmployee?'Designation':'Class'?></th>
 <?php for($d=1;$d<=$days;$d++):?><th><?=$d?></th><?php endfor;?>

@@ -13,6 +13,8 @@ return [
         $child('Fees Structure', 'fee-structure', '/admin/settings/fee-structure'),
         $child('Discount Type', 'discount-type', '/admin/settings/discount-types'),
         $child('Accounts For Fees Invoice', 'fee-invoice-accounts', '/admin/settings/fee-invoice-accounts'),
+        $child('Fee Voucher Settings', 'fee-voucher-settings', '/admin/settings/fee-voucher'),
+        $child('Inactive & Suspended Rules', 'status-rules', '/admin/settings/status-rules'),
         $child('Rules & Regulations', 'rules-regulations', '/admin/settings/rules-regulations'),
         $child('Marks Grading', 'marks-grading', '/admin/settings/marks-grading'),
         $child('Academic Configuration', 'academic-profiles', '/admin/settings/academic-profiles'),
@@ -32,7 +34,7 @@ return [
     $item('Students', 'students', 'users-round', null, [
         $child('All Students', 'students', '/admin/students'), $child('Add New', 'student-add', '/admin/students/create'),
         $child('Bulk Import CSV', 'student-import', '/admin/students#bulk-student-import'),
-        $child('Manage Families', 'student-families', '/admin/students/families'), $child('Active / Inactive', 'student-status', '/admin/students/status'),
+        $child('Manage Families', 'student-families', '/admin/students/families'), $child('Active / Inactive / Suspended', 'student-status', '/admin/students/status'),
         $child('Admission Letter', 'student-admission-letter', '/admin/students/admission-letter'),
         $child('ID Cards', 'student-id-cards', '/admin/students/id-cards'), $child('Print Basic List', 'student-basic-list', '/admin/students/basic-list'),
         $child('Manage Login', 'student-logins', '/admin/students/logins'), $child('Promote Students', 'student-promotions', '/admin/students/promotions'),
@@ -42,23 +44,25 @@ return [
     $item('Employees', 'employees', 'briefcase-business', null, [
         $child('All Employees', 'employees', '/admin/employees'), $child('Add New', 'employee-add', '/admin/employees/create'),
         $child('Job Letter', 'employee-job-letter', '/admin/employees/job-letter'),
+        $child('Active / Inactive / Suspended', 'employee-status', '/admin/employees/status'),
         $child('Manage Login', 'staff-logins', '/admin/employees/logins'),
     ]),
     $item('Accounts', 'accounts', 'landmark', null, [
         $child('Chart Of Account', 'accounts-chart', '/admin/accounts'), $child('Add Income', 'income-add', '/admin/accounts/income/create'),
         $child('Add Expense', 'expense-add', '/admin/accounts/expense/create'), $child('Account Statement', 'account-statement', '/admin/accounts/statement'),
+        $child('Daily Statement', 'accounts-daily', '/admin/accounts/daily'), $child('Expense Report', 'expense-report', '/admin/accounts/expense-report'),
     ]),
     $item('Fees', 'fees', 'badge-dollar-sign', null, [
-        $child('Generate Fees Invoice', 'fees-generate', '/admin/fees/collect'), $child('Collect Fees', 'fees-collect', '/admin/fees/collect'),
+        $child('Generate Fees Invoice', 'fees-generate', '/admin/fees/vouchers'), $child('Collect Fees', 'fees-collect', '/admin/fees/collect'),
         $child('Fees Paid Slip', 'fees-receipt', '/admin/fees/receipt'), $child('Fees Defaulters', 'fees-defaulters', '/admin/fees/defaulters'),
         $child('Fees Report', 'fees-report', '/admin/fees/report'), $child('Delete Fees', 'fees-delete', '/admin/fees/delete'),
         $child('Fee Automation', 'fee-automation', '/admin/fees/automation'),
     ]),
     $item('Salary', 'salary', 'wallet-cards', null, [
-        $child('Pay Salary', 'salary-pay', '/admin/salary/pay'), $child('Salary Paid Slip', 'salary-receipt', '/admin/salary/receipt'),
+        $child('Salary Sheet', 'salary-sheet', '/admin/salary/sheet'), $child('Pay Salary', 'salary-pay', '/admin/salary/pay'), $child('Advance Salary', 'salary-advances', '/admin/salary/advances'), $child('Salary Paid Slip', 'salary-receipt', '/admin/salary/receipt'),
     ]),
     $item('Attendance', 'attendance', 'clipboard-check', null, [
-        $child('Students', 'attendance-students', '/admin/attendance/students'), $child('Employees', 'attendance-employees', '/admin/attendance/employees'),
+        $child('Daily Report', 'attendance-daily', '/admin/attendance/daily-report'), $child('Students', 'attendance-students', '/admin/attendance/students'), $child('Employees', 'attendance-employees', '/admin/attendance/employees'),
         $child('Classwise', 'attendance-classwise', '/admin/attendance/classwise'), $child('Student Report', 'attendance-student-report', '/admin/attendance/student-report'),
         $child('Employee Report', 'attendance-employee-report', '/admin/attendance/employee-report'),
     ]),
@@ -66,12 +70,25 @@ return [
         $child('Homework', 'homework', '/admin/homework'), $child('Class Notes', 'notes', '/admin/notes'),
     ]),
     $item('Messaging', 'messaging', 'messages-square', '/admin/communication/messaging'),
+    $item('Announcements', 'announcements', 'megaphone', '/admin/announcements'),
     $item('WhatsApp', 'whatsapp', 'message-circle', '/admin/whatsapp'),
-    $item('SMS', 'sms', 'message-square-text', null, [
-        $child('Gateway', 'sms-gateway', null, true),
+    $item('SMS Center', 'sms', 'message-square-text', null, [
+        $child('Dashboard', 'sms-dashboard', '/admin/sms'),
+        $child('Compose SMS', 'sms-compose', '/admin/sms/compose'),
+        $child('Bulk SMS', 'sms-bulk', '/admin/sms/bulk'),
+        $child('Templates', 'sms-templates', '/admin/sms/templates'),
+        $child('SMS Queue', 'sms-queue', '/admin/sms/queue'),
+        $child('Sent Messages', 'sms-sent', '/admin/sms/sent'),
+        $child('Failed Messages', 'sms-failed', '/admin/sms/failed'),
+        $child('Scheduled Messages', 'sms-scheduled', '/admin/sms/scheduled'),
+        $child('Automations', 'sms-automations', '/admin/sms/automations'),
+        $child('Gateway Devices', 'sms-devices', '/admin/sms/devices'),
+        $child('SMS Settings', 'sms-settings', '/admin/sms/settings'),
+        $child('Logs', 'sms-logs', '/admin/sms/logs'),
     ]),
     // Was a locked placeholder with no route until Google Meet live classes shipped.
     $item('Live Classes', 'live-classes', 'video', '/admin/live-classes'),
+    $item('Recorded Lectures', 'recorded-lectures', 'clapperboard', '/admin/recorded-lectures'),
     $item('Exams', 'exams', 'file-check-2', null, [
         $child('Create New Exam', 'exam-create', '/admin/exams/create'), $child('Exam Setup', 'exam-setup', '/admin/exams/setup'),
         $child('Add / Update Marks', 'exam-marks', '/admin/exams/marks'), $child('Result Card', 'exam-results', '/admin/exams/results'),
@@ -79,6 +96,10 @@ return [
     $item('Class Tests', 'class-tests', 'clipboard-list', null, [
         $child('Manage Class Tests', 'test-manage', '/admin/class-tests'),
         $child('New Test Marks', 'test-marks', '/admin/class-tests/marks'), $child('Test Result', 'test-results', '/admin/class-tests/results'),
+    ]),
+    $item('Online Tests', 'online-tests', 'clipboard-check', null, [
+        $child('Create & Manage Tests', 'online-tests', '/admin/online-tests'),
+        $child('Results Center', 'results', '/admin/results'),
     ]),
     $item('Behaviour & Skills', 'behaviour', 'smile', null, [
         $child('Rate Behaviours', 'behaviour-rate', '/admin/behaviour/rate'),
@@ -102,6 +123,5 @@ return [
         $child('Family / Sibling Report', 'report-families', '/admin/reports/families'),
         $child('Academic Activity', 'report-academic', '/admin/reports/academic'),
     ]),
-    $item('Certificates', 'certificates', 'award', null, [], true),
     $item('Roles & Permissions', 'roles', 'shield-check', '/admin/roles'),
 ];

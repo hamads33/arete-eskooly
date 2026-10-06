@@ -1,11 +1,11 @@
-@media (max-width: 1250px) {
+@media screen and (max-width: 1250px) {
   .main__inner { padding-inline: 22px; }
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .activity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .calendar-card { grid-column: auto; }
   .profile-trigger__copy { display: none; }
 }
-@media (max-width: 1023px) {
+@media screen and (max-width: 1023px) {
   :root { --header-height: 66px; }
   .app-header, .app-shell.is-collapsed .app-header { grid-template-columns: 66px minmax(0,1fr); }
   .brand { justify-content: center; padding: 0; }
@@ -35,7 +35,7 @@
   .chart-wrap { height: 240px; }
   .header-action--optional { display: none; }
 }
-@media (max-width: 767px) {
+@media screen and (max-width: 767px) {
   .header-main { padding: 0 10px; }
   .header-actions { gap: 1px; }
   .search { position: static; width: auto; }
@@ -80,7 +80,7 @@
   }
   .profile-menu { left: auto; width: min(248px, calc(100vw - 16px)); }
 }
-@media (max-width: 420px) {
+@media screen and (max-width: 420px) {
   .app-header, .app-shell.is-collapsed .app-header { grid-template-columns: 57px minmax(0,1fr); }
   .brand__mark { width: 35px; height: 35px; border-radius: 10px; }
   .header-main { gap: 4px; }

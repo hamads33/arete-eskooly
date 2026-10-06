@@ -94,12 +94,11 @@ $section = static function (string $title, array $items, string $empty) use ($ro
       <?php if(!$connected):?><p class="live-quick__blocked">Google Calendar is not connected. Connect the institute Google account first.</p><?php endif?>
       <form class="live-instant" method="post" action="<?= url('/admin/live-classes/instant') ?>" hidden data-instant-form><?= csrf_field() ?>
         <div class="form-grid">
-          <label class="field"><span>Class</span>
-            <select class="form-select" name="class_id" required data-class-source>
-              <option value="">Select class</option>
-              <?php foreach($classes as $c):?><option value="<?= e($c['id']) ?>"><?= e($c['name']) ?></option><?php endforeach?>
-            </select>
-          </label>
+          <fieldset class="field field--wide live-class-picker" data-live-class-picker>
+            <legend>Classes <em>*</em></legend>
+            <small class="live-class-picker__hint">Select one or more classes for this shared Meet.</small>
+            <div class="live-class-picker__options"><?php foreach($classes as $c):?><label><input type="checkbox" name="class_ids[]" value="<?= e($c['id']) ?>" data-live-class-check><span><?= e($c['name']) ?></span></label><?php endforeach?></div>
+          </fieldset>
           <label class="field"><span>Title <em>(optional)</em></span><input class="form-input" type="text" name="title" maxlength="160" placeholder="Defaults to the subject name"></label>
           <label class="field"><span>Duration</span>
             <select class="form-select" name="duration"><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60" selected>60 minutes</option><option value="90">90 minutes</option></select>

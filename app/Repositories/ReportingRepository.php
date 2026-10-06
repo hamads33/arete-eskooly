@@ -38,13 +38,13 @@ final class ReportingRepository
                 LEFT JOIN classes c ON c.id = s.class_id
                 LEFT JOIN student_attendance a
                        ON a.student_id = s.id AND DATE_FORMAT(a.attendance_date, \'%Y-%m\') = :p
-                WHERE s.institute_id = :i AND s.status = \'active\'';
-        $params = ['i' => $instituteId, 'p' => $period];
+                WHERE s.institute_id = :i AND (' . \App\Support\PersonStatus::visibleSql($this->database, $instituteId, 'student', 's', 'attendance', ':since') . ' OR a.id IS NOT NULL)';
+        $params = ['i' => $instituteId, 'p' => $period, 'since' => $period . '-01 00:00:00'];
         if ($classId > 0) {
             $sql .= ' AND s.class_id = :c';
             $params['c'] = $classId;
         }
-        return $this->pivot($this->database->query($sql . ' ORDER BY c.name, s.student_name', $params)->fetchAll(), 'student_name');
+        return $this->pivot($this->database->query($sql . ' ORDER BY c.name ASC,s.student_name ASC,s.registration_no ASC,s.id ASC', $params)->fetchAll(), 'student_name');
     }
 
     public function employeeMonthlyAttendance(int $instituteId, string $period): array
@@ -55,9 +55,9 @@ final class ReportingRepository
              FROM employees e
              LEFT JOIN employee_attendance a
                     ON a.employee_id = e.id AND DATE_FORMAT(a.attendance_date, \'%Y-%m\') = :p
-             WHERE e.institute_id = :i AND e.status = \'active\'
-             ORDER BY e.name',
-            ['i' => $instituteId, 'p' => $period]
+             WHERE e.institute_id = :i AND (' . \App\Support\PersonStatus::visibleSql($this->database, $instituteId, 'employee', 'e', 'attendance', ':since') . ' OR a.id IS NOT NULL)
+             ORDER BY e.name ASC,e.employee_no ASC,e.id ASC',
+            ['i' => $instituteId, 'p' => $period, 'since' => $period . '-01 00:00:00']
         )->fetchAll();
         return $this->pivot($rows, 'student_name');
     }
@@ -161,10 +161,10 @@ final class ReportingRepository
              FROM employees e
              LEFT JOIN salary_payments sp
                     ON sp.employee_id = e.id AND sp.salary_month BETWEEN :from AND :to
-             WHERE e.institute_id = :i AND e.status = \'active\'
+             WHERE e.institute_id = :i AND (' . \App\Support\PersonStatus::visibleSql($this->database, $instituteId, 'employee', 'e', 'billing', ':since') . ' OR sp.id IS NOT NULL)
              GROUP BY e.id, e.employee_no, e.name, e.role, e.monthly_salary
              ORDER BY e.name',
-            ['i' => $instituteId, 'from' => $fromMonth, 'to' => $toMonth]
+            ['i' => $instituteId, 'from' => $fromMonth, 'to' => $toMonth, 'since' => $fromMonth . '-01 00:00:00']
         )->fetchAll();
     }
 
@@ -251,13 +251,13 @@ final class ReportingRepository
                 LEFT JOIN classes c ON c.id = s.class_id
                 LEFT JOIN student_attendance a
                        ON a.student_id = s.id AND a.attendance_date BETWEEN :from AND :to
-                WHERE s.institute_id = :i AND s.status = 'active'";
-        $params = ['i' => $instituteId, 'from' => $from, 'to' => $to];
+                WHERE s.institute_id = :i AND (" . \App\Support\PersonStatus::visibleSql($this->database, $instituteId, 'student', 's', 'attendance', ':since') . " OR a.id IS NOT NULL)";
+        $params = ['i' => $instituteId, 'from' => $from, 'to' => $to, 'since' => $from . ' 00:00:00'];
         if ($classId > 0) {
             $sql .= ' AND s.class_id = :c';
             $params['c'] = $classId;
         }
-        $rows = $this->database->query($sql . ' GROUP BY s.id, s.registration_no, s.student_name, c.name ORDER BY c.name, s.student_name', $params)->fetchAll();
+        $rows = $this->database->query($sql . ' GROUP BY s.id, s.registration_no, s.student_name, c.name ORDER BY c.name ASC,s.student_name ASC,s.registration_no ASC,s.id ASC', $params)->fetchAll();
         foreach ($rows as &$row) {
             $marked = (int) $row['marked'];
             // Late still counts as attending; only Absent and Leave reduce the percentage.
@@ -301,7 +301,7 @@ final class ReportingRepository
                 LEFT JOIN academic_streams str ON str.id = s.stream_id
                 WHERE s.institute_id = :i';
         $params = ['i' => $instituteId];
-        if (in_array($status, ['active', 'inactive'], true)) {
+        if (in_array($status, ['active', 'inactive', 'suspended'], true)) {
             $sql .= ' AND s.status = :st';
             $params['st'] = $status;
         }
@@ -309,7 +309,7 @@ final class ReportingRepository
             $sql .= ' AND s.class_id = :c';
             $params['c'] = $classId;
         }
-        return $this->database->query($sql . ' ORDER BY c.name, s.student_name', $params)->fetchAll();
+        return $this->database->query($sql . ' ORDER BY c.name ASC,s.student_name ASC,s.registration_no ASC,s.id ASC', $params)->fetchAll();
     }
 
     /** Siblings grouped by the family label, with each child's outstanding balance. */
@@ -323,7 +323,7 @@ final class ReportingRepository
              LEFT JOIN fee_invoices fi ON fi.student_id = s.id
              WHERE s.institute_id = :i AND s.family IS NOT NULL AND s.family <> ''
              GROUP BY s.id, s.family, s.registration_no, s.student_name, s.father_name, s.mobile, c.name
-             ORDER BY s.family, s.student_name",
+             ORDER BY s.family ASC,s.student_name ASC,s.registration_no ASC,s.id ASC",
             ['i' => $instituteId]
         )->fetchAll();
         $families = [];

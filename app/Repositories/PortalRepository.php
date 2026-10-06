@@ -172,24 +172,23 @@ final class PortalRepository
         )->fetchAll();
     }
 
-    public function studentHomework(int $classId, int $instituteId, int $limit = 60): array
+    public function studentHomework(int $classId, int $instituteId, int $limit = 60, int $studentId = 0): array
     {
         return $this->database->query(
             'SELECT h.homework_date, h.homework_text, h.attachment_path,
                     sub.name AS subject, e.name AS teacher
              FROM homework h
-             JOIN classes c ON c.id = h.class_id
              LEFT JOIN subjects sub ON sub.id = h.subject_id
              LEFT JOIN employees e ON e.id = h.teacher_id
-             WHERE h.class_id = :class AND c.institute_id = :institute AND h.status = \'published\'
+             WHERE h.teacher_id IN(SELECT id FROM employees WHERE institute_id=:institute) AND h.status = \'published\' AND (h.audience_type=\'all\' OR (h.audience_type=\'class\' AND EXISTS(SELECT 1 FROM homework_classes hc WHERE hc.homework_id=h.id AND hc.class_id=:class)) OR (h.audience_type=\'student\' AND h.student_id=:student))
              ORDER BY h.homework_date DESC LIMIT ' . $this->limit($limit),
-            ['class' => $classId, 'institute' => $instituteId]
+            ['class' => $classId, 'student'=>$studentId, 'institute' => $instituteId]
         )->fetchAll();
     }
 
-    public function studentNotes(int$classId,int$instituteId,int$limit=60):array
+    public function studentNotes(int$classId,int$instituteId,int$limit=60,int$studentId=0):array
     {
-        return $this->database->query('SELECT n.title,n.chapter,n.description,n.attachment_path,n.publish_date,s.name subject,e.name teacher FROM class_notes n JOIN subjects s ON s.id=n.subject_id LEFT JOIN employees e ON e.id=n.teacher_id WHERE n.class_id=:class AND n.institute_id=:institute AND n.status="published" ORDER BY n.publish_date DESC,n.id DESC LIMIT '.$this->limit($limit),['class'=>$classId,'institute'=>$instituteId])->fetchAll();
+        return $this->database->query('SELECT n.id,n.title,n.chapter,n.description,n.attachment_path,n.external_url,n.publish_date,COALESCE(s.name,"General") subject,e.name teacher,n.audience_type FROM class_notes n LEFT JOIN subjects s ON s.id=n.subject_id LEFT JOIN employees e ON e.id=n.teacher_id WHERE n.institute_id=:institute AND n.status="published" AND (n.audience_type="all" OR (n.audience_type="class" AND EXISTS(SELECT 1 FROM class_note_classes nc WHERE nc.note_id=n.id AND nc.class_id=:class)) OR (n.audience_type="student" AND n.student_id=:student)) ORDER BY n.publish_date DESC,n.id DESC LIMIT '.$this->limit($limit),['class'=>$classId,'student'=>$studentId,'institute'=>$instituteId])->fetchAll();
     }
 
     public function studentCertificates(int $studentId, int $instituteId): array
@@ -232,7 +231,7 @@ final class PortalRepository
     public function employeeSalaryPayments(int $employeeId, int $limit = 60): array
     {
         return $this->database->query(
-            'SELECT id, salary_month, base_salary, adjustment_amount, paid_amount, payment_date
+            'SELECT id, salary_month, base_salary, adjustment_amount, deduction_amount, advance_recovered, paid_amount, payment_date
              FROM salary_payments WHERE employee_id = :id
              ORDER BY salary_month DESC LIMIT ' . $this->limit($limit),
             ['id' => $employeeId]

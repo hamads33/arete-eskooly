@@ -152,10 +152,13 @@ final class TeacherLiveClassController extends PortalController
             Flash::add('error', $e->getMessage());
             return Response::redirect($redirect);
         }
-        $service->audit($institute, (int) user()['id'], $instant ? 'live_class.instant_created' : 'live_class.created', $result['id'], ['by' => 'teacher', 'pending' => $result['pending']]);
+        $classCount = count($normalised['target_class_ids']);
+        $service->audit($institute, (int) user()['id'], $instant ? 'live_class.instant_created' : 'live_class.created', $result['id'], ['by' => 'teacher', 'pending' => $result['pending'], 'class_count' => $classCount]);
         Flash::add($result['pending'] ? 'error' : 'success', $result['pending']
             ? 'The class was created, but its Google Meet link is still being generated. Please refresh shortly.'
-            : ($instant ? 'Meeting ready. Open Google Meet from the class card.' : 'Live class scheduled.'));
+            : ($instant
+                ? 'Meeting ready for ' . $classCount . ' class' . ($classCount === 1 ? '' : 'es') . '. Open Google Meet from the class card.'
+                : 'Live class scheduled for ' . $classCount . ' class' . ($classCount === 1 ? '' : 'es') . '.'));
         return Response::redirect($redirect);
     }
 
@@ -166,8 +169,15 @@ final class TeacherLiveClassController extends PortalController
      */
     private function assertAssigned(int $employeeId, int $institute, array $normalised): void
     {
-        if (!$this->liveClassAuthorization()->teacherMayHost($employeeId, $institute, (int) $normalised['target_class_id'], $normalised['subject_id'] !== null ? (int) $normalised['subject_id'] : null)) {
-            throw new DomainException('You are not assigned to that class or subject.');
+        $classIds = $normalised['target_class_ids'] ?? [$normalised['target_class_id']];
+        $multipleClasses = count($classIds) > 1;
+        foreach ($classIds as $classId) {
+            $allowed = $multipleClasses
+                ? $this->liveClassAuthorization()->teacherIsAssignedToClass($employeeId, $institute, (int) $classId)
+                : $this->liveClassAuthorization()->teacherMayHost($employeeId, $institute, (int) $classId, $normalised['subject_id'] !== null ? (int) $normalised['subject_id'] : null);
+            if (!$allowed) {
+                throw new DomainException('You are not assigned to every selected class or subject.');
+            }
         }
     }
 

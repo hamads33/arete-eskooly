@@ -1,0 +1,23 @@
+/* Online Tests → Upload settings card and the per-test page limit in the saved tests list. */
+.upload-settings{margin-bottom:18px}
+.upload-settings__form{display:grid;grid-template-columns:repeat(2,minmax(0,240px)) auto;gap:14px;align-items:end}
+.upload-settings__form .btn{min-height:44px;gap:6px;justify-self:start}
+.upload-settings__note{display:flex;align-items:flex-start;gap:8px;margin:14px 0 0;color:var(--text-secondary);font-size:13px;line-height:1.5}
+.upload-settings__note svg{flex:none;width:16px;height:16px;margin-top:2px;color:var(--primary)}
+.pages-limit-form{display:flex;align-items:center;gap:6px}
+.pages-limit-form .module-input{width:76px;min-height:38px}
+.pages-limit-form .btn{min-height:38px;padding-inline:12px}
+.late-badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:99px;background:#fdecc8;color:#7a4504;font-size:11px;font-weight:800;white-space:nowrap}
+.purged-note{display:flex;align-items:center;gap:8px;padding:12px 14px;border:1px dashed var(--border-strong);border-radius:12px;color:var(--text-secondary);font-size:13px}
+@media screen and (max-width:700px){.upload-settings__form{grid-template-columns:1fr}.upload-settings__form .btn{width:100%;justify-content:center}}
+.teacher-comment-card textarea{width:100%;min-height:110px}.teacher-comment-card h2 label{cursor:pointer}.teacher-comment-card__when{display:block;margin-top:6px;color:var(--text-secondary);font-size:12px}
+/* Extra time (whole class and one student) on the submissions page. */
+.extra-time-card{margin-bottom:16px}.extra-time-card .module-card__body{display:grid;gap:12px}
+.extra-time-card__now{display:flex;align-items:center;gap:8px;color:var(--text-primary)}.extra-time-card__now svg{width:18px;height:18px;color:var(--primary)}
+.extra-time-form{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}.extra-time-form__minutes{display:grid;gap:6px;font-size:12px;font-weight:700}.extra-time-form__minutes .module-input{width:110px}.extra-time-form .btn{min-height:44px;gap:6px}
+.test-edit-check{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:13px;color:var(--text-secondary)}
+.extra-time-card__hint{margin:0;color:var(--text-secondary);font-size:13px}
+.extra-badge{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:99px;background:#e3f1e8;color:#1c6b3d;font-size:11px;font-weight:800;white-space:nowrap}
+.extra-time-row{display:flex;gap:6px;margin-top:8px}.extra-time-row .module-input{width:70px;min-height:38px}.extra-time-row .btn{min-height:38px;padding-inline:12px;white-space:nowrap}
+@media screen and (max-width:700px){.extra-time-form{display:grid}.extra-time-form .btn{width:100%;justify-content:center}.extra-time-form__minutes .module-input{width:100%}}
+.extra-time-row .btn.btn--secondary,.test-edit-page .btn.btn--secondary,.module-page__header .table-actions .btn.btn--secondary{border:1.5px solid var(--primary-200);background:#fff;color:var(--primary-dark)}

@@ -144,7 +144,7 @@ final class BehaviourController extends AdminPageController
         return $this->renderPage('behaviour-observations', [
             'classes' => $this->classes(),
             'selectedClass' => $classId,
-            'students' => (new StudentRepository($this->app->database()))->paginate($institute, '', $classId ?: null, 200),
+            'students' => (new StudentRepository($this->app->database()))->paginate($institute, '', $classId ?: null),
             'observations' => $this->repo()->observations($institute, $classId),
         ]);
     }

@@ -23,6 +23,64 @@
   toggle('data-toggle-instant', 'data-instant-form');
   toggle('data-toggle-schedule', 'data-schedule-form');
 
+  /* One shared Meet may target several classes; subjects remain single-class only. */
+  document.querySelectorAll('[data-live-class-picker]').forEach(function (picker) {
+    var form = picker.closest('form');
+    var checks = Array.prototype.slice.call(picker.querySelectorAll('[data-live-class-check]'));
+    var subject = form ? form.querySelector('[data-live-subject]') : null;
+    var audience = form ? form.querySelector('[data-audience]') : null;
+    var applyClasses = function () {
+      var selected = checks.filter(function (check) { return check.checked; });
+      var selectedId = selected.length === 1 ? selected[0].value : '';
+      if (subject) {
+        subject.disabled = selected.length !== 1;
+        if (selected.length !== 1) { subject.value = ''; }
+        Array.prototype.forEach.call(subject.options, function (option) {
+          if (!option.value) { return; }
+          option.hidden = option.getAttribute('data-class') !== selectedId;
+          option.disabled = option.hidden;
+        });
+      }
+      if (audience) {
+        Array.prototype.forEach.call(audience.options, function (option) {
+          var singleOnly = option.value === 'SEC' || option.value === 'SEL';
+          option.disabled = singleOnly && selected.length !== 1;
+        });
+        if (selected.length !== 1) {
+          audience.value = 'SC';
+          audience.dispatchEvent(new Event('change'));
+        }
+      }
+      if (form) {
+        form.querySelectorAll('[data-audience-field="SEC"] option[data-class]').forEach(function (option) {
+          option.hidden = option.getAttribute('data-class') !== selectedId;
+          option.disabled = option.hidden;
+        });
+        form.querySelectorAll('.live-student-picker__item[data-class]').forEach(function (student) {
+          student.hidden = student.getAttribute('data-class') !== selectedId;
+          var input = student.querySelector('input');
+          if (input) { input.disabled = student.hidden; }
+        });
+      }
+    };
+    checks.forEach(function (check) {
+      check.addEventListener('change', function () {
+        if (checks.length) { checks[0].setCustomValidity(''); }
+        applyClasses();
+      });
+    });
+    if (form) {
+      form.addEventListener('submit', function (event) {
+        if (!checks.some(function (check) { return check.checked; })) {
+          event.preventDefault();
+          checks[0].setCustomValidity('Choose at least one class.');
+          checks[0].reportValidity();
+        }
+      });
+    }
+    applyClasses();
+  });
+
   /*
    * Show only the audience field that applies. This is presentation: the server decides what a
    * given audience actually requires, so hiding a field here can never relax a rule.

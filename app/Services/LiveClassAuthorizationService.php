@@ -31,6 +31,19 @@ final class LiveClassAuthorizationService
         return (new PakistanErpRepository($this->db))->teacherCan($employeeId, $institute, $classId, $subjectId);
     }
 
+    /** Multi-class meetings have no single subject, so any active assignment to each class qualifies. */
+    public function teacherIsAssignedToClass(int $employeeId, int $institute, int $classId): bool
+    {
+        if ($classId <= 0) {
+            return false;
+        }
+        return (bool) $this->db->query(
+            'SELECT 1 FROM teacher_assignments
+             WHERE employee_id=:e AND institute_id=:i AND class_id=:c AND status=\'active\' LIMIT 1',
+            ['e' => $employeeId, 'i' => $institute, 'c' => $classId]
+        )->fetchColumn();
+    }
+
     /**
      * May this teacher edit or cancel this meeting? Ownership by default; anything wider requires
      * live-classes.manage-all, which is not granted to the teacher role.

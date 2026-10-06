@@ -1,0 +1,1 @@
+document.querySelector('[data-fee-reminder-close]')?.addEventListener('click',event=>{const reminder=event.currentTarget.closest('[data-fee-reminder]');reminder.classList.add('is-closing');setTimeout(()=>reminder.remove(),180)});

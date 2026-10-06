@@ -4,7 +4,7 @@
 
 <form class="filter-bar filter-bar--compact" method="get">
 <div class="module-field"><label for="class">Class</label><select class="module-input" id="class" name="class"><option value="0">All classes</option><?php foreach($classes as $c):?><option value="<?=(int)$c['id']?>" <?=$selectedClass===(int)$c['id']?'selected':''?>><?=e($c['name'])?></option><?php endforeach?></select></div>
-<div class="module-field"><label for="status">Status</label><select class="module-input" id="status" name="status"><option value="">All</option><option value="active" <?=$status==='active'?'selected':''?>>Active</option><option value="inactive" <?=$status==='inactive'?'selected':''?>>Inactive</option></select></div>
+<div class="module-field"><label for="status">Status</label><select class="module-input" id="status" name="status"><option value="">All</option><option value="active" <?=$status==='active'?'selected':''?>>Active</option><option value="inactive" <?=$status==='inactive'?'selected':''?>>Inactive</option><option value="suspended" <?=$status==='suspended'?'selected':''?>>Suspended</option></select></div>
 <div class="filter-actions"><button class="btn btn--primary">Apply</button></div>
 </form>
 

@@ -1,7 +1,8 @@
 <div class="auth-heading"><span class="eyebrow">YOUR INSTITUTE, AT YOUR FINGERTIPS</span><h1>Welcome back<span>.</span></h1><p>A new day of possibilities starts here.<br>Sign in to your school workspace.</p></div>
-<form class="auth-form" method="post" action="<?= url('/login') ?>">
+<form class="auth-form" method="post" action="<?= url('/login') ?>" autocomplete="on">
 <?= csrf_field() ?>
-<?php $fields=[['email','Email address','email','email','you@school.edu'],['password','Password','password','current-password','Enter your password']]; require BASE_PATH.'/app/Views/auth/fields.php'; ?>
+<?php $fields=[['email','Email address','email','username','you@school.edu'],['password','Password','password','current-password','Enter your password']]; require BASE_PATH.'/app/Views/auth/fields.php'; ?>
+<label class="auth-remember"><input type="checkbox" name="remember" value="1"<?= old('remember') === '1' ? ' checked' : '' ?>><span>Remember me</span></label>
 <button class="auth-submit" type="submit"><span>Sign In</span><span aria-hidden="true">↗</span></button>
 </form>
 <p class="auth-switch">New to Arete? <a href="<?= url('/signup') ?>">Create an institute account <span aria-hidden="true">→</span></a></p>

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace App\Controllers;
-use App\Core\{Request,Response};use App\Repositories\{WorkflowRepository,SettingsRepository,AcademicRepository,EmployeeRepository,SupportRepository};use App\Support\{UploadPolicy,Flash};
+use App\Core\{Request,Response};use App\Repositories\{WorkflowRepository,SettingsRepository,AcademicRepository,EmployeeRepository,SupportRepository,StudentRepository};use App\Support\{UploadPolicy,Flash};
 
 /**
  * Homework assignment. Administrators may assign on behalf of any teacher; a signed-in
@@ -17,7 +17,7 @@ private function pinnedTeacher():int{if(can('*'))return 0;return$this->repo()->e
 public function index(Request$r):Response{$i=$this->i();$pinned=$this->pinnedTeacher();$teachers=(new EmployeeRepository($this->app->database()))->all($i,'',true);
 if($pinned>0)$teachers=array_values(array_filter($teachers,static fn(array$t):bool=>(int)$t['id']===$pinned));
 $teacherFilter=$pinned>0?$pinned:(int)$r->query('teacher',0);
-return$this->renderPage('homework',['rows'=>$this->repo()->homework($i,(string)$r->query('date')?:null,(int)$r->query('class',0),$teacherFilter),'classes'=>(new AcademicRepository($this->app->database()))->classes($i),'teachers'=>$teachers,'subjects'=>(new SupportRepository($this->app->database()))->subjects($i),'pinnedTeacher'=>$pinned,'editId'=>(int)$r->query('edit',0),'filterDate'=>(string)$r->query('date',''),'filterClass'=>(int)$r->query('class',0),'filterTeacher'=>$teacherFilter]);}
+return$this->renderPage('homework',['rows'=>$this->repo()->homework($i,(string)$r->query('date')?:null,(int)$r->query('class',0),$teacherFilter),'classes'=>(new AcademicRepository($this->app->database()))->classes($i),'students'=>(new StudentRepository($this->app->database()))->basicList($i,'',null),'teachers'=>$teachers,'subjects'=>(new SupportRepository($this->app->database()))->subjects($i),'pinnedTeacher'=>$pinned,'editId'=>(int)$r->query('edit',0),'filterDate'=>(string)$r->query('date',''),'filterClass'=>(int)$r->query('class',0),'filterTeacher'=>$teacherFilter]);}
 
 public function store(Request$r):Response{return$this->save($r);}
 public function update(Request$r):Response{return$this->save($r,(int)$r->route('id'));}
@@ -33,7 +33,7 @@ private function ownedByTeacher(int$id,int$teacher):bool{return(bool)$this->app-
 private function save(Request$r,?int$id=null):Response{$pinned=$this->pinnedTeacher();
 if($id!==null&&$pinned>0&&!$this->ownedByTeacher($id,$pinned)){Flash::add('error','You can only edit homework you assigned.');return Response::redirect(url('/admin/homework'));}
 $attachment=null;$file=$r->file('hwattachment');if($file&&($file['error']??UPLOAD_ERR_NO_FILE)!==UPLOAD_ERR_NO_FILE){$policy=new UploadPolicy(['application/pdf','image/jpeg','image/png'],['pdf','jpg','jpeg','png'],5242880);if(!$policy->validate($file))return Response::html('Invalid homework attachment',422);$name=$policy->safeFilename(pathinfo((string)$file['name'],PATHINFO_EXTENSION));$dir=BASE_PATH.'/public/uploads/homework';if(!is_dir($dir))mkdir($dir,0775,true);if(!move_uploaded_file($file['tmp_name'],$dir.'/'.$name))return Response::html('Upload failed',422);$attachment='uploads/homework/'.$name;}
-$data=['date'=>$r->input('hwdate'),'teacher_id'=>$pinned>0?$pinned:$r->input('hwteacher'),'class_id'=>$r->input('hwclass'),'subject_id'=>$r->input('hwsubject'),'text'=>$r->input('homework'),'attachment'=>$attachment];
+$data=['date'=>$r->input('hwdate'),'teacher_id'=>$pinned>0?$pinned:$r->input('hwteacher'),'audience_type'=>$pinned>0?'class':$r->input('audience_type','class'),'class_ids'=>$pinned>0?[(int)$r->input('hwclass')]:(array)$r->input('class_ids',[]),'class_id'=>$r->input('hwclass'),'student_id'=>$r->input('student_id'),'subject_id'=>$r->input('hwsubject'),'text'=>$r->input('homework'),'attachment'=>$attachment];
 try{$w=$this->repo();$id?$w->updateHomework($this->i(),$id,$data):$w->createHomework($this->i(),$data,(int)user()['id']);}catch(\DomainException$e){if($attachment&&is_file(BASE_PATH.'/public/'.$attachment))unlink(BASE_PATH.'/public/'.$attachment);return Response::html(e($e->getMessage()),422);}
 Flash::add('success',$id?'Homework updated.':'Homework added.');return Response::redirect(url('/admin/homework'));}
 }

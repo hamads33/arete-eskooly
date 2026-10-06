@@ -1,0 +1,106 @@
+/* Salary Sheet ----------------------------------------------------------------------------- */
+.salary-sheet-page{gap:16px}
+.ss-month{display:inline-block;margin-left:6px;padding:3px 10px;border-radius:999px;background:#fbeef2;color:var(--primary);font-size:.55em;vertical-align:middle;font-weight:700}
+.ss-filters{display:grid;grid-template-columns:170px minmax(200px,1fr) 180px 150px auto;gap:12px;align-items:end;padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--surface,#fff)}
+.ss-filters label{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}
+.ss-filters__actions{display:flex;gap:8px}
+.ss-tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.ss-tile{padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--surface,#fff);min-width:0}
+.ss-tile span{display:block;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}
+.ss-tile strong{display:block;margin-top:6px;font-size:19px;color:var(--primary-dark,#3b0b18);overflow-wrap:anywhere}
+.ss-tile small{display:block;margin-top:2px;font-size:11.5px;color:var(--text-secondary)}
+.ss-tile--good strong{color:#2f7a4a}.ss-tile--warn strong{color:#b45309}
+.ss-card .module-card__header{padding-bottom:10px}
+.ss-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.ss-table{width:100%;border-collapse:collapse;font-size:13px}
+.ss-table th{position:sticky;top:0;z-index:1;padding:10px 10px;background:#f4eff1;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#5d4b52;text-align:left;white-space:nowrap}
+.ss-table td{padding:10px;border-top:1px solid #f1eaed;vertical-align:top}
+.ss-table .ss-num{text-align:right;white-space:nowrap}
+.ss-table td small{display:block;margin-top:3px;font-size:11px;color:var(--text-secondary);white-space:normal}
+.ss-check{width:34px;text-align:center!important}.ss-check input{width:18px;height:18px;accent-color:var(--primary);cursor:pointer}
+.ss-emp strong{display:block;font-size:13.5px;color:#2b1a21}.ss-emp .person-status-tag{margin:4px 0 0}
+.ss-att{min-width:120px}
+.ss-chip{display:inline-block;margin:0 4px 4px 0;padding:2px 7px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap}
+.ss-chip--p{background:#e9f7ee;color:#22663b}.ss-chip--l{background:#fff4e0;color:#8a5a00}.ss-chip--a{background:#fdecee;color:#9b1c31}.ss-chip--h{background:#f3eefc;color:#5b3fa0}.ss-chip--v{background:#eef3fb;color:#2c5282}
+.ss-muted{color:#a3949a;font-size:12px}
+.ss-input{width:96px;min-height:36px;padding:6px 8px;border:1px solid #e2d8dc;border-radius:8px;text-align:right;font:inherit;font-weight:700;color:var(--primary-dark,#3b0b18);background:#fff}
+.ss-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(122,22,50,.1)}
+.ss-input:disabled{border-color:transparent;background:transparent;color:#3b2a31;-webkit-text-fill-color:#3b2a31;opacity:1}
+.ss-input--deduct:not(:disabled){border-color:#f0c6cf}
+.ss-suggest{display:block;margin:5px 0 0 auto;padding:3px 8px;border:1px dashed #e0b4bf;border-radius:999px;background:#fff7f9;color:#9b1c31;font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.ss-suggest:hover{background:#fdecee}
+.ss-net strong{font-size:14.5px;color:var(--primary-dark,#3b0b18)}
+.ss-row.is-invalid .ss-net strong{color:#c0263f}
+.ss-row.is-picked td{background:#fffaf2}
+.ss-row.is-editing td{background:#f7f1ff}
+.ss-row.is-paid .ss-emp strong{color:#2b1a21}
+.ss-state{min-width:150px}
+.ss-badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800;white-space:nowrap}
+.ss-badge--paid{background:#e9f7ee;color:#22663b}.ss-badge--pending{background:#fff4e0;color:#8a5a00}
+.ss-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;font-size:12px}
+.ss-actions a,.ss-link{color:var(--primary);font-weight:700;text-decoration:underline;background:none;border:0;padding:0;font:inherit;font-size:12px;cursor:pointer}
+.ss-note{display:block;width:100%;max-width:170px;margin-top:6px;min-height:32px;padding:5px 8px;border:1px solid #e9e1e4;border-radius:8px;font:inherit;font-size:12px}
+.ss-table tfoot td{padding:12px 10px;border-top:2px solid #eadfe3;background:#fbf8f9}
+.ss-paybar{position:sticky;bottom:12px;z-index:30;display:grid;grid-template-columns:auto 180px minmax(180px,1fr) auto;gap:12px 14px;align-items:end;padding:14px 16px;border:1px solid #e3d1d8;border-radius:14px;background:rgba(255,255,255,.97);box-shadow:0 12px 34px rgba(59,11,24,.16);backdrop-filter:blur(6px)}
+.ss-paybar label{font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}
+.ss-paybar__sum{display:grid;gap:2px;font-size:12px;color:var(--text-secondary)}
+.ss-paybar__total{font-size:20px;color:var(--primary-dark,#3b0b18)}
+.ss-paybar.is-active{border-color:var(--primary)}
+.ss-adjust-form{display:none}
+.print-only{display:none}
+
+@media screen and (max-width:1100px){
+  .ss-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ss-filters{grid-template-columns:repeat(2,minmax(0,1fr))}.ss-filters__search{grid-column:1/-1}
+}
+@media screen and (max-width:767px){
+  .ss-tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ss-tile{padding:11px 12px}.ss-tile strong{font-size:16px}
+  .ss-filters{grid-template-columns:1fr 1fr;padding:12px}.ss-filters__actions{grid-column:1/-1}.ss-filters__actions .btn{flex:1;justify-content:center}
+  .ss-table-wrap{overflow:visible}
+  .ss-table,.ss-table tbody,.ss-table tr,.ss-table td{display:block;width:100%}
+  .ss-table thead{display:none}
+  .ss-table tbody tr{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin:0 0 12px;padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff}
+  .ss-table tbody td{padding:0;border:0;min-width:0;text-align:left!important;white-space:normal}
+  .ss-table tbody td::before{content:attr(data-label);display:block;margin-bottom:4px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}
+  .ss-table td.ss-check{position:absolute;top:12px;right:12px;width:auto}.ss-table td.ss-check::before{display:none}.ss-check input{width:22px;height:22px}
+  .ss-table td.ss-emp{grid-column:1/-1;padding-right:36px}.ss-table td.ss-emp::before{display:none}
+  .ss-table td.ss-att,.ss-table td.ss-state{grid-column:1/-1}
+  .ss-table td.ss-net{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:10px;background:#faf7f8}
+  .ss-table td.ss-net::before{margin:0}
+  .ss-input{width:100%;font-size:16px;text-align:left}.ss-suggest{margin-left:0}
+  .ss-note{max-width:none}
+  .ss-table tfoot{display:block}.ss-table tfoot tr{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;padding:12px;border-radius:12px;background:#fbf8f9}.ss-table tfoot td{display:block;padding:0;border:0;background:none}
+  .ss-table tfoot td:empty,.ss-table tfoot td.no-print{display:none}
+  .ss-paybar{grid-template-columns:1fr 1fr;bottom:calc(8px + env(safe-area-inset-bottom));padding:12px}
+  .ss-paybar__sum{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center}
+  .ss-paybar .btn{grid-column:1/-1;width:100%;justify-content:center}
+  .ss-paybar input{font-size:16px}
+}
+@media print{
+  .no-print,.ss-filters,.ss-paybar,.ss-suggest,.ss-actions,.ss-note,.sidebar,.app-header,.pwa-install-banner{display:none!important}
+  .print-only{display:flex!important}
+  .salary-sheet-page{gap:8px}.ss-tiles{grid-template-columns:repeat(6,1fr);gap:6px}.ss-tile{padding:6px 8px;border-radius:6px}.ss-tile strong{font-size:12px}.ss-tile small{display:none}
+  .ss-table{font-size:10px}.ss-table th{position:static;padding:5px 6px;font-size:8.5px}.ss-table td{padding:5px 6px}
+  .ss-input{width:auto;min-height:0;padding:0;border:0;background:none;font-weight:600}
+  .ss-chip{padding:0 4px;font-size:8.5px}
+  .ss-card{border:0;box-shadow:none}
+  .ss-print-sign{justify-content:space-between;margin-top:28px;font-size:11px}
+  .ss-row{break-inside:avoid}
+}
+
+/* Tile amounts stay on one line and scale to the tile width (screen only — print has its own size). */
+@media screen{.ss-tile{container-type:inline-size}.ss-tile strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(14px,12cqi,20px);font-variant-numeric:tabular-nums}}
+
+/* The pay bar only pins to the bottom of the screen while something is selected. */
+.ss-paybar:not(.is-active){position:static}
+/* Slip / Edit / Cancel as small outline buttons (were bare text links). */
+.ss-actions a,.ss-link{display:inline-flex;align-items:center;min-height:30px;padding:4px 11px;border:1px solid #e3d1d8;border-radius:8px;background:#fff;text-decoration:none}
+.ss-actions a:hover,.ss-link:hover{background:#fbeef2}
+@media screen and (max-width:767px){
+  .ss-actions a,.ss-link,.ss-actions .btn{min-height:36px;padding-inline:14px}
+  .ss-table tfoot tr{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+  .ss-table tfoot td.ss-foot-title{grid-column:1/-1}
+  .ss-table tfoot td[data-label]{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+  .ss-table tfoot td[data-label]::before{content:attr(data-label);font-size:10.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80;align-self:center}
+  .ss-table tfoot td.ss-foot-net{grid-column:1/-1;padding-top:8px!important;border-top:1px dashed #e3d1d8!important;font-size:15px}
+}

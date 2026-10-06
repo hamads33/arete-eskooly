@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+<?php require BASE_PATH . '/app/Views/partials/pwa-head.php'; ?>
   <link rel="icon" type="image/png" href="<?= e(asset('images/arete-logo.png')) ?>"><link rel="apple-touch-icon" href="<?= e(asset('images/arete-logo.png')) ?>">
   <meta name="description" content="<?= e($pageDescription) ?>">
   <title><?= e($pageTitle) ?> · <?= e($institute['name'] ?? 'Institute') ?></title>
@@ -11,6 +12,8 @@
 <?php endforeach; ?>
   <link rel="stylesheet" href="<?= e(asset('css/premium-ui.css?v=1')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/workflows.css?v=1')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/ui-polish.css?v=1')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=6')) ?>">
 </head>
 <body class="portal-shell">
 <?php require BASE_PATH . '/app/Views/partials/impersonation-banner.php'; ?>
@@ -19,6 +22,9 @@
 <?php require BASE_PATH . '/app/Views/partials/sidebar.php'; ?>
 <?php require BASE_PATH . '/app/Views/partials/print-letterhead.php'; ?>
 <?= $content ?>
+<?php require BASE_PATH . '/app/Views/partials/fee-reminder.php'; ?>
+<?php require BASE_PATH . '/app/Views/partials/announcement-popup.php'; ?>
+<?php require BASE_PATH . '/app/Views/partials/student-notifications.php'; ?>
   </div>
 
 <?php require BASE_PATH . '/app/Views/partials/flash.php'; ?>
@@ -30,5 +36,6 @@
 <?php foreach ($inlineScripts as $inlineScript): ?>
   <script><?= $inlineScript ?></script>
 <?php endforeach; ?>
+<?php require BASE_PATH . '/app/Views/partials/pwa-ui.php'; ?>
 </body>
 </html>

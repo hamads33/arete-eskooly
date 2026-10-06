@@ -33,15 +33,27 @@ final class AdminAreaMiddleware
             return $next($request);
         }
 
+        // Reading the dashboard is open to anyone who holds any admin module: it is the shell
+        // staff land on and every breadcrumb links back to, and DashboardController releases each
+        // figure on it only to the permission for the module that figure comes from. Writes to it
+        // (the statistics rebuild) still need dashboard.view.
+        if ($this->module($request) === 'dashboard' && strtoupper($request->method()) === 'GET' && has_admin_access()) {
+            return $next($request);
+        }
+
         return Response::html(View::render('errors/403', ['pageTitle' => 'Access Denied'], 'layouts/error'), 403);
+    }
+
+    private function module(Request $request): string
+    {
+        $segments = array_values(array_filter(explode('/', $request->path())));
+        return $segments[1] ?? 'dashboard';
     }
 
     /** Null means "no mapping", which the caller treats as admin-only. */
     private function requiredPermission(Request $request): ?string
     {
-        $segments = array_values(array_filter(explode('/', $request->path())));
-        $module = $segments[1] ?? 'dashboard';
-        $map = $this->app->config('permissions.' . $module);
+        $map = $this->app->config('permissions.' . $this->module($request));
         if (!is_array($map)) {
             return null;
         }

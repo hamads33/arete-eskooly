@@ -1,1 +1,1 @@
-<main class="error-card"><span>404</span><h1>Page not found</h1><p>The requested admin page does not exist or has not been scaffolded yet.</p><a href="<?= e(url('/admin/dashboard')) ?>">Return to dashboard</a></main>
+<main class="error-card"><span>404</span><h1>Page not found</h1><p>The requested admin page does not exist or has not been scaffolded yet.</p><a href="<?= e(url(admin_home())) ?>">Go to my workspace</a></main>

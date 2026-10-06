@@ -42,6 +42,7 @@ $instituteName = $institute['name'] ?? 'Institute';
             <span><strong><?= e($currentUserName) ?></strong><span><?= e($currentUser['email'] ?? '') ?></span></span>
           </div>
           <a class="profile-link" href="<?= e(url($home . '/profile')) ?>" role="menuitem"><i data-lucide="user-round"></i>My Profile</a>
+          <a class="profile-link" href="<?= e(url('/install')) ?>" role="menuitem"><i data-lucide="download"></i>Install App</a>
           <form method="post" action="<?= e(url('/logout')) ?>"><?= csrf_field() ?><button class="profile-link profile-link--danger" type="submit" role="menuitem"><i data-lucide="log-out"></i>Logout</button></form>
         </div>
       </div>
