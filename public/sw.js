@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION = '20261006-mobile-a11y-1';
+const VERSION = '20261006-mobile-ux-5';
 const STATIC_CACHE = `arete-static-${VERSION}`;
 const RUNTIME_CACHE = `arete-runtime-${VERSION}`;
 const APPROVED_CACHES = new Set([STATIC_CACHE, RUNTIME_CACHE]);
@@ -13,6 +13,7 @@ const PRECACHE = [
   '/assets/css/install.css',
   '/assets/css/install-refinement.css',
   '/assets/css/mobile-ui.css',
+  '/assets/js/mobile-ux.js?v=3',
   '/assets/css/fee-workspace.css?v=1',
   '/assets/js/fee-workspace.js?v=1',
   '/assets/js/pwa.js',

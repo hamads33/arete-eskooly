@@ -77,7 +77,7 @@ abstract class PortalController extends Controller
                 'css/dashboard.css', 'css/portal.css', 'css/responsive.css', 'css/print.css',
             ],
             'scripts' => [
-                'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=4', 'js/app.js',
+                'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=5', 'js/app.js',
             ],
         ];
         $announcementAudience=$audience==='employee'&&hasRole('teacher')?'teacher':$audience;

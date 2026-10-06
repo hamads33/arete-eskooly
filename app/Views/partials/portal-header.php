@@ -29,7 +29,7 @@ $instituteName = $institute['name'] ?? 'Institute';
     <div class="header-spacer"></div>
     <div class="header-actions">
       <div class="dropdown" data-dropdown>
-        <button class="profile-trigger" type="button" aria-expanded="false" data-dropdown-trigger>
+        <button class="profile-trigger" type="button" aria-label="Open profile menu" aria-expanded="false" data-dropdown-trigger>
           <span class="avatar" aria-hidden="true"><?= e($currentUserInitials ?: 'U') ?></span>
           <span class="profile-trigger__copy">
             <strong data-field="current-user-name"><?= e($currentUserName) ?></strong><span data-field="user-role"><?= e($currentUserRole) ?></span>

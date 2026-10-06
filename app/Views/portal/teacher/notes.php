@@ -20,12 +20,12 @@
 </div></section>
 <?php endif; ?>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Notes I Uploaded</h2><p><?=count($rows)?> record(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Publish Date</th><th>Class</th><th>Subject</th><th>Title</th><th>Chapter</th><th>Status</th><th>File</th></tr></thead><tbody>
+<section class="module-card"><header class="module-card__header"><div><h2>Notes I Uploaded</h2><p><?=count($rows)?> record(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Publish Date</th><th>Class</th><th>Subject</th><th>Title</th><th>Chapter</th><th>Status</th><th>File</th></tr></thead><tbody>
 <?php foreach($rows as $n):?><tr>
-<td><?=e($n['publish_date'])?></td><td><?=e($n['class_name'])?></td><td><?=e($n['subject_name']??'—')?></td>
-<td><?=e($n['title'])?></td><td><?=e($n['chapter']?:'—')?></td>
-<td><span class="status-badge"><?=e(ucfirst((string)$n['status']))?></span></td>
-<td><?php if(!empty($n['attachment_path'])):?><a href="<?=e(url('/attachments/notes/'.$n['id']))?>" target="_blank" rel="noopener">Open preview</a><?php else:?>—<?php endif?></td>
+<td data-label="Publish Date"><?=e($n['publish_date'])?></td><td data-label="Class" class="record-title"><?=e($n['class_name'])?></td><td data-label="Subject" class="record-title"><?=e($n['subject_name']??'—')?></td>
+<td data-label="Title" class="record-title"><?=e($n['title'])?></td><td data-label="Chapter"><?=e($n['chapter']?:'—')?></td>
+<td data-label="Status"><span class="status-badge"><?=e(ucfirst((string)$n['status']))?></span></td>
+<td data-label="File"><?php if(!empty($n['attachment_path'])):?><a href="<?=e(url('/attachments/notes/'.$n['id']))?>" target="_blank" rel="noopener">Open preview</a><?php else:?>—<?php endif?></td>
 </tr><?php endforeach?>
 <?php if(!$rows):?><tr><td colspan="7"><div class="compact-empty"><h3>No Notes</h3><p>Notes you upload will appear here.</p></div></td></tr><?php endif?>
 </tbody></table></div></div></section>

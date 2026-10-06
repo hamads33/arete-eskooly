@@ -48,7 +48,7 @@ $currentUserInitials = strtoupper(implode('', array_map(static fn (string $part)
 <?php endif; ?>
 
           <div class="dropdown" data-dropdown>
-            <button class="profile-trigger" type="button" aria-expanded="false" data-dropdown-trigger>
+            <button class="profile-trigger" type="button" aria-label="Open profile menu" aria-expanded="false" data-dropdown-trigger>
               <span class="avatar" aria-hidden="true"><?= e($currentUserInitials ?: 'A') ?></span>
               <span class="profile-trigger__copy">
                 <strong data-field="current-user-name"><?= e($currentUserName) ?></strong><span data-field="user-role"><?= e($currentUserRole) ?></span>

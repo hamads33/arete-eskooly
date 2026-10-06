@@ -7,7 +7,7 @@ $printDefault = (($activeMenu ?? '') === 'reports' && in_array(($activeSubmenu ?
 <html data-print-default="<?= $printDefault ?>" data-print-mode="<?= $printDefault ?>" lang="<?= e(($institute['language'] ?? 'en') === 'ur' ? 'ur' : 'en') ?>" data-theme="<?= e($institute['theme'] ?? 'maroon') ?>">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <?php require BASE_PATH . '/app/Views/partials/pwa-head.php'; ?>
   <link rel="icon" type="image/png" href="<?= e(asset('images/arete-logo.png')) ?>"><link rel="apple-touch-icon" href="<?= e(asset('images/arete-logo.png')) ?>">
   <meta name="description" content="<?= e($pageDescription) ?>">
@@ -17,9 +17,9 @@ $printDefault = (($activeMenu ?? '') === 'reports' && in_array(($activeSubmenu ?
 <?php endforeach; ?>
   <link rel="stylesheet" href="<?= e(asset('css/premium-ui.css?v=1')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/workflows.css?v=1')) ?>">
-  <link rel="stylesheet" href="<?= e(asset('css/ui-polish.css?v=1')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/ui-polish.css?v=2')) ?>">
   <style id="printPageSize">@media print{@page{size:A4 <?= $printDefault ?>;margin:<?= $printDefault === 'landscape' ? '9mm 8mm 10mm' : '14mm 12mm 16mm' ?>}}</style>
-  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=6')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=10')) ?>">
 </head>
 <?php $reportScreen=($activeMenu??'')==='reports';$reportLandscape=in_array(($activeSubmenu??''),['report-student-attendance','report-employee-attendance','report-admissions','report-contacts'],true); ?>
 <body class="<?= $reportScreen?'report-screen ':'' ?><?= $reportLandscape?'report-landscape':'' ?>">

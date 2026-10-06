@@ -9,12 +9,12 @@
 <div class="metric-card"><span>Status</span><strong><?=e(ucfirst(str_replace('_',' ',(string)$invoice['status'])))?></strong></div>
 </div>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Particulars</h2></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Particular</th><th>Amount</th></tr></thead><tbody>
-<?php foreach($items as $it):?><tr><td><?=e($it['particular'])?></td><td><?=e($cur)?> <?=number_format((float)$it['amount'],2)?></td></tr><?php endforeach?>
+<section class="module-card"><header class="module-card__header"><div><h2>Particulars</h2></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Particular</th><th>Amount</th></tr></thead><tbody>
+<?php foreach($items as $it):?><tr><td data-label="Particular"><?=e($it['particular'])?></td><td data-label="Amount"><?=e($cur)?> <?=number_format((float)$it['amount'],2)?></td></tr><?php endforeach?>
 <?php if(!$items):?><tr><td colspan="2"><div class="compact-empty"><h3>No Particulars</h3><p>This invoice has no line items.</p></div></td></tr><?php endif?>
-<tr><th>Subtotal</th><th><?=e($cur)?> <?=number_format((float)$invoice['subtotal'],2)?></th></tr>
-<tr><th>Discount</th><th><?=e($cur)?> <?=number_format((float)$invoice['discount'],2)?></th></tr>
-<tr><th>Previous Balance</th><th><?=e($cur)?> <?=number_format((float)$invoice['previous_balance'],2)?></th></tr>
-<tr><th>Total</th><th><?=e($cur)?> <?=number_format((float)$invoice['total_amount'],2)?></th></tr>
+<tr><th data-label="Particular">Subtotal</th><th data-label="Amount"><?=e($cur)?> <?=number_format((float)$invoice['subtotal'],2)?></th></tr>
+<tr><th data-label="Particular">Discount</th><th data-label="Amount"><?=e($cur)?> <?=number_format((float)$invoice['discount'],2)?></th></tr>
+<tr><th data-label="Particular">Previous Balance</th><th data-label="Amount"><?=e($cur)?> <?=number_format((float)$invoice['previous_balance'],2)?></th></tr>
+<tr><th data-label="Particular">Total</th><th data-label="Amount"><?=e($cur)?> <?=number_format((float)$invoice['total_amount'],2)?></th></tr>
 </tbody></table></div></div></section>
 </div></div></main>

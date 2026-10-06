@@ -79,7 +79,7 @@
 /* ---- stat tiles on phones ---------------------------------------------------------------- */
 /* Two per row instead of one: four full-width tiles pushed the useful content below the fold. */
 @media screen and (max-width: 767px) {
-  .portal-shell .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; }
+  .portal-shell .metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .portal-shell .metric-grid .metric-card { padding: 14px 14px 14px 16px; min-width: 0; }
   .portal-shell .metric-grid .metric-card strong { font-size: 19px; overflow-wrap: anywhere; }
 }

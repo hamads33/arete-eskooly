@@ -6,7 +6,7 @@
  * re-checks audience, timing and cancellation before redirecting to Google. A link in this markup
  * would be a link anyone with the page source could reuse.
  */
-$card = static function (array $m): void { ?>
+$card = static function (array $m) use ($joinWindow): void { ?>
   <article class="live-card live-card--<?= e($m['state']['state']) ?>">
     <div class="live-card__body">
       <div class="live-card__head">

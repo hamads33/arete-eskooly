@@ -4,7 +4,7 @@ namespace App\Controllers;
 use App\Core\{Request,Response};use App\Repositories\OnlineTestRepository;use App\Support\{Flash,SecureAttachment};
 final class StudentOnlineTestsController extends PortalController{
 private function r():OnlineTestRepository{return new OnlineTestRepository($this->app->database());}
-public function index(Request$r):Response{if(!$s=$this->repo()->studentByUser($this->userId()))return$this->forbidden();return$this->portalView('portal/student/online-tests','student',['pageTitle'=>'Online Tests','activeMenu'=>'portal-online-tests','instituteId'=>(int)$s['institute_id'],'student'=>$s,'tests'=>$tests=$this->r()->available($s),'submittedTestIds'=>array_column(array_filter($tests,static fn($t)=>in_array($t['attempt_status']??'',['submitted','marked'],true)),'id'),'styles'=>['css/submission-pages.css?v=1'],'scripts'=>['js/submission-pages.js?v=1']]);}
+public function index(Request$r):Response{if(!$s=$this->repo()->studentByUser($this->userId()))return$this->forbidden();return$this->portalView('portal/student/online-tests','student',['pageTitle'=>'Online Tests','activeMenu'=>'portal-online-tests','instituteId'=>(int)$s['institute_id'],'student'=>$s,'tests'=>$tests=$this->r()->available($s),'submittedTestIds'=>array_column(array_filter($tests,static fn($t)=>in_array($t['attempt_status']??'',['submitted','marked'],true)),'id'),'styles'=>['css/submission-pages.css?v=3'],'scripts'=>['js/submission-pages.js?v=1']]);}
 public function show(Request$r):Response{
     if(!$s=$this->repo()->studentByUser($this->userId()))return$this->forbidden();
     $test=$this->r()->start((int)$r->route('id'),$s);
@@ -12,7 +12,7 @@ public function show(Request$r):Response{
     if(in_array($test['attempt']['status']??'',['submitted','marked'],true))return Response::redirect(url('/portal/student/online-tests'));
     $deadline=$test['duration_minutes']?strtotime((string)$test['attempt']['started_at'])+OnlineTestRepository::allowance($test,$test['attempt'])*60:null;
     return$this->portalView('portal/student/take-test','student',['pageTitle'=>$test['title'],'activeMenu'=>'portal-online-tests','instituteId'=>(int)$s['institute_id'],'student'=>$s,'test'=>$test,'maxPages'=>$this->r()->maxPages($test),'deadline'=>$deadline,'hideInstallBanner'=>true,
-        'styles'=>['css/online-tests.css?v=2','css/upload-only-tests.css?v=1','css/online-test-mobile.css?v=1','css/test-uploads.css?v=1','css/submission-pages.css?v=1'],'scripts'=>['js/online-test-student.js?v=3','js/submission-pages.js?v=1']]);
+        'styles'=>['css/online-tests.css?v=2','css/upload-only-tests.css?v=1','css/online-test-mobile.css?v=1','css/test-uploads.css?v=1','css/submission-pages.css?v=3'],'scripts'=>['js/online-test-student.js?v=3','js/submission-pages.js?v=1']]);
 }
 /**
  * Final submission. The uploader posts here with fetch/XHR (Accept: application/json) and keeps

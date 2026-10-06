@@ -19,12 +19,12 @@
 <section class="module-card"><div class="module-card__body"><div class="empty-state"><div><span class="empty-state__icon"><i data-lucide="book-open"></i></span><strong>No Subjects Assigned</strong><p>You have no subjects assigned in this class.</p></div></div></div></section>
 <?php endif; ?>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Homework I Assigned</h2><p><?=count($rows)?> record(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Class</th><th>Subject</th><th>Homework</th><th>Attachment</th><th></th></tr></thead><tbody>
+<section class="module-card"><header class="module-card__header"><div><h2>Homework I Assigned</h2><p><?=count($rows)?> record(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Date</th><th>Class</th><th>Subject</th><th>Homework</th><th>Attachment</th><th></th></tr></thead><tbody>
 <?php foreach($rows as $h):?><tr>
-<td><?=e($h['homework_date'])?></td><td><?=e($h['class_name'])?></td><td><?=e($h['subject_name']??'—')?></td>
-<td><?=e($h['homework_text'])?></td>
-<td><?php if(!empty($h['attachment_path'])):?><a href="<?=e(url('/'.ltrim((string)$h['attachment_path'],'/')))?>" target="_blank" rel="noopener">Open</a><?php else:?>—<?php endif?></td>
-<td><form method="post" action="<?=e(url('/portal/employee/teaching/homework/'.(int)$h['id'].'/delete'))?>" class="inline-form"><?=csrf_field()?><button class="text-button" type="submit" onclick="return confirm('Delete this homework?')">Delete</button></form></td>
+<td data-label="Date"><?=e($h['homework_date'])?></td><td data-label="Class" class="record-title"><?=e($h['class_name'])?></td><td data-label="Subject" class="record-title"><?=e($h['subject_name']??'—')?></td>
+<td data-label="Homework" class="record-wide"><?=e($h['homework_text'])?></td>
+<td data-label="Attachment" class="record-wide"><?php if(!empty($h['attachment_path'])):?><a href="<?=e(url('/'.ltrim((string)$h['attachment_path'],'/')))?>" target="_blank" rel="noopener">Open</a><?php else:?>—<?php endif?></td>
+<td data-label="Action" class="record-wide"><form method="post" action="<?=e(url('/portal/employee/teaching/homework/'.(int)$h['id'].'/delete'))?>" class="inline-form"><?=csrf_field()?><button class="text-button" type="submit" onclick="return confirm('Delete this homework?')">Delete</button></form></td>
 </tr><?php endforeach?>
 <?php if(!$rows):?><tr><td colspan="6"><div class="compact-empty"><h3>No Homework</h3><p>Homework you publish will appear here.</p></div></td></tr><?php endif?>
 </tbody></table></div></div></section>

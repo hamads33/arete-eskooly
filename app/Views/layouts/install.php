@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="<?= e(asset('css/install.css?v=3')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/install-refinement.css?v=1')) ?>">
   <title><?= e($pageTitle) ?> &middot; Arete Coaching Center</title>
-  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=6')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=10')) ?>">
 </head>
 <body class="install-page">
 <?= $content ?>

@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
 <?php require BASE_PATH . '/app/Views/partials/pwa-head.php'; ?>
   <link rel="icon" type="image/png" href="<?= e(asset('images/arete-logo.png')) ?>">
   <title><?= e($pageTitle) ?> &middot; Arete</title>
   <link rel="stylesheet" href="<?= e(asset('css/auth.css?v=4')) ?>">
-  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=6')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=10')) ?>">
 </head>
 <body><main class="auth-page"><div class="auth-shell">
 <section class="form-panel"><a class="auth-brand" href="<?= url('/login') ?>" aria-label="Arete home"><img class="auth-brand-logo" src="<?= asset('images/arete-logo.png') ?>" alt="Arete" width="62" height="62"><span>ARETE COACHING CENTER<span class="brand-caption">A PROJECT OF USAMA EDUCATION SYSTEM</span></span></a>

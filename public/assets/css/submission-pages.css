@@ -50,7 +50,9 @@
 .test-submit-bar{align-items:center;gap:12px}
 .test-submit-bar__summary{font-weight:800;color:var(--primary-dark)}
 .test-submit-bar .btn{min-height:50px;padding-inline:22px;font-size:15px}
-@media screen and (max-width:700px){
+.mobile-test-back{display:none}
+@media screen and (max-width:767px){
+  .mobile-test-back{display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:700;color:var(--primary);text-decoration:none}
   .test-submit-bar{position:sticky;bottom:0;z-index:6;justify-content:space-between;margin:0 -16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:rgba(255,255,255,.97);box-shadow:0 -6px 18px rgba(42,20,28,.07)}
   .test-submit-bar .btn{flex:1;justify-content:center}
   .test-submit-bar__summary{font-size:13px;white-space:nowrap}
@@ -61,6 +63,23 @@
   .page-card__actions .page-card__remove{grid-column:1/-1}
   .pages-box__more{display:grid;grid-template-columns:1fr 1fr}
   .pages-box__more-label{grid-column:1/-1}
+  .pages-box__start{grid-template-columns:minmax(0,1fr)}
+  .page-card__actions .btn.btn--ghost{min-height:44px!important}
+  .test-submit-bar{margin:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom));flex-wrap:wrap;box-shadow:none}
+  .test-submit-bar__summary{width:100%;text-align:center}
+  .test-submit-bar .btn{width:100%;flex-basis:100%;min-height:52px}
+  .student-test-hero{padding:16px;gap:12px}
+  .student-test-hero h1{font-size:22px;line-height:1.25}
+  .student-test-hero p{font-size:14px;line-height:1.5}
+  .attempt-progress{display:flex;align-items:center;flex-wrap:wrap;gap:8px;text-align:left;min-width:0}
+  .attempt-progress strong{font-size:17px}
+  .attempt-progress small{font-size:12px}
+  .test-timer{margin-top:0}
+  .answer-card__head{display:grid;grid-template-columns:32px minmax(0,1fr);padding:14px;gap:10px}
+  .answer-card__head h2{font-size:16px}
+  .answer-card__head small{grid-column:2;margin-left:0}
+  .answer-card__body{padding:16px}
+  .pages-restored>span{min-width:0}
 }
 @media screen and (max-width:360px){.page-card{grid-template-columns:76px minmax(0,1fr)}.page-card__thumb{width:76px}.page-card__meta{flex-direction:column;align-items:flex-start;gap:2px}.btn.btn--ghost{padding:0 6px;font-size:12.5px}}
 
@@ -146,3 +165,16 @@ html.pages-layer-open .toast{z-index:1300}
 .pages-camera .btn.btn--secondary{border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff}
 .attempt-progress strong+small{display:block}
 .pages-camera__tip[hidden]{display:none}
+
+@media screen and (max-width:1023px) and (max-height:500px) and (orientation:landscape){
+  .pages-camera{display:grid;grid-template-columns:minmax(0,1fr) 160px;grid-template-rows:auto minmax(0,1fr) auto}
+  .pages-camera__bar{grid-column:1/-1}
+  .pages-camera__tool{min-height:44px!important}
+  .pages-camera__stage{grid-row:2/4;grid-column:1}
+  .pages-camera__controls{grid-column:2;grid-row:2;grid-template-columns:1fr;justify-items:center;gap:8px;padding:8px}
+  .pages-camera__controls.is-review{grid-template-columns:1fr;align-content:center}
+  .pages-camera__controls.is-review .btn{width:100%;font-size:14px}
+  .pages-camera__tip{grid-column:2;grid-row:3;padding:8px;font-size:12px}
+  .pages-camera__shutter{width:64px;height:64px}
+  .pages-camera__shutter span{width:48px;height:48px}
+}

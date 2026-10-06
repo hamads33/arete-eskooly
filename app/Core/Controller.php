@@ -21,7 +21,7 @@ abstract class Controller
                 'css/print.css?v=3', 'css/reports.css?v=1',
             ];
             $baseScripts = [
-                'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=4', 'js/app.js?v=3',
+                'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=5', 'js/app.js?v=3',
                 'js/class-subject-filter.js?v=1',
                 'js/preview-lock.js?v=2',
             ];

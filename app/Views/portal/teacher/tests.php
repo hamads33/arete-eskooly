@@ -17,11 +17,11 @@
 </div></section>
 <?php endif; ?>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Tests In My Classes</h2><p><?=count($tests)?> test(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Title</th><th>Class</th><th>Subject</th><th>Total</th><th>Marked</th><th></th></tr></thead><tbody>
+<section class="module-card"><header class="module-card__header"><div><h2>Tests In My Classes</h2><p><?=count($tests)?> test(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Date</th><th>Title</th><th>Class</th><th>Subject</th><th>Total</th><th>Marked</th><th></th></tr></thead><tbody>
 <?php foreach($tests as $t):?><tr>
-<td><?=e($t['test_date'])?></td><td><?=e($t['title'])?></td><td><?=e($t['class_name'])?></td><td><?=e($t['subject_name'])?></td>
-<td><?=e((string)$t['total_marks'])?></td><td><?=(int)$t['marked']?></td>
-<td><a href="<?=e(url('/portal/employee/teaching/tests/'.(int)$t['id'].'/marks'))?>">Enter marks</a></td>
+<td data-label="Date"><?=e($t['test_date'])?></td><td data-label="Title" class="record-title"><?=e($t['title'])?></td><td data-label="Class" class="record-title"><?=e($t['class_name'])?></td><td data-label="Subject" class="record-title"><?=e($t['subject_name'])?></td>
+<td data-label="Total"><?=e((string)$t['total_marks'])?></td><td data-label="Marked"><?=(int)$t['marked']?></td>
+<td data-label="Action" class="record-wide"><a href="<?=e(url('/portal/employee/teaching/tests/'.(int)$t['id'].'/marks'))?>">Enter marks</a></td>
 </tr><?php endforeach?>
 <?php if(!$tests):?><tr><td colspan="7"><div class="compact-empty"><h3>No Class Tests</h3><p>Tests you create will appear here.</p></div></td></tr><?php endif?>
 </tbody></table></div></div></section>

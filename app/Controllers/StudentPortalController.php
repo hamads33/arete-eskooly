@@ -47,7 +47,7 @@ final class StudentPortalController extends PortalController
             // dashboard shows what the student can act on rather than a history list.
             'liveClasses' => $this->upcomingLiveClasses($studentId, $instituteId, 4),
             'joinWindowMinutes' => $this->joinWindowMinutes(),
-            'styles' => ['css/live-classes.css?v=1', 'css/online-tests.css?v=2', 'css/dashboard-tests.css?v=1', 'css/fee-reminder.css?v=1', 'css/submission-pages.css?v=1'],
+            'styles' => ['css/live-classes.css?v=1', 'css/online-tests.css?v=2', 'css/dashboard-tests.css?v=1', 'css/fee-reminder.css?v=1', 'css/submission-pages.css?v=3'],
             'scripts' => ['js/fee-reminder.js?v=1', 'js/submission-pages.js?v=1'],
         ]);
     }

@@ -11,6 +11,7 @@
 
   if (!shell || !sidebar || !toggle || !closeButton || !overlay) return;
   const main = shell.querySelector('main');
+  const studentNav = shell.querySelector('.student-mobile-nav');
   function setMobileSidebar(open, returnFocus = false) {
     open = mobileQuery.matches && open;
     if (!open && sidebar.contains(document.activeElement)) toggle.focus({ preventScroll: true });
@@ -19,11 +20,13 @@
     else sidebar.removeAttribute('aria-hidden');
     overlay.hidden = !open;
     if (main) main.inert = open;
+    if (studentNav) studentNav.inert = open;
     sidebar.classList.toggle("is-open", open);
     overlay.classList.toggle("is-visible", open);
     document.body.classList.toggle("no-scroll", open);
-    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-expanded", String(mobileQuery.matches ? open : !shell.classList.contains('is-collapsed')));
     if (open) closeButton.focus({ preventScroll: true });
+    else if (returnFocus) toggle.focus({ preventScroll: true });
   }
 
   function toggleSidebar() {
@@ -38,6 +41,17 @@
   toggle.addEventListener("click", toggleSidebar);
   closeButton.addEventListener("click", () => setMobileSidebar(false, true));
   overlay.addEventListener("click", () => setMobileSidebar(false, true));
+  let swipeStart;
+  sidebar.addEventListener('touchstart', event => {
+    if (mobileQuery.matches && sidebar.classList.contains('is-open')) {
+      const touch = event.touches[0]; swipeStart = { x: touch.clientX, y: touch.clientY };
+    }
+  }, { passive: true });
+  sidebar.addEventListener('touchend', event => {
+    const touch = event.changedTouches[0];
+    if (swipeStart && touch && swipeStart.x - touch.clientX > 64 && Math.abs(swipeStart.y - touch.clientY) < 64) setMobileSidebar(false, true);
+    swipeStart = null;
+  }, { passive: true });
 
   document.querySelectorAll("[data-submenu-trigger]").forEach((trigger) => {
     trigger.addEventListener("click", () => {
