@@ -19,7 +19,7 @@ final class SmsQueue
 {
     public const STATUSES = ['queued', 'scheduled', 'reserved', 'processing', 'sent', 'failed', 'cancelled'];
     public const TYPES = ['manual', 'attendance', 'fee', 'result', 'announcement', 'admission', 'general', 'system'];
-    public const SOURCES = ['manual', 'bulk', 'automation', 'attendance_module', 'fee_module', 'exam_module', 'announcement_module', 'admission_module', 'api'];
+    public const SOURCES = ['manual', 'bulk', 'automation', 'attendance_module', 'fee_module', 'exam_module', 'online_test_module', 'announcement_module', 'admission_module', 'api'];
     public const RECIPIENT_TYPES = ['student', 'guardian', 'staff', 'manual'];
     public const PRIORITIES = ['high' => 1, 'normal' => 2, 'low' => 3];
     /** Failures worth another attempt; anything else (INVALID_NUMBER, SMS_PERMISSION_DENIED...) is final. */

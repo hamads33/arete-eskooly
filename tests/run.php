@@ -112,6 +112,8 @@ $submissionPages = require BASE_PATH . '/tests/Feature/SubmissionPagesFeatureTes
 $checks = array_merge($checks, $submissionPages($app));
 $onlineTestEdit = require BASE_PATH . '/tests/Feature/OnlineTestEditFeatureTest.php';
 $checks = array_merge($checks, $onlineTestEdit($app));
+$onlineResultSms = require BASE_PATH . '/tests/Feature/OnlineResultSmsFeatureTest.php';
+$checks = array_merge($checks, $onlineResultSms($app));
 
 foreach ($checks as $name => $result) {
     echo ($result ? '[PASS] ' : '[FAIL] ') . $name . PHP_EOL;

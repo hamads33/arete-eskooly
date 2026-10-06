@@ -372,11 +372,16 @@ final class OnlineTestRepository {
         }
     }
 
+    /** @var list<int> attempts released by the last publishResults() call */
+    public array $justPublished=[];
+
     /** Publishes every marked-but-not-yet-published attempt for a test. Re-running with a wider scope also widens who can already see a published result. */
     public function publishResults(int$i,int$testId,string$visibleTo,int$user):int
     {
         if(!in_array($visibleTo,self::VISIBILITY,true))throw new DomainException('Invalid visibility.');
         if(!$this->db->query('SELECT 1 FROM online_tests WHERE id=:id AND institute_id=:i',['id'=>$testId,'i'=>$i])->fetchColumn())throw new DomainException('Test not found.');
+        // Remembered so the caller can send the result SMS for these, and only these, attempts.
+        $this->justPublished=array_map('intval',$this->db->query("SELECT a.id FROM online_test_attempts a WHERE a.test_id=:id AND a.status='marked' AND a.published_at IS NULL",['id'=>$testId])->fetchAll(\PDO::FETCH_COLUMN));
         return $this->db->query(
             "UPDATE online_test_attempts a JOIN online_tests t ON t.id=a.test_id SET a.published_at=COALESCE(a.published_at,:n),a.visible_to=:v WHERE t.id=:id AND t.institute_id=:i AND a.status='marked'",
             ['n'=>date('Y-m-d H:i:s'),'v'=>$visibleTo,'id'=>$testId,'i'=>$i]

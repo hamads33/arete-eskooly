@@ -22,7 +22,7 @@ final class SmsAutomation
         'fee_due' => ['Fee Due Reminder', 'An unpaid invoice falls due within the next few days', 'fee-due', 'fee_sms_enabled', ['days_before' => 3]],
         'fee_overdue' => ['Fee Overdue Reminder', 'An invoice is still unpaid after its due date', 'fee-overdue', 'fee_sms_enabled', ['days_after' => 1]],
         'fee_payment' => ['Payment Confirmation', 'A fee payment is recorded', 'fee-payment', 'fee_sms_enabled', []],
-        'result_published' => ['Result Published', 'An exam\'s status is changed to Published', 'result-published', 'result_sms_enabled', []],
+        'result_published' => ['Result Published', 'An exam is published, or online test results are published', 'result-published', 'result_sms_enabled', []],
         'admission_confirmed' => ['Admission Confirmed', 'A new student is admitted', 'admission-confirmed', null, []],
     ];
 
@@ -263,6 +263,47 @@ final class SmsAutomation
             $entries = $this->sms->recipients->group($institute, 'parents', ['filter' => 'exam', 'exam_id' => $examId]);
             return $this->queueFor($institute, $rule, $entries, 'result', 'exam_module', static fn($e) => "result:{$examId}:{$e['recipient_id']}");
         });
+    }
+
+    /**
+     * Online test results that were just released: one SMS home per attempt, whoever the result
+     * is visible to in the portal. Keyed per attempt, so publishing the test again (or widening who
+     * can see it) never sends a second copy.
+     * @param list<int> $attemptIds
+     */
+    public function onlineResultsPublished(int $institute, array $attemptIds): int
+    {
+        self::$lastSkipped = [];
+        return $this->guard(function () use ($institute, $attemptIds) {
+            $ids = array_values(array_unique(array_filter(array_map('intval', $attemptIds))));
+            if (!$ids || !($rule = $this->active($institute, 'result_published'))) {
+                return 0;
+            }
+            $rows = $this->db->query('SELECT a.id,a.student_id,a.total_score,t.title,(SELECT SUM(q.marks) FROM online_test_questions q WHERE q.test_id=t.id) total_marks
+                FROM online_test_attempts a JOIN online_tests t ON t.id=a.test_id
+                WHERE t.institute_id=? AND a.status=\'marked\' AND a.published_at IS NOT NULL AND a.id IN (' . implode(',', array_fill(0, count($ids), '?')) . ')', array_merge([$institute], $ids))->fetchAll();
+            $num = static fn(float $v) => rtrim(rtrim(number_format($v, 2, '.', ''), '0'), '.');
+            $made = 0;
+            foreach ($rows as $a) {
+                $score = (float) $a['total_score'];
+                $total = (float) $a['total_marks'];
+                $vars = [(int) $a['student_id'] => ['exam_name' => $a['title'], 'marks' => $num($score) . '/' . $num($total), 'percentage' => (string) ($total > 0 ? round($score / $total * 100, 1) : 0)]];
+                $made += $this->queueFor($institute, $rule, $this->sms->recipients->parentsOf($institute, [(int) $a['student_id']], $vars), 'result', 'online_test_module',
+                    static fn($e) => 'online_result:' . $a['id']);
+            }
+            return $made;
+        });
+    }
+
+    /** A withdrawn online test result: its SMS is cancelled if the gateway has not sent it yet. */
+    public function onlineResultWithdrawn(int $institute, int $attemptId): bool
+    {
+        try {
+            return $this->sms->queue->cancelByKey($institute, 'online_result:' . $attemptId, 'result withdrawn');
+        } catch (\Throwable $e) {
+            error_log('SMS automation skipped: ' . $e::class . ': ' . $e->getMessage());
+            return false;
+        }
     }
 
     public function admissionConfirmed(int $institute, int $studentId): int
