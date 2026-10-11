@@ -19,7 +19,7 @@
 <section class="module-card"><div class="module-card__body"><div class="empty-state"><div><span class="empty-state__icon"><i data-lucide="book-open"></i></span><strong>No Subjects Assigned</strong><p>You have no subjects assigned in this class.</p></div></div></div></section>
 <?php endif; ?>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Homework I Assigned</h2><p><?=count($rows)?> record(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Date</th><th>Class</th><th>Subject</th><th>Homework</th><th>Attachment</th><th></th></tr></thead><tbody>
+<section class="module-card"><header class="module-card__header"><div><h2>Homework I Assigned</h2><p><?=count($rows)?> record(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Date</th><th>Class</th><th>Subject</th><th>Homework</th><th>Attachment</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
 <?php foreach($rows as $h):?><tr>
 <td data-label="Date"><?=e($h['homework_date'])?></td><td data-label="Class" class="record-title"><?=e($h['class_name'])?></td><td data-label="Subject" class="record-title"><?=e($h['subject_name']??'—')?></td>
 <td data-label="Homework" class="record-wide"><?=e($h['homework_text'])?></td>

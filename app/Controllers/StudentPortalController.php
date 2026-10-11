@@ -41,13 +41,14 @@ final class StudentPortalController extends PortalController
             'invoices' => array_slice($this->repo()->studentInvoices($studentId, 5), 0, 5),
             'homework' => array_slice($this->repo()->studentHomework((int) $student['class_id'], $instituteId, 5,(int)$student['id']), 0, 5),
             'latestExam' => $this->latestExam($results),
+            'classTests' => $this->repo()->studentClassTests($studentId, $instituteId, 5),
             'onlineTests' => array_slice($tests, 0, 4),
             'submittedTestIds' => array_column(array_filter($tests, static fn($t) => in_array($t['attempt_status'] ?? '', ['submitted', 'marked'], true)), 'id'),
             // Upcoming Live Classes tile (§22). Only classes that have not finished, so the
             // dashboard shows what the student can act on rather than a history list.
             'liveClasses' => $this->upcomingLiveClasses($studentId, $instituteId, 4),
             'joinWindowMinutes' => $this->joinWindowMinutes(),
-            'styles' => ['css/live-classes.css?v=1', 'css/online-tests.css?v=2', 'css/dashboard-tests.css?v=1', 'css/fee-reminder.css?v=1', 'css/submission-pages.css?v=3'],
+            'styles' => ['css/live-classes.css?v=3', 'css/online-tests.css?v=3', 'css/dashboard-tests.css?v=1', 'css/fee-reminder.css?v=2', 'css/submission-pages.css?v=4'],
             'scripts' => ['js/fee-reminder.js?v=1', 'js/submission-pages.js?v=1'],
         ]);
     }
@@ -202,7 +203,7 @@ final class StudentPortalController extends PortalController
         unset($course);
         return $this->portalView('portal/student/courses', 'student', [
             'pageTitle' => 'My Courses', 'activeMenu' => 'portal-courses', 'instituteId' => $instituteId,
-            'student' => $student, 'courses' => $courses, 'styles' => ['css/courses.css?v=1'],
+            'student' => $student, 'courses' => $courses, 'styles' => ['css/courses.css?v=2'],
         ]);
     }
 
@@ -297,7 +298,7 @@ final class StudentPortalController extends PortalController
             'past' => array_slice(array_reverse($past), 0, 20),
             'timezone' => $timezone,
             'joinWindow' => $window,
-            'styles' => ['css/live-classes.css?v=1'],
+            'styles' => ['css/live-classes.css?v=3'],
         ]);
     }
 

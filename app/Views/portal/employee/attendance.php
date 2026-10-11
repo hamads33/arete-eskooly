@@ -10,7 +10,7 @@
 <div class="metric-card"><span>Leave / Half Day</span><strong><?=(int)$summary['leave']?></strong></div>
 </div>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Attendance Record</h2><p><?=e($from)?> to <?=e($to)?></p></div><button class="export-button" type="button" onclick="window.print()">Print</button></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Date</th><th>Day</th><th>Status</th><th>Time In</th><th>Time Out</th><th>Remarks</th></tr></thead><tbody>
+<section class="module-card"><header class="module-card__header"><div><h2>Attendance Record</h2><p><?=e($from)?> to <?=e($to)?></p></div><button class="export-button" type="button" onclick="window.print()">Print</button></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-register"><thead><tr><th>Date</th><th>Day</th><th>Status</th><th>Time In</th><th>Time Out</th><th>Remarks</th></tr></thead><tbody>
 <?php foreach($records as $r):?><tr><td data-label="Date"><?=e($r['attendance_date'])?></td><td data-label="Day"><?=e(date('l',strtotime((string)$r['attendance_date'])))?></td><td data-label="Status"><span class="status-badge"><?=e($r['status'])?></span></td><td data-label="Time In"><?=e($r['time_in']?:'—')?></td><td data-label="Time Out"><?=e($r['time_out']?:'—')?></td><td data-label="Remarks" class="record-wide"><?=e($r['remarks']?:'—')?></td></tr><?php endforeach?>
 <?php if(!$records):?><tr><td colspan="6"><div class="compact-empty"><h3>No Records Found</h3><p>No attendance was recorded in this range.</p></div></td></tr><?php endif?>
 </tbody></table></div></div></section>

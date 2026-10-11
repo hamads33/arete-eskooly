@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * Cron (daily at 09:00):  0 9 * * * php /path/to/app/scripts/sms_daily.php
  */
-define('BASE_PATH', dirname(__DIR__));
+defined('BASE_PATH') || define('BASE_PATH', dirname(__DIR__));
 require BASE_PATH . '/vendor/autoload.php';
 $app = require BASE_PATH . '/bootstrap/app.php';
 

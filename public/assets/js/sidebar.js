@@ -49,7 +49,7 @@
   }, { passive: true });
   sidebar.addEventListener('touchend', event => {
     const touch = event.changedTouches[0];
-    if (swipeStart && touch && swipeStart.x - touch.clientX > 64 && Math.abs(swipeStart.y - touch.clientY) < 64) setMobileSidebar(false, true);
+    if (swipeStart && touch && swipeStart.x - touch.clientX > 64 && Math.abs(swipeStart.y - touch.clientY) < 32 && swipeStart.x - touch.clientX > Math.abs(swipeStart.y - touch.clientY) * 2) setMobileSidebar(false, true);
     swipeStart = null;
   }, { passive: true });
 

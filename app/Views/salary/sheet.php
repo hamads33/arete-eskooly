@@ -33,7 +33,7 @@ $s = $summary;
 <?php else: ?>
 <form method="post" action="<?= url('/admin/salary/sheet/pay') ?>" data-ss-form data-currency="<?= e($cur) ?>"><?= csrf_field() ?><input type="hidden" name="month" value="<?= e($month) ?>"><?php foreach (['q' => $q, 'role' => $role, 'state' => $state] as $k => $v): if ((string) $v !== ''): ?><input type="hidden" name="keep_<?= $k ?>" value="<?= e((string) $v) ?>"><?php endif; endforeach ?>
 <section class="module-card ss-card"><header class="module-card__header no-print"><div><h2><?= (int) $s['filtered'] ?> employee<?= $s['filtered'] == 1 ? '' : 's' ?></h2><p>Tick pending rows to pay them together. Typing in a pending row ticks it for you.</p></div></header>
-<div class="ss-table-wrap"><table class="ss-table no-table-tools">
+<div class="ss-table-wrap"><table class="ss-table no-table-tools mobile-register">
 <thead><tr><th class="ss-check no-print"><input type="checkbox" data-ss-all aria-label="Select all pending employees"></th><th>Employee</th><th>Attendance</th><th class="ss-num">Salary</th><th class="ss-num">Bonus</th><th class="ss-num">Deduction</th><th class="ss-num">Advance</th><th class="ss-num">Net pay</th><th>Status</th></tr></thead>
 <tbody>
 <?php foreach ($rows as $x): $id = (int) $x['id']; $paid = (bool) $x['payment_id']; $bal = (float) $x['advance_balance']; ?>

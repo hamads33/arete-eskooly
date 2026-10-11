@@ -14,9 +14,9 @@ abstract class Controller
     {
         if (in_array($layout, ['layouts/admin', 'layouts/portal'], true)) {
             $baseStyles = [
-                'css/variables.css', 'css/reset.css', 'css/base.css', 'css/layout.css',
-                'css/components.css?v=6', 'css/account-settings.css?v=1',
-                'css/settings.css?v=2', 'css/admin-pages.css?v=9', 'css/dashboard.css',
+                'css/variables.css?v=2', 'css/reset.css', 'css/base.css', 'css/layout.css',
+                'css/components.css?v=106', 'css/account-settings.css?v=1',
+                'css/settings.css?v=102', 'css/admin-pages.css?v=109', 'css/dashboard.css',
                 'css/responsive.css',
                 'css/print.css?v=3', 'css/reports.css?v=1',
             ];

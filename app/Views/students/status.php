@@ -1,6 +1,6 @@
 <?php
 use App\Support\PersonStatus;
-$styles[] = 'css/fee-workspace.css?v=4';
+$styles[] = 'css/fee-workspace.css?v=104';
 $people = $students; $kind = 'student'; $idField = 'student_ids[]';
 $action = url('/admin/students/status');
 $filter = $statusFilter ?? '';

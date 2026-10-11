@@ -18,7 +18,7 @@
 <?php if(!$tests):?>
 <div class="compact-empty"><h3>No tests match these filters</h3><p><?=$canManageAll?'Create a test to see its results here.':'You can only manage results for tests you created or for classes you are assigned to teach.'?></p></div>
 <?php else:?>
-<div class="table-scroll"><table class="data-table"><thead><tr><th>Test</th><th>Class</th><th>Subject</th><th>Submitted</th><th>Needs marking</th><th>Ready to publish</th><th>Publish</th><th></th></tr></thead><tbody>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Test</th><th>Class</th><th>Subject</th><th>Submitted</th><th>Needs marking</th><th>Ready to publish</th><th>Publish</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
 <?php foreach($tests as$t):$submitted=(int)$t['submission_count'];$pending=(int)$t['pending_count'];$unpublished=(int)$t['unpublished_count'];?>
 <tr>
 <td data-label="Test"><strong><?=e($t['title'])?></strong></td>

@@ -214,69 +214,34 @@ final class TeacherWorkspaceController extends PortalController
 
     public function homework(Request $request): Response
     {
-        if (!$teacher = $this->teacher()) {
+        if (!can('homework.view')) {
             return $this->forbidden();
         }
-        [$employeeId, $instituteId, $employee] = $teacher;
-        $classId = (int) $request->query('class', 0);
-        return $this->portalView('portal/teacher/homework', 'employee', [
-            'pageTitle' => 'My Homework',
-            'activeMenu' => 'portal-teaching',
-            'instituteId' => $instituteId,
-            'employee' => $employee,
-            'scope' => $this->scope($employeeId, $instituteId),
-            'selectedClass' => $classId,
-            'subjects' => $classId > 0 ? $this->subjectsFor($employeeId, $instituteId, $classId) : [],
-            'rows' => $this->workflow()->homework($instituteId, null, $classId, $employeeId),
-        ]);
+        return Response::redirect(url('/admin/homework') . ($request->query() ? '?' . http_build_query($request->query()) : ''));
     }
 
     public function storeHomework(Request $request): Response
     {
-        if (!$teacher = $this->teacher()) {
+        if (!can('homework.manage')) {
             return $this->forbidden();
         }
-        [$employeeId, $instituteId] = $teacher;
-        $classId = (int) $request->input('class_id');
-        $subjectId = (int) $request->input('subject_id');
-        try {
-            $this->assertScope($employeeId, $instituteId, $classId, $subjectId);
-            $attachment = $this->upload($request, 'attachment', 'homework');
-            // teacher_id is forced to the signed-in teacher: never taken from the form.
-            $this->workflow()->createHomework($instituteId, [
-                'date' => (string) $request->input('date'),
-                'teacher_id' => $employeeId,
-                'class_id' => $classId,
-                'subject_id' => $subjectId,
-                'text' => (string) $request->input('homework'),
-                'attachment' => $attachment,
-            ], $this->userId());
-            Flash::add('success', 'Homework published.');
-        } catch (DomainException $e) {
-            Flash::add('error', $e->getMessage());
-        }
-        return Response::redirect(url('/portal/employee/teaching/homework?class=' . $classId));
+        // Accept submissions from a teacher form opened before the shared workspace shipped.
+        $body = array_replace($request->all(), [
+            'hwdate' => $request->input('hwdate', $request->input('date')),
+            'hwteacher' => $request->input('hwteacher', $this->workflow()->employeeIdForUser($this->userId(), (int) ($this->teacher()[1] ?? 0))),
+            'hwclass' => $request->input('hwclass', $request->input('class_id')),
+            'hwsubject' => $request->input('hwsubject', $request->input('subject_id')),
+        ]);
+        $file = $request->file('hwattachment') ?? $request->file('attachment');
+        return (new HomeworkController($this->app))->store(new Request([], $body, $file ? ['hwattachment' => $file] : [], ['REQUEST_METHOD' => 'POST']));
     }
 
     public function deleteHomework(Request $request): Response
     {
-        if (!$teacher = $this->teacher()) {
+        if (!can('homework.manage')) {
             return $this->forbidden();
         }
-        [$employeeId, $instituteId] = $teacher;
-        $id = (int) $request->route('id');
-        $owned = $this->app->database()->query(
-            'SELECT 1 FROM homework h JOIN classes c ON c.id = h.class_id
-             WHERE h.id = :id AND h.teacher_id = :t AND c.institute_id = :i',
-            ['id' => $id, 't' => $employeeId, 'i' => $instituteId]
-        )->fetchColumn();
-        if (!$owned) {
-            Flash::add('error', 'You can only delete homework you assigned.');
-        } else {
-            $this->workflow()->deleteHomework($instituteId, $id);
-            Flash::add('success', 'Homework deleted.');
-        }
-        return Response::redirect(url('/portal/employee/teaching/homework'));
+        return (new HomeworkController($this->app))->delete($request);
     }
 
     /* --------------------------------------------------------------------- notes */

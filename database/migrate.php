@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-define('BASE_PATH', dirname(__DIR__));
+defined('BASE_PATH') || define('BASE_PATH', dirname(__DIR__));
 require BASE_PATH . '/vendor/autoload.php';
 /** @var \App\Core\App $app */
 $app = require BASE_PATH . '/bootstrap/app.php';

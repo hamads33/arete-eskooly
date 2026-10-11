@@ -17,6 +17,27 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .module-page__header > .filter-actions > .btn { flex: 1 1 auto; width: auto; }
   .table-scroll, .class-table-wrap, .report-table-wrap, .fd-table-wrap,
   .ss-table-wrap, .ek-table-wrap { max-width: 100%; overflow-x: auto; }
+  /* portal-page (courses, live classes, notes, lectures, announcements) has no layout of its own:
+     give its header, sections and section titles the same rhythm as module pages. */
+  .portal-page { display: grid; gap: 16px; }
+  .portal-page__header h1 { margin: 4px 0; }
+  .portal-page__header p { margin: 0; color: var(--text-secondary); }
+  .module-section__title { margin: 0 0 10px; font-size: 17px; line-height: 1.3; }
+}
+/* Hidden column labels ("Actions") stay in the table's flow: an absolutely positioned .sr-only in a
+   header cell escapes unpositioned scroll wrappers and widens the page (Exams > Create at 820px). */
+.data-table th > .sr-only { position: static; display: inline-block; vertical-align: top; }
+/* Where the header shows only the avatar (<=1250px, see responsive.css), the name and role are visually
+   hidden rather than display:none, so they remain the profile button's accessible name. */
+@media screen and (max-width: 1250px) {
+  .profile-trigger { position: relative; }
+  .profile-trigger__copy { display: block; position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+}
+/* Small desktops (1024-1279px): header action groups wrap inside themselves instead of running off the edge
+   (Pay Salary at 1024px). Wider desktop layouts are deliberately left as they were. */
+@media screen and (min-width: 1024px) and (max-width: 1279px) {
+  .module-page__header > .filter-actions { flex-wrap: wrap; justify-content: flex-end; }
+  .module-page__header > .filter-actions > .btn { white-space: nowrap; }
 }
 @media screen and (max-width: 767px) {
   :root { --header-height: 60px; --mobile-nav-height: 64px; }
@@ -32,7 +53,7 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .icon-button, .profile-trigger, .modal-close, .danger-icon-button,
   .class-action-button { min-width: 44px; width: 44px; min-height: 44px; }
   .announcement-modal__close, .print-choice__cancel, .toast__close { min-width: 44px; min-height: 44px; }
-  .profile-trigger__copy, .profile-trigger > .lucide { display: none; }
+  .profile-trigger > .lucide { display: none; }
   .sidebar, .app-shell.is-collapsed .sidebar { width: min(86vw, 340px); }
   .sidebar__scroll { padding: 64px 12px 24px; }
   .nav-link, .submenu-link, .profile-link { min-height: 44px; font-size: 14px; }
@@ -86,7 +107,8 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .student-mobile-shell .student-notify__card { width: 100%; max-height: 45dvh; padding: 16px; border: 1px solid var(--border); box-shadow: none; }
   .student-mobile-shell .student-notify__card h2 { padding-right: 36px; font-size: 17px; }
   .student-mobile-shell .student-notify__x { width: 44px; min-height: 44px; top: 6px; right: 6px; }
-  .portal-shell .fee-reminder { position: relative; inset: auto; width: 100%; max-width: 100%; transform: none; margin: 0; box-shadow: none; }
+  /* In-flow on phones. Its desktop z-index (80) must not follow it, or it paints over the open drawer. */
+  .portal-shell .fee-reminder { position: relative; z-index: auto; inset: auto; width: 100%; max-width: 100%; transform: none; margin: 0; box-shadow: none; }
   .student-mobile-shell:has(.student-notify:not([hidden])) .fee-reminder { display: none; }
   .portal-page__header h1, .test-page-header h1 { font-size: 22px; line-height: 1.25; }
   .portal-page__header p { font-size: 14px; line-height: 1.5; }
@@ -98,6 +120,24 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .live-card__meta dd { overflow-wrap: anywhere; }
   .live-card__hint { display: flex; white-space: normal; line-height: 1.5; }
   .live-card__hint svg { flex: 0 0 18px; }
+  /* Student test list: subject eyebrow, compact title, two-line instructions, full-width action. */
+  .student-test-list { display: grid; gap: 12px; }
+  .student-test-list .module-card__body { display: grid; gap: 4px; }
+  .student-test-list h2 { margin: 0; font-size: 17px; line-height: 1.3; }
+  .student-test-list p { margin: 0; color: var(--text-secondary); font-size: 14px; line-height: 1.45; }
+  .student-test-list p:first-of-type { order: -1; color: var(--primary); font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .student-test-list p:nth-of-type(2) { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .student-test-list .module-card__body > :is(.btn, .status-badge) { margin-top: 8px; }
+  .student-test-list .module-card__body > .btn { width: 100%; justify-content: center; }
+  .student-test-list .status-badge { justify-self: start; }
+  /* Text values (a name) in a numeric KPI tile. */
+  .metric-card--text strong, .portal-shell .module-page .metric-card--text strong { font-size: 16px; line-height: 1.3; }
+  /* Teacher quick actions: the primary task on its own row, the rest as equal outlined tiles. */
+  .quick-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .quick-actions > .btn { width: 100%; padding-inline: 8px; justify-content: center; }
+  .quick-actions > .btn--primary { grid-column: 1 / -1; }
+  .quick-actions > .btn--ghost { border: 1px solid var(--border); background: var(--surface); }
+  .portal-thread-list__header h2 { font-size: 17px; }
   .chat-pane:has(.compact-empty) { display: none; }
   .chat-reply { flex-wrap: wrap; }
   .chat-reply > .module-field { width: 100%; }
@@ -108,8 +148,6 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .dashboard-test-item { grid-template-columns: auto minmax(0, 1fr); gap: 10px; }
   .dashboard-test-item > .btn { grid-column: 1 / -1; width: 100%; justify-content: center; }
   .dashboard-test-item h3 { font-size: 16px; }
-  .live-card__actions { align-items: stretch; flex-direction: column; }
-  .live-card__actions .btn { width: 100%; }
   .student-mobile-nav { position: fixed; inset: auto 0 0; z-index: 45; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--border); box-shadow: 0 -4px 16px #3b0b1808; }
   .student-mobile-nav a { display: grid; place-items: center; align-content: center; gap: 4px; min-height: 52px; color: var(--text-secondary); text-decoration: none; font-size: 11px; font-weight: 650; border-radius: 10px; }
   .student-mobile-nav svg { width: 21px; height: 21px; }
@@ -117,8 +155,11 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .student-mobile-shell .main .main__inner { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
   .student-mobile-shell .pwa-install-banner { display: none; }
   body:has([data-test-attempt]) .student-mobile-nav { display: none; }
+  body:has([data-test-attempt]) .main .main__inner { padding-bottom: 0; }
   body:has([data-test-attempt]) .pwa-install-banner { display: none; }
   .student-mobile-shell .toast { bottom: calc(80px + env(safe-area-inset-bottom)); }
+  /* Assessments have no bottom bar: toasts sit where the sticky submit bar cannot cover them. */
+  body:has([data-test-attempt]) .toast { top: calc(var(--header-height) + 8px); bottom: auto; }
   /* Opt-in read-only records. No duplicate rows or responsive data copies. */
   .portal-shell .table-scroll:has(> .mobile-records), .portal-shell .table-scroll:has(> .mobile-details) { border: 0; overflow: visible; }
   .portal-shell .module-page table.mobile-records, .portal-shell .module-page table.mobile-details { display: block; width: 100%; min-width: 0; table-layout: auto; }
@@ -135,18 +176,31 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .mobile-records td .btn { width: 100%; justify-content: center; }
   .mobile-records td > a:not(.btn) { display: inline-flex; align-items: center; min-height: 44px; }
   .portal-shell .module-page .mobile-records tr[hidden] { display: none; }
+  /* Two-<th> rows are totals (invoice subtotal / discount / total): a quiet summary list
+     under the record cards, not more cards. */
+  .portal-shell .module-page .mobile-records tbody:has(> tr > th:first-child + th:last-child) { gap: 0; }
+  .portal-shell .module-page .mobile-records tbody:has(> tr > th:first-child + th:last-child) > tr:not(:has(> th:first-child + th:last-child)) { margin-bottom: 12px; }
+  .portal-shell .module-page .mobile-records tr:has(> th:first-child + th:last-child) { grid-template-columns: minmax(0, 1fr) auto; padding: 10px 2px; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; background: none; }
+  .portal-shell .module-page .mobile-records tr:has(> th:first-child + th:last-child) > th { color: var(--text-secondary); font-size: 14px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .portal-shell .module-page .mobile-records tr:has(> th:first-child + th:last-child) > th:last-child { color: var(--text-primary); text-align: right; }
+  .portal-shell .module-page .mobile-records tr:has(> th:first-child + th:last-child):last-child { border-bottom: 0; }
+  .portal-shell .module-page .mobile-records tr:has(> th:first-child + th:last-child):last-child > th { color: var(--text-primary); font-size: 15px; font-weight: 750; }
+  .mobile-records tr:has(> th:first-child + th:last-child) > [data-label]::before { display: none; }
   .portal-shell .module-page .mobile-records .compact-empty { min-height: 0; padding: 12px 0; }
   .mobile-records td[colspan] > * { position: static; max-width: 100%; }
   .portal-shell .module-page .mobile-details tbody { display: block; }
-  .portal-shell .module-page .mobile-details tr { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .portal-shell .module-page .mobile-details :is(th, td) { display: block; height: auto; padding: 8px 0; border: 0; white-space: normal; overflow-wrap: anywhere; font-size: 14px; }
-  .portal-shell .module-page .mobile-details th { padding-bottom: 0; color: var(--text-secondary); font-size: 12px; background: none; }
-  .portal-shell .module-page .mobile-details td { padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-  .portal-shell .module-page .attendance-table { min-width: 0; }
-  .portal-shell .module-page .attendance-table tbody td { padding: 0; height: auto; white-space: normal; font-size: 14px; }
-  .portal-shell .module-page .attendance-table .att-name { order: -1; font-weight: 700; font-size: 16px; }
+  /* Label / value rows: the value is the information, the label is quiet context. */
+  .portal-shell .module-page .mobile-details tr { display: grid; grid-template-columns: minmax(96px, 2fr) minmax(0, 3fr); align-items: stretch; }
+  .portal-shell .module-page .mobile-details tbody :is(th, td) { display: block; height: auto; padding: 11px 0; border: 0; border-bottom: 1px solid var(--border); background: none; white-space: normal; overflow-wrap: anywhere; font-size: 14px; line-height: 1.4; }
+  .portal-shell .module-page .mobile-details th { padding-right: 12px; color: var(--text-secondary); font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .portal-shell .module-page .mobile-details td { color: var(--text-primary); font-weight: 600; }
+  .portal-shell .module-page .mobile-details tr:last-child > :nth-last-child(-n+2) { border-bottom: 0; }
   .attendance-checkbox { display: flex; align-items: center; min-width: 44px; min-height: 44px; }
-  .mobile-filter-toggle { width: 100%; justify-content: space-between; }
+  .btn.mobile-filter-toggle { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text-primary); font-size: 14px; font-weight: 700; justify-content: flex-start; }
+  .mobile-filter-toggle svg { width: 18px; height: 18px; color: var(--primary); }
+  .mobile-filter-toggle::after { content: ""; width: 7px; height: 7px; margin: -3px 4px 0 auto; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
+  .mobile-filter-toggle[aria-expanded=true]::after { margin-top: 4px; transform: rotate(-135deg); }
+  .mobile-filter-toggle__count { padding: 2px 8px; border-radius: 999px; background: var(--primary-50); color: var(--primary); font-size: 12px; }
   .mobile-following summary, .mobile-secondary-section > summary { min-height: 48px; padding: 14px; color: var(--primary); font-size: 14px; font-weight: 700; cursor: pointer; }
   .mobile-following__content { display: grid; gap: 12px; }
   .mobile-secondary-section { min-width: 0; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
@@ -158,18 +212,31 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .is-mobile-filter-closed { display: none !important; }
   .mobile-table-hint { margin: 0 0 8px; color: var(--text-secondary); font-size: 12px; }
   .mobile-table-hint[hidden] { display: none; }
-  .mobile-table-scroll { min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; -webkit-overflow-scrolling: touch; }
+  /* Positioned like the other scroll wrappers so absolutely positioned content (.sr-only labels) stays inside. */
+  .mobile-table-scroll { position: relative; min-width: 0; max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; -webkit-overflow-scrolling: touch; }
   .fee-structure-card .fee-structure-table { min-width: 0; }
   .fee-structure-table tr { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .fee-structure-table td { min-width: 0; }
-  .mobile-action-menu { margin-left: auto; }
-  .mobile-action-menu summary { display: flex; align-items: center; justify-content: center; min-width: 60px; min-height: 44px; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; color: var(--primary); font-weight: 700; cursor: pointer; }
-  .mobile-action-menu__panel { display: grid; gap: 8px; padding: 12px 0 4px; }
-  .mobile-action-menu[open] { width: 100%; }
-  .mobile-action-menu__panel .btn, .mobile-action-menu__panel form { width: 100%; }
+  .data-table td > .row-actions { flex-wrap: nowrap; }
+  .data-table td:has(> .row-actions > .mobile-action-menu) { padding: 6px 8px; }
+  .mobile-action-menu { flex: none; margin-left: auto; }
+  .mobile-action-menu > summary { display: flex; align-items: center; justify-content: center; width: 44px; min-height: 44px; padding: 0; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--primary); font-size: 13px; font-weight: 700; list-style: none; cursor: pointer; }
+  .mobile-action-menu > summary::-webkit-details-marker { display: none; }
+  /* An open menu is a bottom action sheet. Fixed positioning lets it escape the table's scroll box,
+     which clipped the in-flow panel and spilled its items over the following rows. Tapping the
+     backdrop (part of the summary) closes it natively. */
+  .mobile-action-menu[open] > summary::before { content: ""; position: fixed; inset: 0; z-index: 89; background: rgba(33, 26, 29, .46); cursor: default; }
+  .mobile-action-menu__panel { position: fixed; inset: auto 0 0; z-index: 90; display: grid; gap: 2px; max-height: 70dvh; overflow-y: auto; overscroll-behavior: contain; padding: 8px 12px calc(12px + env(safe-area-inset-bottom)); border-radius: 18px 18px 0 0; background: var(--surface); box-shadow: 0 -12px 32px rgba(33, 26, 29, .18); }
+  .mobile-action-menu__title { margin: 6px 4px 6px; padding-bottom: 10px; border-bottom: 1px solid var(--border); overflow: hidden; color: var(--text-secondary); font-size: 13px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+  .mobile-action-menu__panel > :is(a, button, form) { width: 100%; margin: 0; }
+  .mobile-action-menu__panel :is(.btn, .text-button, button) { width: 100%; min-height: 48px; padding: 0 14px; justify-content: flex-start; border: 0; border-radius: 10px; background: transparent; box-shadow: none; color: var(--text-primary); font-size: 15px; font-weight: 600; text-align: left; }
+  .mobile-action-menu__panel :is(.btn, .text-button, button):is(:hover, :focus-visible) { background: var(--primary-50); }
+  .mobile-action-menu__panel :is([class*=danger], form:is([action*=delete], [action*=unassign], [action*=remove]) button) { color: #a3202c; }
+  body:has(.mobile-action-menu[open]) { overflow: hidden; }
   .modal-shell, .account-modal, .print-choice { padding: 12px; }
   .modal-shell__dialog { width: 100%; max-width: 100%; max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; padding: 20px; border-radius: 16px; }
-  .dropdown-menu { max-width: calc(100vw - 24px); max-height: calc(100dvh - 84px); overflow-y: auto; top: var(--header-height); }
+  .dropdown-menu { max-width: calc(100vw - 24px); max-height: calc(100dvh - 84px); overflow-y: auto; }
+  .app-header .dropdown-menu { top: var(--header-height); }
   .auth-page { min-height: 100dvh; justify-content: flex-start; padding: 20px 12px 100px; }
   .auth-shell { width: 100%; grid-template-columns: minmax(0, 1fr); }
   .visual-panel { display: none; }
@@ -190,7 +257,7 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
 @media print {
   .student-mobile-nav, .mobile-filter-toggle, .mobile-table-hint { display: none !important; }
   .is-mobile-filter-closed { display: grid !important; }
-  .mobile-action-menu summary { display: none; }
+  .mobile-action-menu summary, .mobile-action-menu__title { display: none; }
   .mobile-action-menu__panel { display: contents; }
   .mobile-secondary-section > summary, .mobile-following > summary { display: none; }
   .mobile-secondary-section > :not(summary), .mobile-following > :not(summary) { display: block !important; }
@@ -199,7 +266,6 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
 .live-class-picker__options{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-height:220px;overflow:auto;padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--surface-soft)}.live-class-picker__option{display:flex;align-items:center;gap:9px;min-height:44px;padding:9px 11px;border:1px solid transparent;border-radius:9px;background:#fff;cursor:pointer}.live-class-picker__option:has(input:checked){border-color:var(--primary);background:var(--primary-50);color:var(--primary);font-weight:700}.live-class-picker__option input{width:18px;height:18px;accent-color:var(--primary)}fieldset.module-field{min-width:0;border:0;padding:0}fieldset.module-field legend{margin-bottom:7px;font-size:12px;font-weight:700}
 /* Attendance registers: on phones each row becomes a card so marking never needs sideways scrolling
    (a wide scroll box swallowed vertical swipes in the PWA). The save button stays reachable. */
-@media screen and (max-width:767px){.table-scroll.attendance-scroll{overflow:visible;border:0;max-width:none}.data-table.attendance-table{min-width:0!important;width:100%;table-layout:auto}.attendance-table,.attendance-table tbody,.attendance-table tr,.attendance-table td{display:block;width:100%}.attendance-table thead{display:none}.data-table.attendance-table tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 10px;margin-bottom:10px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff}.data-table.attendance-table td{padding:0;border:0;min-width:0;background:none}.attendance-table td::before{content:attr(data-label);display:block;margin-bottom:3px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--text-secondary)}.data-table.attendance-table td.att-name{grid-column:1/-1;font-size:15px}.attendance-table td.att-name::before{display:none}.data-table.attendance-table td[data-label=Remarks],.data-table.attendance-table td[data-label=Status]{grid-column:1/-1}.attendance-table .module-input,.attendance-table .module-select{width:100%;min-height:44px;font-size:16px}.attendance-save{position:sticky;bottom:env(safe-area-inset-bottom);z-index:20;padding:10px 0;background:linear-gradient(transparent,var(--surface,#fff) 30%)}.attendance-save .btn{width:100%;justify-content:center;min-height:48px}}
 .data-table th.is-sortable{cursor:pointer;user-select:none;white-space:nowrap}.data-table th.is-sortable:hover{color:var(--primary)}.sort-arrow{display:inline-block;width:8px;margin-left:6px;opacity:.35;vertical-align:middle}.sort-arrow::before{content:"↕";font-size:11px}[aria-sort=ascending] .sort-arrow,[aria-sort=descending] .sort-arrow{opacity:1;color:var(--primary)}[aria-sort=ascending] .sort-arrow::before{content:"↑"}[aria-sort=descending] .sort-arrow::before{content:"↓"}
 .table-filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}.table-filter-bar input,.table-filter-bar select{min-height:40px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface,#fff);font:inherit;font-size:14px}.table-filter-search{flex:1 1 220px}.table-filter-search input{width:100%}.table-filter-count{margin-left:auto;font-size:12px;color:var(--text-secondary);white-space:nowrap}
 .data-table td{overflow-wrap:normal}.data-table td:has(>a[href^="tel:"]){white-space:nowrap}
@@ -243,7 +309,7 @@ html,body{max-width:100%;overflow-x:hidden}@supports(overflow:clip){html,body{ov
   .status-rules-table tr{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;padding:12px 14px;border-bottom:1px solid var(--border)}
   .status-rules-table td{padding:0!important;border:0!important}
   .status-rules-table td:first-child{grid-column:1/-1}
-  .status-rules-table td[data-label]::before{content:attr(data-label);display:block;margin-bottom:4px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}
+  .status-rules-table td[data-label]::before{content:attr(data-label);display:block;margin-bottom:4px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#746a6e}
 }
 
 /* Notifications: errors and warnings look different from successes and can be dismissed. */
@@ -285,3 +351,65 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-vis
 
 @media screen and (max-width:767px){.search,.search__field{position:static}.search{width:auto}.search input{position:absolute;top:calc(var(--header-height) + 8px);left:10px;right:10px;width:calc(100% - 20px);transition:border-color .16s ease,box-shadow .16s ease}.search.is-mobile-open input{visibility:visible;opacity:1;transform:none}}
 @media screen and (max-width:767px){.search input{padding-left:16px}.search__field>svg,.search__field>i{display:none}}
+
+/* The drawer owns a bounded scroll area on phones and in standalone PWAs. */
+@media screen and (max-width:1023px) {
+  .sidebar, .app-shell.is-collapsed .sidebar {
+    top: 0; bottom: auto; height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar .mobile-sidebar-close {
+    position: absolute; top: calc(12px + env(safe-area-inset-top));
+    right: 12px; left: auto; z-index: 2; background: var(--surface);
+  }
+  .sidebar__scroll {
+    flex: 1 1 auto; min-height: 0; height: auto;
+    overflow-x: hidden; overflow-y: auto;
+    -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    padding-top: calc(64px + env(safe-area-inset-top));
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Preserve the desktop attendance register and native controls on every screen. */
+@media screen and (max-width:767px) {
+  .table-scroll.attendance-scroll { overflow-x:auto; max-width:100%; -webkit-overflow-scrolling:touch; }
+  .data-table.attendance-table { min-width:720px; width:100%; }
+  .data-table.attendance-table--employees { min-width:960px; }
+  .attendance-table .module-input,.attendance-table .module-select { min-height:44px; height:44px; font-size:16px; }
+  .attendance-table td.att-name { min-width:180px; }
+  .attendance-table td[data-label=Status] { min-width:140px; }
+  .attendance-table td[data-label=Remarks] { min-width:200px; }
+  .attendance-table td[data-label="Time In"],.attendance-table td[data-label="Time Out"] { min-width:140px; }
+  .attendance-save { position:sticky; bottom:0; z-index:20; padding:10px 0 calc(10px + env(safe-area-inset-bottom)); background:var(--surface); border-top:1px solid var(--border); }
+  .attendance-save .btn { width:100%; justify-content:center; min-height:48px; }
+  .attendance-filters { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .attendance-filters > .btn { align-self:end; }
+  .table-tools { flex-wrap:wrap; gap:8px; }
+  .row-actions { display:flex; flex-wrap:wrap; gap:6px; }
+}
+
+/* Aligned registers for comparisons, bulk selection and spreadsheet-style editing. */
+@media screen and (max-width:767px) {
+  :is(.table-scroll,.class-table-wrap,.fd-table-wrap,.ss-table-wrap):has(> .mobile-register) { overflow-x:auto !important; overflow-y:auto; max-width:100%; -webkit-overflow-scrolling:touch; }
+  body .mobile-register { display:table !important; width:100% !important; min-width:var(--register-width,680px) !important; border-collapse:collapse; table-layout:auto; }
+  body .mobile-register thead { display:table-header-group !important; }
+  body .mobile-register tbody { display:table-row-group !important; }
+  body .mobile-register tfoot { display:table-footer-group !important; }
+  body .mobile-register tr { display:table-row !important; position:static !important; padding:0 !important; margin:0 !important; border:0 !important; border-radius:0 !important; background:transparent; }
+  body .mobile-register :is(td,th) { display:table-cell !important; position:static !important; width:auto !important; height:auto !important; padding:10px 12px !important; border-radius:0 !important; white-space:normal; vertical-align:middle; }
+  body .mobile-register tbody :is(td,th) { border-bottom:1px solid var(--border) !important; }
+  body .mobile-register [data-label]::before { display:none !important; }
+  body .mobile-register [hidden] { display:none !important; }
+  body .mobile-register :is(.ss-num,.fd-num) { text-align:right !important; }
+  body .mobile-register :is(.module-input,.module-select,.form-input,.ss-input,.ss-note) { min-height:44px; font-size:16px; }
+  body .mobile-register .ss-input { width:110px; text-align:right; }
+  body .mobile-register .ss-note { width:170px; }
+  body .mobile-register .btn { min-height:44px; }
+  body .mobile-register.ss-table { --register-width:1120px; }
+  body .mobile-register.fd-table { --register-width:1100px; }
+  body .mobile-register.sms-table { --register-width:900px; }
+  body .mobile-register.fee-structure-table { --register-width:600px; }
+  body .mobile-register .sms-snippet { max-width:280px; }
+}

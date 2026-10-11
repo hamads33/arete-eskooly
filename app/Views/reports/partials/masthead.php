@@ -1,7 +1,7 @@
 <?php
 $reportInstitute = $institute ?? [];
 // Uploaded logos live under public/uploads, not public/assets, so only the bundled default goes through asset().
-$reportLogo = ($reportInstitute['logo_path'] ?? '') !== '' ? url('/' . ltrim((string) $reportInstitute['logo_path'], '/')) : asset('images/arete-logo.png');
+$reportLogo = ($reportInstitute['logo_path'] ?? '') !== '' ? url('/' . ltrim((string) $reportInstitute['logo_path'], '/')) : brand()['logo'];
 $reportContact = array_values(array_filter([$reportInstitute['address'] ?? null, $reportInstitute['phone'] ?? null, $reportInstitute['website'] ?? null]));
 $reportFilters = [];
 $reportAddFilter = static function (string $label, mixed $value) use (&$reportFilters): void {

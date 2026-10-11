@@ -5,5 +5,5 @@
 <label class="auth-remember"><input type="checkbox" name="remember" value="1"<?= old('remember') === '1' ? ' checked' : '' ?>><span>Remember me</span></label>
 <button class="auth-submit" type="submit"><span>Sign In</span><span aria-hidden="true">↗</span></button>
 </form>
-<p class="auth-switch">New to Arete? <a href="<?= url('/signup') ?>">Create an institute account <span aria-hidden="true">→</span></a></p>
+<?php if(!brand()['school']):?><p class="auth-switch">New to Arete? <a href="<?= url('/signup') ?>">Create an institute account <span aria-hidden="true">→</span></a></p><?php endif ?>
 <div class="auth-reassurance"><svg width="19" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6L12 3Z" stroke="currentColor" stroke-width="1.5"/><path d="m8 12 3 3 5-6" stroke="currentColor" stroke-width="1.5"/></svg><span>Your workspace. Your people. Securely connected.</span></div>

@@ -161,7 +161,7 @@ return static function (App $app): array {
         $check('search by reference and by student registration', count($fees->paidSlips($i, ['q' => 'DQREF'])) >= 1 && count($fees->paidSlips($i, ['q' => 'DQ-' . $suffix . '-0'])) === 1);
         $sp = $get('/admin/fees/receipt?q=' . rawurlencode('DQR-' . $suffix))->content();
         $check('paid slip page shows the receipt with View, Detailed and WhatsApp', str_contains($sp, 'DQR-' . $suffix) && str_contains($sp, '/admin/fees/receipt/' . $pay1) && str_contains($sp, '/admin/reports/fee-receipt/' . $pay1 . '/pdf') && str_contains($sp, 'whatsapp'));
-        $check('the default view lists recent payments', $get('/admin/fees/receipt')->status() === 200 && str_contains($get('/admin/fees/receipt')->content(), 'Recent payments'));
+        $check('the default view lists recent payments', $get('/admin/fees/receipt')->status() === 200 && str_contains($get('/admin/fees/receipt')->content(), 'Fees Paid Slip'));
         $check('a receipt that does not exist is a 404', $get('/admin/fees/receipt/999999999')->status() === 404);
         $check('bad filter values are handled', $get('/admin/fees/receipt?month=bad&from=x&to=y&reversed=hack')->status() === 200);
     } finally {

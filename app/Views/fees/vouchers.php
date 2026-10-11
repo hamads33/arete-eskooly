@@ -1,5 +1,5 @@
 <?php
-$styles[] = 'css/fee-workspace.css?v=4';
+$styles[] = 'css/fee-workspace.css?v=104';
 $scripts[] = 'js/fee-workspace.js?v=2';
 $scopeLabels = ['student' => 'Student Wise', 'class' => 'Class Wise', 'all' => 'All Students'];
 $copySet = match ($copies) { 'three_copy' => ['bank', 'student', 'institute'], 'student_institute' => ['student', 'institute'], default => ['student'] };

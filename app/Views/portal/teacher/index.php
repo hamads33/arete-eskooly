@@ -8,11 +8,11 @@
 <div class="metric-card"><span>Assigned Classes</span><strong><?=count($scope)?></strong></div>
 <div class="metric-card"><span>Subjects</span><strong><?=array_sum(array_map(static fn(array $c):int=>count($c['subjects']),$scope))?></strong></div>
 <div class="metric-card"><span>Whole-Class Roles</span><strong><?=count(array_filter($scope,static fn(array $c):bool=>$c['whole_class']))?></strong></div>
-<div class="metric-card"><span>Teacher</span><strong><?=e($employee['name'])?></strong></div>
+<div class="metric-card metric-card--text"><span>Teacher</span><strong><?=e($employee['name'])?></strong></div>
 </div>
 
 <section class="module-card"><header class="module-card__header"><div><h2>Quick Actions</h2><p>Everything here is limited to your assigned classes.</p></div></header><div class="module-card__body">
-<div class="filter-actions">
+<div class="filter-actions quick-actions">
 <a class="btn btn--primary" href="<?=e(url('/portal/employee/teaching/attendance'))?>">Mark Attendance</a>
 <a class="btn btn--ghost" href="<?=e(url('/portal/employee/teaching/homework'))?>">Homework</a>
 <a class="btn btn--ghost" href="<?=e(url('/portal/employee/teaching/notes'))?>">Class Notes</a>

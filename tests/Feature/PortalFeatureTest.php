@@ -122,7 +122,7 @@ return static function (App $app): array {
     $check('employee homework page renders', $get('/portal/employee/homework')->status() === 200);
     $check('employee profile page renders', str_contains($get('/portal/employee/profile')->content(), 'EMP-PORTAL-' . $suffix));
     $check('employee blocked from student portal', $get('/portal/student')->status() === 403);
-    $check('permitted teacher can open restricted admin workspace', $get('/admin/dashboard')->status() === 200);
+    $check('employee without module permissions cannot open admin workspace', $get('/admin/dashboard')->status() === 403);
 
     // ---- eSkooly StudentPortal parity: documents, messaging, account ---------
     $db->query('INSERT INTO fee_payments(fee_invoice_id,student_id,receipt_no,payment_date,amount,payment_method,received_by,created_at) VALUES(:i,:s,:r,:d,1000,"Cash",:u,:x)', ['i' => $invoiceId, 's' => $studentId, 'r' => 'PRCP-' . $suffix, 'd' => date('Y-m-d'), 'u' => $admin, 'x' => $now]);

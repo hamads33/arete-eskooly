@@ -1,9 +1,9 @@
 <main class="install-main">
   <section class="install-card" aria-labelledby="install-title" data-pwa-install-page>
-    <a class="install-brand" href="<?= e(url('/')) ?>" aria-label="Arete home">
-      <span class="install-brand__mark"><img src="<?= e(asset('images/arete-logo.png')) ?>" width="104" height="104" alt="Arete"></span>
-      <span>ARETE COACHING CENTER</span>
-      <small>A PROJECT OF USAMA EDUCATION SYSTEM</small>
+    <a class="install-brand" href="<?= e(url('/')) ?>" aria-label="<?= e(brand()['short']) ?> home">
+      <span class="install-brand__mark"><img src="<?= e(brand()['logo']) ?>" width="104" height="104" alt="<?= e(brand()['short']) ?>"></span>
+      <span><?= e(mb_strtoupper(brand()['name'])) ?></span>
+      <?php if(brand()['caption']!==''):?><small><?= e(brand()['caption']) ?></small><?php endif ?>
     </a>
 
     <div class="install-copy">
@@ -26,7 +26,7 @@
 
     <div class="install-state install-state--success" data-install-state="installed" hidden>
       <span class="install-check" aria-hidden="true">&#10003;</span>
-      <div><strong>App Installed</strong><p>Open Arete normally from your device.</p></div>
+      <div><strong>App Installed</strong><p>Open <?= e(brand()['short']) ?> normally from your device.</p></div>
     </div>
 
     <div class="install-state install-state--success" data-install-state="accepted" hidden>
@@ -51,7 +51,7 @@
 
     <div class="install-state install-state--success" data-install-state="installed-browser" hidden>
       <span class="install-check" aria-hidden="true">&#10003;</span>
-      <div><strong>Already installed on this device</strong><p>Open Arete from your desktop or Start menu, or click <strong>Open in app</strong> in the browser's address bar.</p></div>
+      <div><strong>Already installed on this device</strong><p>Open <?= e(brand()['short']) ?> from your desktop or Start menu, or click <strong>Open in app</strong> in the browser's address bar.</p></div>
     </div>
 
     <div class="install-state install-state--guide" data-install-state="unavailable" hidden>
@@ -59,7 +59,7 @@
         <svg viewBox="0 0 24 24"><path d="M12 3v11m0 0 4-4m-4 4-4-4M5 20h14"/></svg>
       </span>
       <h2>Install prompt unavailable</h2>
-      <p class="install-state__intro">Your browser has not offered one-click installation on this page. If Arete is already installed, open it from your desktop or Start menu.</p>
+      <p class="install-state__intro">Your browser has not offered one-click installation on this page. If <?= e(brand()['short']) ?> is already installed, open it from your desktop or Start menu.</p>
       <p class="install-state__intro" data-install-desktop-guide hidden>To install manually in Chrome or Edge, click the install icon at the right end of the address bar, or open the browser menu (&#8942;) and choose <strong>Cast, save and share &rarr; Install page as app</strong>.</p>
       <button class="install-secondary install-secondary--full" type="button" data-pwa-recheck>Try Again</button>
     </div>

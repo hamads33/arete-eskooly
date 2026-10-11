@@ -18,7 +18,7 @@
     weekdays.forEach((weekday) => {
       const label = document.createElement("div");
       label.className = "calendar-weekday";
-      label.setAttribute("role", "columnheader");
+      label.setAttribute("aria-hidden", "true"); // each day button announces its full date
       label.textContent = weekday;
       calendarGrid.append(label);
     });
@@ -37,7 +37,6 @@
       const events = window.dashboardData?.calendarEvents ?? [];
       cell.className = "calendar-day" + (isToday ? " is-today" : "") + (events.includes(`${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`) ? " has-event" : "");
       cell.textContent = String(day);
-      cell.setAttribute("role", "gridcell");
       cell.setAttribute("aria-label", new Date(year, month, day).toLocaleDateString("en-US", { dateStyle: "full" }));
       cell.addEventListener("click", () => window.showDashboardToast?.("Calendar date selected."));
       calendarGrid.append(cell);

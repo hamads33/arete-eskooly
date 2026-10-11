@@ -14,6 +14,7 @@
 <?=csrf_field()?>
 <input type="hidden" name="class" value="<?=(int)$selectedClass?>">
 <input type="hidden" name="date" value="<?=e($date)?>">
+<div class="table-tools"><span><strong><?=count($rows)?></strong> students loaded</span><button class="btn btn--secondary" type="button" onclick="this.closest('form').querySelectorAll('select[name^=&quot;status[&quot;]').forEach(x=>{x.value='Present';x.dispatchEvent(new Event('change',{bubbles:true}))})">Mark All Present</button></div>
 <div class="table-scroll attendance-scroll"><table class="data-table attendance-table"><thead><tr><th>Registration</th><th>Student</th><th>Status</th><th>Remarks</th></tr></thead><tbody>
 <?php foreach($rows as $row): $cur=$row['attendance_status']??'Present'; ?><tr>
 <td data-label="Registration"><?=e($row['registration_no'])?></td>

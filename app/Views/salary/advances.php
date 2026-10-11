@@ -17,7 +17,7 @@
 
 <section class="module-card"><header class="module-card__header"><h2>Advances</h2></header><div class="module-card__body">
 <?php if(!$advances):?><div class="compact-empty"><h3>No advances yet</h3><p>Advances given to employees will appear here.</p></div><?php else:?>
-<div class="table-scroll"><table class="data-table"><thead><tr><th>Employee</th><th>Date</th><th>Amount</th><th>Recovered</th><th>Balance</th><th>Reason</th><th>Status</th><th></th></tr></thead><tbody>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Employee</th><th>Date</th><th>Amount</th><th>Recovered</th><th>Balance</th><th>Reason</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
 <?php foreach($advances as$a):?><tr>
 <td><?= e($a['employee_no'].' — '.$a['name']) ?></td>
 <td><?= e($a['date_given']) ?></td>

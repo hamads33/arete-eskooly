@@ -11,7 +11,7 @@
 <p class="module-card__note">To correct any of these details, please contact the institute office. You can change your sign-in email and password under <a href="<?= e(url('/portal/account')) ?>">Account Settings</a>.</p>
 </div></section>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Linked Children</h2><p><?= count($children) ?> student(s) linked to you.</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Registration</th><th>Student</th><th>Class</th><th>Status</th><th></th></tr></thead><tbody>
+<section class="module-card"><header class="module-card__header"><div><h2>Linked Children</h2><p><?= count($children) ?> student(s) linked to you.</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Registration</th><th>Student</th><th>Class</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
 <?php foreach ($children as $child): ?><tr>
 <td data-label="Registration"><?= e($child['registration_no']) ?></td>
 <td data-label="Student"><?= e($child['student_name']) ?></td>

@@ -93,7 +93,7 @@ return static function (App $app): array {
         $check('the tests list can show unsent drafts', str_contains($list, 'data-submission-drafts') && str_contains($list, 'data-owner="s' . $studentId . '"'));
         $dashboard = $run('GET', '/portal/student')->content();
         $check('the dashboard can show unsent drafts', str_contains($dashboard, 'data-submission-drafts'));
-        $check('the install banner can always be dismissed with a visible close button', str_contains($dashboard, 'pwa-install-banner__close') && str_contains($dashboard, 'aria-label="Dismiss install banner"'));
+        $check('dashboard omits the intrusive install banner', !str_contains($dashboard, 'data-pwa-install-banner'));
         $pwa = (string) file_get_contents(BASE_PATH . '/public/assets/js/pwa.js');
         $check('dismissing the install banner is remembered for a week and works by swiping down', str_contains($pwa, 'arete-install-later-until') && str_contains($pwa, "querySelectorAll('[data-pwa-install-later]')") && str_contains($pwa, 'touchend'));
         $check('the install banner is not shown over the test submit bar', !str_contains($html, 'data-pwa-install-banner'));

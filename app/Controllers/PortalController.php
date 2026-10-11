@@ -72,8 +72,8 @@ abstract class PortalController extends Controller
             'pageDescription' => '',
             // Same stack the admin shell loads, so the portal inherits the maroon theme.
             'styles' => [
-                'css/variables.css', 'css/reset.css', 'css/base.css', 'css/layout.css',
-                'css/components.css?v=6', 'css/account-settings.css?v=1', 'css/admin-pages.css?v=9',
+                'css/variables.css?v=2', 'css/reset.css', 'css/base.css', 'css/layout.css',
+                'css/components.css?v=106', 'css/account-settings.css?v=1', 'css/admin-pages.css?v=109',
                 'css/dashboard.css', 'css/portal.css', 'css/responsive.css', 'css/print.css',
             ],
             'scripts' => [

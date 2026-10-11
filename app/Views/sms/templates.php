@@ -9,7 +9,7 @@ $headerActions = can('sms.templates.manage') ? '<a class="btn btn--primary" href
   <?php if (!$templates): ?>
     <div class="compact-empty sms-empty"><i data-lucide="file-text"></i><h3>No templates yet</h3><p>Create a template to reuse a message.</p></div>
   <?php else: ?>
-    <div class="table-scroll"><table class="data-table sms-table">
+    <div class="table-scroll"><table class="data-table sms-table mobile-register">
       <thead><tr><th>Template</th><th>Category</th><th>Message</th><th>Variables</th><th>Status</th><?php if (can('sms.templates.manage')): ?><th>Actions</th><?php endif ?></tr></thead>
       <tbody>
       <?php foreach ($templates as $t): $vars = json_decode((string) $t['variables_json'], true) ?: []; ?>

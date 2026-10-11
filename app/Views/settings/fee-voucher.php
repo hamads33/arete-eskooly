@@ -1,5 +1,5 @@
 <?php
-$styles[] = 'css/fee-workspace.css?v=4';
+$styles[] = 'css/fee-workspace.css?v=104';
 $selected = $voucherSettings['bank_ids'];
 $admin = can('*');
 ?>

@@ -17,7 +17,7 @@
 </div></section>
 <?php endif; ?>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Tests In My Classes</h2><p><?=count($tests)?> test(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Date</th><th>Title</th><th>Class</th><th>Subject</th><th>Total</th><th>Marked</th><th></th></tr></thead><tbody>
+<section class="module-card"><header class="module-card__header"><div><h2>Tests In My Classes</h2><p><?=count($tests)?> test(s).</p></div></header><div class="module-card__body"><div class="table-scroll"><table class="data-table mobile-records"><thead><tr><th>Date</th><th>Title</th><th>Class</th><th>Subject</th><th>Total</th><th>Marked</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
 <?php foreach($tests as $t):?><tr>
 <td data-label="Date"><?=e($t['test_date'])?></td><td data-label="Title" class="record-title"><?=e($t['title'])?></td><td data-label="Class" class="record-title"><?=e($t['class_name'])?></td><td data-label="Subject" class="record-title"><?=e($t['subject_name'])?></td>
 <td data-label="Total"><?=e((string)$t['total_marks'])?></td><td data-label="Marked"><?=(int)$t['marked']?></td>

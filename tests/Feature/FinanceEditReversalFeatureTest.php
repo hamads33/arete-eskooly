@@ -165,9 +165,9 @@ return static function (App $app): array {
 
         // ==== mobile markup =====================================================================
         $att = $get('/admin/attendance/employees?date=' . $today);
-        $check('employee attendance renders as mobile cards', $att->status() === 200 && str_contains($att->content(), 'attendance-table') && str_contains($att->content(), 'data-label="Status"'));
+        $check('employee attendance renders its register', $att->status() === 200 && str_contains($att->content(), 'attendance-table') && str_contains($att->content(), 'data-label="Status"'));
         $att = $get('/admin/attendance/students?date=' . $today . '&scope=all');
-        $check('student attendance renders as mobile cards', $att->status() === 200 && str_contains($att->content(), 'attendance-table'));
+        $check('student attendance renders its register', $att->status() === 200 && str_contains($att->content(), 'attendance-table'));
         $check('table sorting and filters load on every page', str_contains($att->content(), 'js/table-tools.js'));
     } finally {
         $db->query('DELETE FROM account_transactions WHERE institute_id=:i AND description LIKE :d', ['i' => $institute, 'd' => '%' . $suffix]);

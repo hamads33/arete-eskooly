@@ -21,7 +21,7 @@
 <input type="hidden" name="domain" value="<?=e($domain)?>">
 <input type="hidden" name="class" value="<?=(int)$selectedClass?>">
 <input type="hidden" name="period" value="<?=e($period)?>">
-<div class="table-scroll"><table class="data-table"><thead><tr><th>Registration</th><th>Student</th><?php foreach($traits as $t):?><th><?=e($t['name'])?></th><?php endforeach?></tr></thead><tbody>
+<div class="table-scroll"><table class="data-table mobile-register"><thead><tr><th>Registration</th><th>Student</th><?php foreach($traits as $t):?><th><?=e($t['name'])?></th><?php endforeach?></tr></thead><tbody>
 <?php foreach($sheet as $row):?><tr>
 <td><?=e($row['registration_no'])?></td>
 <td><?=e($row['student_name'])?></td>

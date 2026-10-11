@@ -47,14 +47,14 @@
 .profile-trigger__copy span { color: var(--text-muted); font-size: 10px; }
 .profile-menu { width: 248px; padding: 9px; }
 .profile-summary { display: flex; gap: 10px; align-items: center; padding: 8px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
-.profile-summary .avatar { width: 42px; height: 42px; }
-.profile-summary strong, .profile-summary span { display: block; }
-.profile-summary strong { font-size: 12px; }
-.profile-summary span { color: var(--text-muted); font-size: 11px; }
+.profile-summary .avatar { flex: none; width: 42px; height: 42px; }
+.profile-summary strong, .profile-summary span:not(.avatar) { display: block; }
+.profile-summary strong { color: var(--text-primary); font-size: 12px; }
+.profile-summary span:not(.avatar) { min-width: 0; overflow-wrap: anywhere; color: var(--text-muted); font-size: 11px; }
 .profile-link { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 40px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text-secondary); font-size: 12px; font-weight: 600; text-align: left; cursor: pointer; }
 .profile-link:hover { background: var(--primary-50); color: var(--primary); }
 .profile-link .icon { width: 17px; height: 17px; }
-.profile-link--danger { color: var(--danger); }
+.profile-link--danger { color: #c0392b; } /* --danger is 4.4:1 on white; this keeps the same red at 5.4:1 */
 .search { position: relative; width: min(100%, 380px); }
 .mobile-search-toggle { display: none; }
 .search__field { position: relative; }

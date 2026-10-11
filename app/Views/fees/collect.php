@@ -1,5 +1,5 @@
 <?php
-$styles[] = 'css/fee-workspace.css?v=4';
+$styles[] = 'css/fee-workspace.css?v=104';
 $scripts[] = 'js/fee-workspace.js?v=2';
 $currency = trim((string) ($institute['currency_symbol'] ?? $institute['currency'] ?? 'PKR'));
 $money = static fn($v): string => number_format((float) $v, 2);

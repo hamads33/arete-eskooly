@@ -59,7 +59,9 @@ return static function (App $app): array {
         // ---- teacher scope -----------------------------------------------------------------------
         $as($tUser);
         foreach (['/admin/students', '/admin/classes', '/admin/dashboard', '/admin/attendance/students', '/admin/reports/fee-collection', '/admin/exams/create'] as $uri) {
-            $check("teacher cannot open {$uri}", in_array($get($uri)->status(), [302, 403], true));
+            $allowed = $uri !== '/admin/exams/create' && can_open($uri);
+            $status = $get($uri)->status();
+            $check("teacher module grants are respected at {$uri}", $allowed ? $status === 200 : in_array($status, [302, 403], true));
         }
         $exam = $ids['exams'][] = (function () use ($db, $institute, $admin, $now, $pdo) {
             $db->query("INSERT INTO exams(institute_id,name,start_date,end_date,created_by,created_at,updated_at,status) VALUES(:i,'Scope exam',:d,:d2,:u,:c,:c2,'draft')", ['i' => $institute, 'd' => date('Y-m-d'), 'd2' => date('Y-m-d'), 'u' => $admin, 'c' => $now, 'c2' => $now]);

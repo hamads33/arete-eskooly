@@ -116,7 +116,7 @@ final class PortalPdfController extends PortalController
                 'Total' => (string) ($result['total'] ?? 0),
             ],
             'columns' => ['Subject' => 'subject', 'Total Marks' => 'total_marks', 'Obtained' => 'obtained_marks', 'Remarks' => 'remarks'],
-            'rows' => $result['rows'] ?? [],
+            'rows' => $result['subjects'] ?? [],
             'signatures' => ['Class Teacher', 'Principal'],
             'placeholders' => [
                 'student_name' => $student['student_name'],

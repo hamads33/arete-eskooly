@@ -57,7 +57,7 @@ final class TeacherLiveClassController extends PortalController
             'timezone' => $timezone,
             // A teacher is told whether live classes are available, never why in Google's terms.
             'available' => $this->calendar()->isConnected($institute),
-            'styles' => ['css/live-classes.css?v=1'],
+            'styles' => ['css/live-classes.css?v=3'],
             'scripts' => ['js/live-classes.js?v=1'],
         ]);
     }

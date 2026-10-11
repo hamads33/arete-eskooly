@@ -218,3 +218,40 @@ a.sms-stat:hover { border-color: var(--primary-200); box-shadow: var(--shadow-sm
 @media print {
     .sms-tabs, .sms-row-actions, .sms-filters, .sms-header__actions { display: none !important; }
 }
+
+/* Keep everyday SMS controls visible and compact on phones. */
+@media screen and (max-width: 767px) {
+  .sms-page .sms-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: visible; gap: 4px; }
+  .sms-page .sms-tab { min-height: 44px; white-space: normal; text-align: center; justify-content: center; padding: 7px 5px; font-size: 12px; }
+  .sms-page .sms-stats, .sms-page .sms-segment { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sms-page .sms-segment__option span { min-height: 48px; padding: 8px; font-size: 13px; }
+  .sms-page .sms-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .sms-page .sms-filters > .module-field { grid-column: auto !important; min-width: 0; }
+  .sms-page .sms-filters > .module-field:first-child, .sms-page .sms-filters > .filter-actions { grid-column: 1 / -1 !important; }
+  .sms-page .sms-filters label { font-size: 12px; }
+  .sms-page .sms-filters .filter-actions { display: flex; gap: 8px; }
+  .sms-page .sms-filters .filter-actions .btn { flex: 1; }
+  .sms-page .module-form-grid--two { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .sms-page .module-form-grid--two > .module-field { grid-column: auto !important; min-width: 0; }
+  .sms-page .sms-recipient-grid { grid-template-columns: minmax(0, 1fr); }
+  .sms-page .sms-suggest { max-height: 260px; overscroll-behavior: contain; }
+  .sms-page .sms-suggest li[role="option"] { min-height: 52px; padding: 10px 12px; cursor: pointer; }
+  .sms-page .sms-radio { min-height: 44px; }
+  .sms-page .sms-chip, .sms-page .btn--sm { min-height: 44px; }
+  .sms-page .sms-table { min-width: 0 !important; }
+  .sms-page .sms-table tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; padding: 12px; }
+  .sms-page .sms-table td { display: block; min-width: 0; width: auto; padding: 3px 0 !important; overflow-wrap: anywhere; }
+  .sms-page .sms-table td::before { display: block; margin-bottom: 3px; }
+  .sms-page .sms-table td[data-label="Recipient"], .sms-page .sms-table td[data-label="Message"],
+  .sms-page .sms-table td[data-label="Reason"], .sms-page .sms-table td[data-label="Actions"] { grid-column: 1 / -1; }
+  .sms-page .sms-table td[colspan] { grid-column: 1 / -1; }
+  .sms-page .sms-row-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sms-page .sms-row-actions form { margin: 0; }
+  .sms-page .sms-bubble { max-height: 200px; overflow-y: auto; }
+  .sms-compose > .sms-grid { display: flex; flex-direction: column; }
+  .sms-compose > .sms-grid > .module-card { display: contents; }
+  .sms-compose > .sms-grid > .module-card > .module-card__header { margin-bottom: -16px; }
+  .sms-compose > .sms-grid > .module-card > .module-card__body { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+  .sms-compose > .sms-grid > .sms-side { order: 1; }
+  .sms-compose > .sms-grid > .module-card > .sms-footer { order: 2; position: sticky; bottom: 0; z-index: 5; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+}

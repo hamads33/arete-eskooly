@@ -14,7 +14,7 @@
 <small>Switching subject or class does not require reloading this page.</small>
 </div>
 </div>
-<div class="table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Class</th><th>Subject</th><th>Title</th><th>Total</th><th>Marked</th><th></th></tr></thead><tbody>
+<div class="table-scroll"><table class="data-table mobile-register"><thead><tr><th>Date</th><th>Class</th><th>Subject</th><th>Title</th><th>Total</th><th>Marked</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
 <?php foreach(array_slice($allTests,0,25) as $t): ?><tr>
 <td><?=e($t['test_date'])?></td><td><?=e($t['class_name'])?></td><td><?=e($t['subject_name'])?></td>
 <td><?=e($t['title'])?></td><td><?=e((string)$t['total_marks'])?></td><td><?=(int)$t['marked']?></td>
@@ -42,7 +42,7 @@
 <div class="module-field"><label for="title">Title</label><input class="module-input" id="title" name="title" required maxlength="150"></div>
 <div class="module-field"><label for="total_marks">Maximum Marks</label><input class="module-input" id="total_marks" type="number" name="total_marks" min="1" step="0.01" required></div>
 </div>
-<div class="table-scroll"><table class="data-table"><thead><tr><th>Registration</th><th>Student</th><th>Marks</th><th>Absent</th></tr></thead><tbody>
+<div class="table-scroll"><table class="data-table mobile-register"><thead><tr><th>Registration</th><th>Student</th><th>Marks</th><th>Absent</th></tr></thead><tbody>
 <?php foreach($students as $s):?><tr>
 <td><?=e($s['registration_no'])?></td><td><?=e($s['student_name'])?></td>
 <td><input class="module-input" type="number" min="0" step="0.01" name="marks[<?=(int)$s['id']?>]"></td>

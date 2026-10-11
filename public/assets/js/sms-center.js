@@ -122,6 +122,7 @@
     var controller = null;
     var active = -1;
     var results = [];
+    var lookupVersion = 0;
 
     function type() {
       var t = 'guardian';
@@ -137,6 +138,7 @@
     function close() { list.hidden = true; list.textContent = ''; active = -1; search.setAttribute('aria-expanded', 'false'); }
     function choose(item) {
       hiddenId.value = item.id;
+      search.setCustomValidity('');
       search.value = item.label;
       phone.value = item.raw_phone || '';
       close();
@@ -159,7 +161,8 @@
         li.appendChild(el('strong', '', item.label));
         li.appendChild(el('small', '', item.detail || ''));
         li.appendChild(el('small', item.phone ? '' : 'sms-nophone', item.phone || (item.raw_phone ? 'Invalid number on record: ' + item.raw_phone : 'No phone number on record')));
-        li.addEventListener('mousedown', function (e) { e.preventDefault(); choose(item); });
+        li.addEventListener('pointerdown', function (e) { e.preventDefault(); });
+        li.addEventListener('click', function () { choose(item); });
         li.addEventListener('mouseenter', function () { highlight(i); });
         list.appendChild(li);
       });
@@ -170,12 +173,14 @@
       var q = search.value.trim();
       hiddenId.value = '0';
       syncPreview();
-      if (q.length < 2) { close(); return; }
+      var version = ++lookupVersion;
+      var recipientType = type();
       if (controller) controller.abort();
+      if (q.length < 2 || recipientType === 'manual') { close(); return; }
       controller = new AbortController();
-      fetch(url + '?type=' + encodeURIComponent(type()) + '&q=' + encodeURIComponent(q), { credentials: 'same-origin', signal: controller.signal, headers: { Accept: 'application/json' } })
+      fetch(url + '?type=' + encodeURIComponent(recipientType) + '&q=' + encodeURIComponent(q), { credentials: 'same-origin', signal: controller.signal, headers: { Accept: 'application/json' } })
         .then(function (r) { return r.ok ? r.json() : { results: [] }; })
-        .then(function (data) { show(data.results || []); })
+        .then(function (data) { if (version === lookupVersion && search.value.trim() === q && type() === recipientType) show(data.results || []); })
         .catch(function () {});
     }
     function syncType() {
@@ -188,11 +193,11 @@
     }
 
     types.forEach(function (r) {
-      r.addEventListener('change', function () { hiddenId.value = '0'; search.value = ''; phone.value = ''; close(); syncType(); });
+      r.addEventListener('change', function () { ++lookupVersion; clearTimeout(timer); if (controller) controller.abort(); hiddenId.value = '0'; search.value = ''; search.setCustomValidity(''); phone.value = ''; close(); syncType(); });
     });
     search.setAttribute('role', 'combobox');
     search.setAttribute('aria-expanded', 'false');
-    search.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(lookup, 250); });
+    search.addEventListener('input', function () { ++lookupVersion; hiddenId.value = '0'; search.setCustomValidity(''); close(); syncPreview(); if (controller) controller.abort(); clearTimeout(timer); timer = setTimeout(lookup, 250); });
     search.addEventListener('keydown', function (e) {
       if (list.hidden) return;
       if (e.key === 'ArrowDown') { e.preventDefault(); highlight(Math.min(active + 1, results.length - 1)); }
@@ -205,6 +210,7 @@
     var nameField = form.querySelector('[name="recipient_name"]');
     if (nameField) nameField.addEventListener('input', syncPreview);
     form.addEventListener('reset', function () {
+      ++lookupVersion; clearTimeout(timer); if (controller) controller.abort(); close(); search.setCustomValidity('');
       setTimeout(function () { hiddenId.value = '0'; syncType(); refresh(); }, 0);
     });
     form.addEventListener('submit', function (e) {

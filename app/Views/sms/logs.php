@@ -13,7 +13,7 @@ $pageIntro = 'Audit trail of SMS activity: who queued, cancelled or retried a me
   <?php if (!$rows): ?>
     <div class="compact-empty sms-empty"><i data-lucide="scroll-text"></i><h3>No log entries yet.</h3><p>SMS activity will be recorded here.</p></div>
   <?php else: ?>
-    <div class="table-scroll"><table class="data-table sms-table">
+    <div class="table-scroll"><table class="data-table sms-table mobile-register">
       <thead><tr><th>Time</th><th>Event</th><th>Actor</th><th>Message</th><th>Device</th><th>Details</th></tr></thead>
       <tbody>
       <?php foreach ($rows as $l): $d = json_decode((string) $l['details_json'], true) ?: []; ?>

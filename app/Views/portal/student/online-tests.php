@@ -1,7 +1,7 @@
 <main class="main"><div class="main__inner"><div class="module-page">
 <?php require BASE_PATH . '/app/Views/partials/submission-drafts.php'; ?>
 <header class="module-page__header"><div><h1>Online Tests</h1><p>Tests assigned to your class.</p></div></header>
-<div class="dashboard-grid">
+<div class="dashboard-grid student-test-list">
 <?php foreach($tests as$t):
     $attempted = in_array($t['attempt_status']??'', ['submitted','marked'], true);
     $inProgress = ($t['attempt_status']??'') === 'in_progress';

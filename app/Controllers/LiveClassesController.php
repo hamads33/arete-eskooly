@@ -183,7 +183,7 @@ final class LiveClassesController extends AdminPageController
             $normalised = $service->normalise($r->all(), $institute, $service->timezone($institute), $instant);
             // An admin may nominate the hosting teacher; the value is validated against the
             // institute's employees, never taken on trust.
-            $teacherId = (int) $r->input('teacher_id', 0) ?: null;
+            $teacherId = \App\Support\TeacherIdentity::author($this->app->database(), $institute, (int) $r->input('teacher_id', 0));
             if ($teacherId !== null && !$this->app->database()->query('SELECT 1 FROM employees WHERE id=:e AND institute_id=:i', ['e' => $teacherId, 'i' => $institute])->fetchColumn()) {
                 $teacherId = null;
             }
@@ -214,7 +214,7 @@ final class LiveClassesController extends AdminPageController
             'breadcrumb' => ['Admin', 'Live Classes'],
             'activeMenu' => 'live-classes',
             'activeSubmenu' => 'live-classes',
-            'styles' => ['css/live-classes.css?v=1'],
+            'styles' => ['css/live-classes.css?v=3'],
             'scripts' => ['js/live-classes.js?v=2'],
             'institute' => (new \App\Repositories\SettingsRepository($this->app->database()))->institute(),
         ], $data));

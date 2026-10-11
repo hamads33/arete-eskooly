@@ -1,5 +1,5 @@
 <?php
 declare(strict_types=1);
-define('BASE_PATH',dirname(__DIR__));require BASE_PATH.'/vendor/autoload.php';$app=require BASE_PATH.'/bootstrap/app.php';
+defined('BASE_PATH')||define('BASE_PATH',dirname(__DIR__));require BASE_PATH.'/vendor/autoload.php';$app=require BASE_PATH.'/bootstrap/app.php';
 use App\Repositories\{FeeRepository,StudentRepository};use App\Services\FeeAutomationService;
 $month=$argv[1]??date('Y-m');if(!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/',$month)){fwrite(STDERR,"Usage: php scripts/generate_monthly_fees.php [YYYY-MM]\n");exit(2);}$pdo=$app->database()->connection();$institutes=$pdo->query('SELECT i.id,COALESCE(fs.generation_day,1) generation_day FROM institutes i LEFT JOIN fee_settings fs ON fs.institute_id=i.id')->fetchAll();$service=new FeeAutomationService(new FeeRepository($app->database()),new StudentRepository($app->database()));$total=0;foreach($institutes as$i){if($month===date('Y-m')&&(int)date('j')<(int)$i['generation_day'])continue;$x=$service->generate((int)$i['id'],$month,0);$total+=$x['generated'];echo "Institute {$i['id']}: {$x['generated']} generated, {$x['skipped']} existing\n";}echo "Total generated: {$total}\n";

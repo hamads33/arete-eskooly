@@ -48,6 +48,10 @@
 .compact-empty__icon { display: grid; width: 46px; height: 46px; margin: 0 auto 11px; place-items: center; border-radius: 13px; background: var(--primary-50); color: var(--primary); }
 .compact-empty__icon .lucide { width: 22px; height: 22px; }
 .compact-empty h3 { font-size: 14px; }
+/* Empty states and ID-card names directly under a page h1 are h2 for a valid outline; they keep the
+   compact h3 look. */
+.compact-empty > h2 { margin: 0; font-size: 14px; font-weight: 700; line-height: 1.5; }
+.id-card__name { margin: 0 0 3px; font-size: 15px; font-weight: 700; line-height: 1.5; }
 .compact-empty p { max-width: 470px; margin: 4px auto 0; color: var(--text-secondary); font-size: 11px; }
 .compact-empty .btn { margin-top: 14px; }
 .split-layout { display: grid; grid-template-columns: minmax(300px,.75fr) minmax(0,1.45fr); gap: 18px; align-items: start; }
@@ -184,7 +188,7 @@
 .teacher-pill, .not-assigned, .subject-badge { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
 .teacher-pill { color: var(--text-primary); font-weight: 650; }
 .teacher-pill__avatar { display: grid; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: #f0e3e7; color: var(--primary); font-size: 9px; font-weight: 800; }
-.not-assigned { padding: 5px 8px; border-radius: 7px; background: #faf5ee; color: #92734f; font-size: 10px; font-weight: 700; }
+.not-assigned { padding: 5px 8px; border-radius: 7px; background: #faf5ee; color: #7a5c38; font-size: 10px; font-weight: 700; }
 .not-assigned .lucide { width: 13px; height: 13px; }
 .subject-badge { padding: 5px 9px; border-radius: 999px; background: var(--surface-soft); color: var(--text-secondary); font-size: 10px; font-weight: 750; }
 .class-actions-col { width: 94px; text-align: right !important; }

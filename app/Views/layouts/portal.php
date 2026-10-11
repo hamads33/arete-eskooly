@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <?php require BASE_PATH . '/app/Views/partials/pwa-head.php'; ?>
-  <link rel="icon" type="image/png" href="<?= e(asset('images/arete-logo.png')) ?>"><link rel="apple-touch-icon" href="<?= e(asset('images/arete-logo.png')) ?>">
+  <link rel="icon" type="image/png" href="<?= e(brand()['logo']) ?>"><link rel="apple-touch-icon" href="<?= e(brand()['logo']) ?>">
   <meta name="description" content="<?= e($pageDescription) ?>">
   <title><?= e($pageTitle) ?> · <?= e($institute['name'] ?? 'Institute') ?></title>
 <?php foreach (array_values(array_unique($styles)) as $style): ?>
@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="<?= e(asset('css/premium-ui.css?v=1')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/workflows.css?v=1')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/ui-polish.css?v=2')) ?>">
-  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=10')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=19')) ?>">
 </head>
 <body class="portal-shell<?= ($audience ?? '') === 'student' ? ' student-mobile-shell' : '' ?>">
 <?php require BASE_PATH . '/app/Views/partials/impersonation-banner.php'; ?>

@@ -124,4 +124,6 @@ return [
         $child('Academic Activity', 'report-academic', '/admin/reports/academic'),
     ]),
     $item('Roles & Permissions', 'roles', 'shield-check', '/admin/roles'),
+    // Main portal only: other schools' sign-up approvals (admin-only, see routes/platform.php).
+    ...(\App\Platform\PlatformConfig::enabled() ? [$item('School Sign-ups', 'schools', 'building-2', '/admin/schools')] : []),
 ];

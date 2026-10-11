@@ -9,7 +9,7 @@ $printDefault = (($activeMenu ?? '') === 'reports' && in_array(($activeSubmenu ?
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <?php require BASE_PATH . '/app/Views/partials/pwa-head.php'; ?>
-  <link rel="icon" type="image/png" href="<?= e(asset('images/arete-logo.png')) ?>"><link rel="apple-touch-icon" href="<?= e(asset('images/arete-logo.png')) ?>">
+  <link rel="icon" type="image/png" href="<?= e(brand()['logo']) ?>"><link rel="apple-touch-icon" href="<?= e(brand()['logo']) ?>">
   <meta name="description" content="<?= e($pageDescription) ?>">
   <title><?= e($pageTitle) ?> · <?= e($institute['name'] ?? 'Arete Coaching Center') ?></title>
 <?php foreach (array_values(array_unique($styles)) as $style): ?>
@@ -19,7 +19,7 @@ $printDefault = (($activeMenu ?? '') === 'reports' && in_array(($activeSubmenu ?
   <link rel="stylesheet" href="<?= e(asset('css/workflows.css?v=1')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/ui-polish.css?v=2')) ?>">
   <style id="printPageSize">@media print{@page{size:A4 <?= $printDefault ?>;margin:<?= $printDefault === 'landscape' ? '9mm 8mm 10mm' : '14mm 12mm 16mm' ?>}}</style>
-  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=10')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/mobile-ui.css?v=19')) ?>">
 </head>
 <?php $reportScreen=($activeMenu??'')==='reports';$reportLandscape=in_array(($activeSubmenu??''),['report-student-attendance','report-employee-attendance','report-admissions','report-contacts'],true); ?>
 <body class="<?= $reportScreen?'report-screen ':'' ?><?= $reportLandscape?'report-landscape':'' ?>">

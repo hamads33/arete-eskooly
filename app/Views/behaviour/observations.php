@@ -17,7 +17,7 @@
 <div class="filter-actions"><button class="btn btn--primary">Apply</button></div>
 </form>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Recorded Observations</h2><p><?=count($observations)?> record(s).</p></div><button class="export-button" type="button" onclick="window.print()">Print</button></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Category</th><th>Observation</th><th>By</th><th></th></tr></thead><tbody>
+<section class="module-card"><header class="module-card__header"><div><h2>Recorded Observations</h2><p><?=count($observations)?> record(s).</p></div><button class="export-button" type="button" onclick="window.print()">Print</button></header><div class="module-card__body"><div class="table-scroll"><table class="data-table"><thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Category</th><th>Observation</th><th>By</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody>
 <?php foreach($observations as $o):?><tr>
 <td><?=e($o['observation_date'])?></td>
 <td><?=e($o['student_name'])?><br><small><?=e($o['registration_no'])?></small></td>

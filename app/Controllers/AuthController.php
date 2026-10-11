@@ -86,6 +86,7 @@ final class AuthController extends Controller
 
     public function signup(Request $request):Response
     {
+        if(\App\Platform\PlatformConfig::enabled())return Response::redirect(url('/register-school'));
         return $this->view('auth/signup',['pageTitle'=>'Institute registration — Coming soon','isSignup'=>true],'layouts/auth');
     }
 

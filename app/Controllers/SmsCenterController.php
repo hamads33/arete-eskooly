@@ -49,7 +49,7 @@ final class SmsCenterController extends AdminPageController
             'pageTitle' => $title, 'activeMenu' => 'sms', 'activeSubmenu' => $sub,
             'institute' => (new SettingsRepository($this->app->database()))->institute(),
             'smsSettings' => $this->sms()->settings->get($this->i()),
-            'styles' => ['css/sms-center.css?v=2'], 'scripts' => ['js/sms-center.js?v=1'],
+            'styles' => ['css/sms-center.css?v=3'], 'scripts' => ['js/sms-center.js?v=2'],
         ], $data));
     }
 

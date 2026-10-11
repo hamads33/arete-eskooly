@@ -8,9 +8,10 @@
  */
 
 .live-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-.live-grid--muted { opacity: .82; }
+/* Past and cancelled classes are set apart by a soft surface, not opacity: opacity pulled their text below
+   the 4.5:1 contrast minimum. */
+.live-grid--muted .live-card, .live-list--muted .live-row { background: var(--surface-soft, #faf7f8); }
 .live-list { display: flex; flex-direction: column; gap: 12px; }
-.live-list--muted { opacity: .82; }
 
 /* ---------------------------------------------------------------- status badges */
 
@@ -32,7 +33,7 @@
 .live-card { background: var(--surface, #fff); border: 1px solid var(--border, #e6e2e4); border-radius: 14px; overflow: hidden; transition: box-shadow .18s ease, transform .18s ease; }
 .live-card:hover { box-shadow: 0 10px 24px rgba(24, 12, 18, .08); }
 .live-card--live { border-color: #b9dcc3; }
-.live-card--cancelled { opacity: .7; }
+.live-card--cancelled { background: var(--surface-soft, #faf7f8); }
 .live-card__body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
 .live-card__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .live-card__subject { font-size: .78rem; font-weight: 600; color: var(--brand, #7a1632); }
@@ -51,7 +52,7 @@
 .live-row { display: flex; gap: 16px; align-items: flex-start; justify-content: space-between; padding: 16px 18px; background: var(--surface, #fff); border: 1px solid var(--border, #e6e2e4); border-left: 3px solid var(--border, #e6e2e4); border-radius: 12px; }
 .live-row--live { border-left-color: #1c6b34; }
 .live-row--starting { border-left-color: #b8860b; }
-.live-row--cancelled { border-left-color: #8f2020; opacity: .78; }
+.live-row--cancelled { border-left-color: #8f2020; background: var(--surface-soft, #faf7f8); }
 .live-row__main { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
 .live-row__head { display: flex; flex-wrap: wrap; gap: 6px; }
 .live-row__title { margin: 0; font-size: 1rem; }
@@ -102,9 +103,14 @@
 
 @media screen and (max-width: 767px) {
   .live-row { flex-direction: column; }
+  /* Open Meet keeps a full row; Copy link / Edit / Cancel share one row instead of stacking. */
   .live-row__actions { width: 100%; }
-  .live-row__actions .btn, .live-row__actions form { flex: 1 1 auto; }
-  .live-row__actions .btn { width: 100%; justify-content: center; }
+  .live-row__actions > .btn, .live-row__actions > form { flex: 1 1 0; min-width: 0; }
+  .live-row__actions > .btn--primary { flex-basis: 100%; }
+  .live-row__actions .btn { width: 100%; justify-content: center; padding-inline: 8px; }
+  .live-row__actions .btn:is(.btn--ghost, .btn--secondary) { border: 1px solid var(--border); background: var(--surface); }
+  .live-card__actions { display: flex; flex-direction: column; align-items: stretch; }
+  .live-card__actions .btn { width: 100%; justify-content: center; }
   .live-connection__actions { width: 100%; }
   .live-connection__actions .btn { flex: 1 1 auto; justify-content: center; }
   /* Join is the whole point of the student screen on a phone. */

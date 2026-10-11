@@ -92,14 +92,14 @@
 .ek-results .fee-student-result:hover,.ek-results .fee-student-result:focus{background:#f7f1f3;outline:none}.ek-results .fee-student-copy{flex:1;min-width:0}.ek-results .fee-student-copy strong{font-weight:600;font-size:14px;overflow-wrap:anywhere}
 .ek-results .fee-student-balance{text-align:right;font-size:12px}.ek-results .fee-student-balance small{display:block;color:var(--text-secondary)}.ek-results .fee-student-balance.is-due strong{color:#c0263f}.ek-results svg{width:16px;color:#b9a7ae}
 .ek-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.ek-tile{padding:12px 14px;border:1px solid #ece4e7;border-radius:11px;background:#faf7f8;min-width:0}.ek-tile span{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}.ek-tile svg{width:12px;height:12px}.ek-tile strong{display:block;margin-top:4px;font-size:14px;color:var(--primary-dark,#3b0b18);overflow-wrap:anywhere}
+.ek-tile{padding:12px 14px;border:1px solid #ece4e7;border-radius:11px;background:#faf7f8;min-width:0}.ek-tile span{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#746a6e}.ek-tile svg{width:12px;height:12px}.ek-tile strong{display:block;margin-top:4px;font-size:14px;color:var(--primary-dark,#3b0b18);overflow-wrap:anywhere}
 .ek-month{margin-bottom:12px}
 .ek-month label,.ek-date label,.ek-total>label,.ek-total>span{display:flex;align-items:center;justify-content:inherit;gap:6px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#7b6a71}.ek-month label svg,.ek-date label svg{width:13px;height:13px}
 .ek-pay{display:grid;gap:14px}
 .ek-month-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.ek-month{margin:0}@media screen and (max-width:520px){.ek-month-row{grid-template-columns:1fr}}
 .ek-invoice-ref{display:flex;align-items:center;gap:6px;margin:0;font-size:12px;color:var(--text-secondary)}.ek-invoice-ref svg{width:14px}
 .ek-table-wrap{border:1px solid #ece4e7;border-radius:12px;overflow:hidden}
-.ek-table{width:100%;border-collapse:collapse;font-size:13px}.ek-table th{padding:11px 14px;background:#f4eff1;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#5d4b52;text-align:left}.ek-table th:last-child,.ek-table td:last-child{text-align:right;width:150px}.ek-table th:first-child,.ek-table td:first-child{width:52px;color:#8a7a80}
+.ek-table{width:100%;border-collapse:collapse;font-size:13px}.ek-table th{padding:11px 14px;background:#f4eff1;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#5d4b52;text-align:left}.ek-table th:last-child,.ek-table td:last-child{text-align:right;width:150px}.ek-table th:first-child,.ek-table td:first-child{width:52px;color:#746a6e}
 .ek-table td{padding:7px 14px;border-top:1px solid #f1eaed;font-weight:600;color:#3b2a31}
 .ek-amount{width:130px;max-width:100%;min-height:36px;padding:6px 10px;border:1px solid #e2d8dc;border-radius:8px;text-align:right;font:inherit;font-weight:700;color:var(--primary-dark,#3b0b18);background:#fff}.ek-amount:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(122,22,50,.1)}
 .ek-fixed{display:inline-block;padding:6px 10px;font-weight:700}.ek-row-muted td{background:#fcfafb}.ek-row-paid td{color:#2f7a4a}
@@ -158,11 +158,11 @@
 /* ---- Shared summary tiles (also used by Salary Sheet) ------------------------------------ */
 .ss-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
 .ss-tile{padding:14px 16px;border:1px solid var(--border);border-radius:14px;background:var(--surface,#fff);min-width:0}
-.ss-tile span{display:block;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}
+.ss-tile span{display:block;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#746a6e}
 .ss-tile strong{display:block;margin-top:6px;font-size:19px;color:var(--primary-dark,#3b0b18);overflow-wrap:anywhere}
 .ss-tile small{display:block;margin-top:2px;font-size:11.5px;color:var(--text-secondary)}
 .ss-tile--good strong{color:#2f7a4a}.ss-tile--warn strong{color:#b45309}.fd-tile--danger strong{color:#c0263f}
-.ss-muted{color:#a3949a;font-size:12px}
+.ss-muted{color:#746a6e;font-size:12px}
 .print-only{display:none}
 
 /* ---- Fee Defaulters -------------------------------------------------------------------- */
@@ -180,7 +180,7 @@
 .fd-table td{padding:11px 12px;border-top:1px solid #f1eaed;vertical-align:top}
 .fd-table td small{display:block;margin-top:3px;font-size:11.5px;color:var(--text-secondary)}
 .fd-table td small a{color:var(--primary);font-weight:700;text-decoration:none}
-.fd-sr{width:34px;color:#a3949a}
+.fd-sr{width:34px;color:#746a6e}
 .fd-student strong{font-size:13.5px;color:#2b1a21}
 .fd-num{text-align:right!important;white-space:nowrap}
 .fd-due strong{font-size:15px;color:#c0263f}
@@ -188,7 +188,7 @@
 .fd-month{display:inline-flex;align-items:center;gap:5px;margin:0 6px 6px 0;padding:4px 9px;border:1px solid #efd9df;border-radius:999px;background:#fff7f9;font-size:11.5px;font-weight:600;color:#5d4b52;white-space:nowrap}
 .fd-month b{color:#3b2a31}.fd-month em{font-style:normal;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px}
 .fd-month.is-overdue{border-color:#f3b9c4;background:#fdecee;color:#9b1c31}.fd-month.is-overdue em{color:#c0263f}
-.fd-month.is-unbilled{border-style:dashed;background:#fff;color:#8a7a80}
+.fd-month.is-unbilled{border-style:dashed;background:#fff;color:#746a6e}
 .fd-actions__row{display:flex;flex-wrap:wrap;gap:6px}.fd-actions__row form{margin:0}
 .fd-table tfoot td{padding:12px;border-top:2px solid #eadfe3;background:#fbf8f9}
 @media screen and (max-width:1100px){.fd-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.fd-filters__search{grid-column:1/-1}.fd-toggle,.fd-filters__actions{grid-column:1/-1}}
@@ -200,7 +200,7 @@
   .fd-table thead{display:none}
   .fd-table tbody tr{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin:0 0 12px;padding:14px;border:1px solid var(--border);border-radius:14px;background:#fff}
   .fd-table tbody td{padding:0;border:0;min-width:0;text-align:left!important;white-space:normal}
-  .fd-table tbody td::before{content:attr(data-label);display:block;margin-bottom:4px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#8a7a80}
+  .fd-table tbody td::before{content:attr(data-label);display:block;margin-bottom:4px;font-size:10px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:#746a6e}
   .fd-table td.fd-sr{position:absolute;top:12px;right:14px;width:auto}.fd-table td.fd-sr::before{display:none}
   .fd-table td.fd-student{grid-column:1/-1;padding-right:30px}.fd-table td.fd-student::before{display:none}
   .fd-table td.fd-months,.fd-table td.fd-actions{grid-column:1/-1}

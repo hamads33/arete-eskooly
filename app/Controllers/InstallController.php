@@ -13,8 +13,8 @@ final class InstallController extends Controller
     public function index(Request $request): Response
     {
         return $this->view('install/index', [
-            'pageTitle' => 'Install Arete',
-            'pageDescription' => 'Install Arete Coaching Center for fast, secure access from your home screen.',
+            'pageTitle' => 'Install ' . brand()['short'],
+            'pageDescription' => 'Install ' . brand()['name'] . ' for fast, secure access from your home screen.',
             'hideInstallBanner' => true,
         ], 'layouts/install');
     }

@@ -31,5 +31,11 @@ require BASE_PATH . '/routes/web.php';
 require BASE_PATH . '/routes/portal.php';
 require BASE_PATH . '/routes/auth.php';
 require BASE_PATH . '/routes/api.php';
+if (\App\Platform\PlatformConfig::enabled()) {
+    require BASE_PATH . '/routes/platform.php';
+}
+if (school_slug() !== '') {
+    require BASE_PATH . '/routes/school.php';
+}
 
 return $app;

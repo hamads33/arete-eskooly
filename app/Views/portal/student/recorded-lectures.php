@@ -40,7 +40,7 @@ $months=[];foreach($folder['lectures'] as$l)$months[substr($l['publish_date'],0,
 <a class="lecture-tile" href="<?=url('/portal/student/recorded-lectures/'.$l['id'])?>" data-lecture-card data-text="<?=e(mb_strtolower($l['title'].' '.($l['chapter']??'').' '.($l['teacher']??'')))?>">
 <span class="lecture-thumb"><?php if($thumb):?><img src="<?=e($thumb)?>" alt="" loading="lazy"><?php elseif(!empty($l['video_path'])):?><video src="<?=e(url('/portal/student/recorded-lectures/'.$l['id'].'/video'))?>#t=2" preload="metadata" muted playsinline tabindex="-1" aria-hidden="true"></video><?php else:?><i class="lecture-thumb__icon" data-lucide="clapperboard"></i><?php endif?><span class="lecture-thumb__play"><i data-lucide="play"></i></span></span>
 <span class="lecture-tile__row"><span class="lecture-avatar" aria-hidden="true"><?=e(mb_strtoupper(mb_substr(trim((string)($l['teacher']?:$l['subject'])),0,1)))?></span>
-<span class="lecture-tile__body"><span class="lecture-tile__title"><?=e($l['title'])?></span><span class="lecture-tile__meta"><?=e($l['teacher']?:'Arete')?></span><span class="lecture-tile__meta"><?=e($l['chapter']?:'General topic')?></span></span></span>
+<span class="lecture-tile__body"><span class="lecture-tile__title"><?=e($l['title'])?></span><span class="lecture-tile__meta"><?=e($l['teacher']?:brand()['short'])?></span><span class="lecture-tile__meta"><?=e($l['chapter']?:'General topic')?></span></span></span>
 </a>
 <?php endforeach?>
 </div>

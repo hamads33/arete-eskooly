@@ -12,7 +12,7 @@ $instituteName = $institute['name'] ?? 'Institute';
 ?>
 <header class="app-header">
   <a class="brand" href="<?= e(url($home)) ?>" aria-label="<?= e($instituteName) ?> portal">
-    <span class="brand__mark"><img src="<?= asset('images/arete-logo.png') ?>" alt="Institute logo"></span>
+    <span class="brand__mark"><img src="<?= e(brand()['logo']) ?>" alt="Institute logo"></span>
     <span class="brand__text">
       <strong data-field="institute-name"><?= e($instituteName) ?></strong>
       <span><?= e($currentUserRole) ?> Portal</span>
@@ -29,7 +29,7 @@ $instituteName = $institute['name'] ?? 'Institute';
     <div class="header-spacer"></div>
     <div class="header-actions">
       <div class="dropdown" data-dropdown>
-        <button class="profile-trigger" type="button" aria-label="Open profile menu" aria-expanded="false" data-dropdown-trigger>
+        <button class="profile-trigger" type="button" aria-expanded="false" data-dropdown-trigger>
           <span class="avatar" aria-hidden="true"><?= e($currentUserInitials ?: 'U') ?></span>
           <span class="profile-trigger__copy">
             <strong data-field="current-user-name"><?= e($currentUserName) ?></strong><span data-field="user-role"><?= e($currentUserRole) ?></span>

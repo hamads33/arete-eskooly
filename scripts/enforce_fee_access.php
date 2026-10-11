@@ -6,7 +6,7 @@ declare(strict_types=1);
  *
  * Cron (daily at 06:00):  0 6 * * * php /path/to/app/scripts/enforce_fee_access.php
  */
-define('BASE_PATH', dirname(__DIR__));
+defined('BASE_PATH') || define('BASE_PATH', dirname(__DIR__));
 require BASE_PATH . '/vendor/autoload.php';
 $app = require BASE_PATH . '/bootstrap/app.php';
 

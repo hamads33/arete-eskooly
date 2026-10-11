@@ -12,10 +12,11 @@ use App\Services\{AccountAccess,CredentialService};
 use App\Services\Sms\{SmsAutomation,SmsQueue};
 
 if (($argv[1] ?? '') !== '--seed') { fwrite(STDERR, "Local demo data. Run with --seed\n"); exit(1); }
-define('BASE_PATH', dirname(__DIR__));
+defined('BASE_PATH') || define('BASE_PATH', dirname(__DIR__));
 require BASE_PATH . '/vendor/autoload.php';
 $app = require BASE_PATH . '/bootstrap/app.php';
-if ((string) $app->config('app.env', '') === 'production') { fwrite(STDERR, "Refusing to seed demo data in production.\n"); exit(1); }
+// Signed-up schools (SCHOOL_SLUG set) may load demo data; the main Arete portal in production never.
+if ((string) $app->config('app.env', '') === 'production' && school_slug() === '') { fwrite(STDERR, "Refusing to seed demo data in production.\n"); exit(1); }
 
 const PASSWORD = 'Showcase#2026';
 $db = $app->database();
@@ -137,7 +138,8 @@ $db->query("INSERT INTO live_classes(institute_id,provider,title,audience_type,t
 // ---- SMS: a few messages so the SMS Center has something to show -----------------------------------
 (new SmsAutomation($db))->ensureDefaults($institute);
 $queue = new SmsQueue($db);
-foreach (['03001234501' => 'Dear Imran Khan, Ayesha was marked Absent today. (Showcase)', '03001234502' => 'Dear Naveed Ahmed, fee of Rs 13,500 for Bilal is pending. (Showcase)'] as $phone => $text) {
+// Not on a signed-up school: its demo numbers must never be texted once it pairs a gateway.
+if (school_slug() === '') foreach (['03001234501' => 'Dear Imran Khan, Ayesha was marked Absent today. (Showcase)', '03001234502' => 'Dear Naveed Ahmed, fee of Rs 13,500 for Bilal is pending. (Showcase)'] as $phone => $text) {
     $queue->enqueue($institute, ['phone_number' => $phone, 'message' => $text, 'recipient_type' => 'guardian', 'message_type' => 'general', 'dedupe_key' => 'showcase:' . $phone, 'created_by' => $admin]);
 }
 

@@ -40,7 +40,7 @@ $filterText = trim(implode(' · ', array_filter([$f['month'] ? date('F Y', strto
 <?php if (!$defaulters): ?>
 <section class="module-card"><div class="compact-empty"><h3>No defaulters</h3><p><?= $qs() !== '' ? 'Nobody matches these filters.' : 'Every student is paid up. 🎉' ?></p></div></section>
 <?php else: ?>
-<section class="module-card fd-card"><div class="fd-table-wrap"><table class="fd-table no-table-tools">
+<section class="module-card fd-card"><div class="fd-table-wrap"><table class="fd-table no-table-tools mobile-register">
 <thead><tr><th>#</th><th>Student</th><th>Guardian</th><th>Months due</th><th class="fd-num">Total due</th><th>Last paid</th><th class="no-print">Actions</th></tr></thead>
 <tbody>
 <?php foreach ($defaulters as $n => $x):

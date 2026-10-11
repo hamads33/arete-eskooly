@@ -113,6 +113,9 @@ final class EmployeePortalController extends PortalController
 
     public function homework(Request $request): Response
     {
+        if (can('homework.view')) {
+            return Response::redirect(url('/admin/homework'));
+        }
         if (!$employee = $this->repo()->employeeByUser($this->userId())) {
             return $this->forbidden();
         }

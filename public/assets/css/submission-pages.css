@@ -53,22 +53,23 @@
 .mobile-test-back{display:none}
 @media screen and (max-width:767px){
   .mobile-test-back{display:inline-flex;align-items:center;min-height:44px;font-size:14px;font-weight:700;color:var(--primary);text-decoration:none}
-  .test-submit-bar{position:sticky;bottom:0;z-index:6;justify-content:space-between;margin:0 -16px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:rgba(255,255,255,.97);box-shadow:0 -6px 18px rgba(42,20,28,.07)}
-  .test-submit-bar .btn{flex:1;justify-content:center}
-  .test-submit-bar__summary{font-size:13px;white-space:nowrap}
-  .student-test-hero{position:static}
-  .page-card{grid-template-columns:88px minmax(0,1fr);gap:10px;padding:9px}
-  .page-card__thumb{width:88px}
-  .page-card__actions{grid-template-columns:1fr 1fr}
-  .page-card__actions .page-card__remove{grid-column:1/-1}
+  /* One solid, full-bleed row (bleeds over the 12px page gutter): content scrolling underneath never
+     shows through, and the summary sits beside the button instead of adding a second row. */
+  .test-submit-bar{position:sticky;bottom:0;z-index:6;display:flex;flex-wrap:nowrap;justify-content:space-between;margin:0 -12px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:#fff;box-shadow:0 -6px 18px rgba(42,20,28,.07)}
+  .test-submit-bar .btn{flex:1 1 auto;min-width:0;min-height:50px;justify-content:center}
+  .test-submit-bar__summary{flex:0 1 auto;min-width:0;font-size:13px;line-height:1.3}
+  .test-submit-bar__summary:empty{display:none}
+  .student-test-hero{position:static;padding:16px;gap:12px}
+  /* Page cards: View / Retake on one row; icon-only Up / Down (both aria-labelled) and Remove on the next. */
+  .page-card{grid-template-columns:84px minmax(0,1fr);gap:10px;padding:9px}
+  .page-card__thumb{width:84px}
+  .page-card__actions{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .page-card__actions>:is(:nth-child(-n+2),.page-card__remove){grid-column:span 2}
+  .page-card__actions>:is([data-up],[data-down])>span{display:none}
+  .page-card__actions .btn.btn--ghost{min-height:44px!important;padding:0 6px;font-size:13px}
   .pages-box__more{display:grid;grid-template-columns:1fr 1fr}
   .pages-box__more-label{grid-column:1/-1}
   .pages-box__start{grid-template-columns:minmax(0,1fr)}
-  .page-card__actions .btn.btn--ghost{min-height:44px!important}
-  .test-submit-bar{margin:0;padding:12px 0 calc(12px + env(safe-area-inset-bottom));flex-wrap:wrap;box-shadow:none}
-  .test-submit-bar__summary{width:100%;text-align:center}
-  .test-submit-bar .btn{width:100%;flex-basis:100%;min-height:52px}
-  .student-test-hero{padding:16px;gap:12px}
   .student-test-hero h1{font-size:22px;line-height:1.25}
   .student-test-hero p{font-size:14px;line-height:1.5}
   .attempt-progress{display:flex;align-items:center;flex-wrap:wrap;gap:8px;text-align:left;min-width:0}
@@ -85,7 +86,9 @@
 
 /* layers */
 html.pages-layer-open,html.pages-layer-open body{overflow:hidden}
-html.pages-layer-open .toast{z-index:1300}
+/* Over the camera, viewer and confirm sheet the bottom edge holds the controls: toasts go to the top,
+   below the camera/viewer bar, so they never cover the shutter or a sheet's question. */
+html.pages-layer-open .toast{z-index:1300;top:calc(64px + env(safe-area-inset-top));bottom:auto}
 .pages-sheet{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:16px;background:rgba(20,8,12,.55)}
 .pages-sheet[hidden]{display:none}
 .pages-sheet__card{width:min(440px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:22px;border-radius:18px;background:#fff;box-shadow:0 24px 60px rgba(20,8,12,.3)}
@@ -126,7 +129,9 @@ html.pages-layer-open .toast{z-index:1300}
 .pages-camera__tool svg{width:18px;height:18px}
 .pages-camera__done{background:#fff;color:var(--primary-dark)}
 .pages-camera__stage{position:relative;flex:1;min-height:0;display:grid;place-items:center;overflow:hidden}
-.pages-camera__stage video,.pages-camera__shot{width:100%;height:100%;object-fit:contain;background:#000}
+/* Absolutely filled so the preview and the captured photo are always letterboxed inside the stage
+   (in landscape the photo previously took its natural height and was cropped). */
+.pages-camera__stage video,.pages-camera__shot{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
 .pages-camera__stage video[hidden],.pages-camera__shot[hidden]{display:none}
 .pages-camera__guide{position:absolute;inset:6% 8%;border:2px dashed rgba(255,255,255,.45);border-radius:14px;pointer-events:none}
 .pages-camera__shot:not([hidden])~.pages-camera__guide{display:none}

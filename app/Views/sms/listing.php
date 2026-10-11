@@ -35,7 +35,7 @@ $hasFilters = array_filter($filters) || $batch;
 <section class="module-card">
   <div class="module-card__body">
   <?php if (!$rows): ?>
-    <div class="compact-empty sms-empty"><i data-lucide="<?= $empty[0] ?>"></i><h3><?= $hasFilters ? 'No messages match these filters.' : e($empty[1]) ?></h3><p><?= $hasFilters ? 'Try widening the filters.' : e($empty[2]) ?></p></div>
+    <div class="compact-empty sms-empty"><i data-lucide="<?= $empty[0] ?>"></i><h2><?= $hasFilters ? 'No messages match these filters.' : e($empty[1]) ?></h2><p><?= $hasFilters ? 'Try widening the filters.' : e($empty[2]) ?></p></div>
   <?php else: ?>
     <div class="table-scroll"><table class="data-table sms-table">
       <thead><tr>
