@@ -67,8 +67,25 @@ final class FeeVouchersController extends AdminPageController
             $service = new FeeVoucherService($this->app->database());
             $students = $service->students((int)$institute['id'], $scope, (int)$r->input('class'), (int)$r->input('student_id'), $month);
             if (!$students) throw new \InvalidArgumentException('No students match this selection.');
+            // Extra charges rewrite the invoices they touch, so charging more than one student must be
+            // confirmed by typing the head count; a stray "All Students" tab can no longer bill everyone.
+            if ($extras && $scope !== 'student' && trim((string)$r->input('confirm_extra_count')) !== (string)count($students)) {
+                throw new \InvalidArgumentException('Nothing was charged. These extra charges would be added to '.count($students).' students ('.($scope === 'all' ? 'All Students' : 'the whole class').'). To charge one student, use the Student Wise tab. To really charge all '.count($students).', type '.count($students).' in the confirmation box.');
+            }
+            // Class / All Students runs leave fully paid invoices alone: a bulk charge never lands on a
+            // student who has already paid the month, and printing skips them unless asked not to.
+            if ($scope !== 'student' && ($extras || (string)$r->input('skip_paid', '1') === '1')) {
+                $paid = array_map('intval', $this->app->database()->query("SELECT student_id FROM fee_invoices WHERE fee_month=:m AND status='paid' AND voided_at IS NULL", ['m' => $month])->fetchAll(\PDO::FETCH_COLUMN));
+                $students = array_values(array_filter($students, static fn(array $s): bool => !in_array((int)$s['id'], $paid, true)));
+                if (!$students) throw new \InvalidArgumentException('Every student in this selection has already paid this month. Nothing was generated or charged.');
+            }
+            $before = [];
+            if ($extras) {
+                $feeRepo = new FeeRepository($this->app->database());
+                foreach ($students as $s) if ($inv = $feeRepo->invoice((int)$s['id'], $month)) $before[$inv['invoice_no']] = array_map(static fn(array $i): array => [$i['particular'], (float)$i['amount']], $feeRepo->items((int)$inv['id']));
+            }
             $vouchers = $service->generate((int)$institute['id'], $month, $students, (int)user()['id'], trim((string)$r->input('due_date')) ?: null, $extras);
-            if ($extras) (new \App\Repositories\PakistanErpRepository($this->app->database()))->audit((int)$institute['id'], (int)user()['id'], 'fee.extra_charges_added', 'fee_month', null, ['month' => $month, 'scope' => $scope, 'students' => count($vouchers), 'charges' => $extras]);
+            if ($extras) (new \App\Repositories\PakistanErpRepository($this->app->database()))->audit((int)$institute['id'], (int)user()['id'], 'fee.extra_charges_added', 'fee_month', null, ['month' => $month, 'scope' => $scope, 'students' => count($vouchers), 'charges' => $extras, 'before' => $before]);
             if (!$vouchers) throw new \InvalidArgumentException('All invoices in this selection are voided. No vouchers were generated.');
         } catch (\InvalidArgumentException $e) {
             Flash::add('error', $e->getMessage());

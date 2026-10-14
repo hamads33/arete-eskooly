@@ -23,6 +23,14 @@ $z = match (true) {
 };
 $fmtDate = static fn(?string $d): string => $d ? date('d M Y', strtotime($d)) : 'Not specified';
 // Escaped text with line breaks; **text** prints bold (so admins can emphasise parts of the instructions).
+// Fully paid invoices carry a rotated "PAID" stamp impression (SVG, so mPDF can rotate and fade it).
+$paidStamp = static function (array $invoice): string {
+    $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150" viewBox="0 0 300 150"><g transform="rotate(-12 150 75)" opacity="0.85" fill="none" stroke="#1d7a46">'
+        .'<rect x="22" y="22" width="256" height="106" rx="14" stroke-width="7"/><rect x="34" y="34" width="232" height="82" rx="8" stroke-width="2.5"/>'
+        .'<text x="150" y="86" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="54" font-weight="bold" fill="#1d7a46" stroke="none" letter-spacing="8">PAID</text>'
+        .'<text x="150" y="108" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="13" font-weight="bold" fill="#1d7a46" stroke="none" letter-spacing="2">RECEIVED IN FULL</text></g></svg>';
+    return '<div style="text-align:right;margin:2.5mm 3mm 3mm 0"><img src="data:image/svg+xml;base64,'.base64_encode($svg).'" style="width:46mm;height:23mm"></div>';
+};
 $richText = static fn(string $t): string => nl2br(preg_replace('/\*\*(.+?)\*\*/s', '<strong>$1</strong>', e(trim($t))));
 ?>
 <style>
@@ -80,7 +88,7 @@ body{font-family:dejavusans,sans-serif;font-size:<?= $z['font'] ?>pt;color:#211a
 <tr class="balance"><td class="sr"></td><td>Payable by Due Date<?= !empty($invoice['due_date']) ? ' ('.e($fmtDate($invoice['due_date'])).')' : '' ?></td><td class="amount"><?= e($money($invoice['remaining_amount'])) ?></td></tr>
 <?php if($fineAfterDue>0&&(float)$invoice['remaining_amount']>0): ?><tr class="late"><td class="sr"></td><td>Payable After Due Date</td><td class="amount"><?= e($money((float)$invoice['remaining_amount']+$fineAfterDue)) ?></td></tr><?php endif ?>
 </tbody></table>
-<?php if($banks): ?><div class="bank"><div class="label" style="margin-bottom:0.8mm">PAY AT</div><?php foreach($banks as $bank): ?><div style="margin-bottom:0.8mm"><strong><?= e($bank['bank_name']) ?></strong> · A/C <strong><?= e($bank['account_number']) ?></strong><?= !empty($bank['bank_address']) ? ' · '.e($bank['bank_address']) : '' ?><?php if(trim((string)($bank['instructions']??''))!==''): ?><br><span style="color:#71676c"><?= $richText((string)$bank['instructions']) ?></span><?php endif ?></div><?php endforeach ?></div><?php endif ?>
+<?php if(($invoice['status'] ?? '') === 'paid' && (float)$invoice['remaining_amount'] <= 0): ?><?= $paidStamp($invoice) ?><?php endif ?><?php if($banks): ?><div class="bank"><div class="label" style="margin-bottom:0.8mm">PAY AT</div><?php foreach($banks as $bank): ?><div style="margin-bottom:0.8mm"><strong><?= e($bank['bank_name']) ?></strong> · A/C <strong><?= e($bank['account_number']) ?></strong><?= !empty($bank['bank_address']) ? ' · '.e($bank['bank_address']) : '' ?><?php if(trim((string)($bank['instructions']??''))!==''): ?><br><span style="color:#71676c"><?= $richText((string)$bank['instructions']) ?></span><?php endif ?></div><?php endforeach ?></div><?php endif ?>
 <?php if(trim((string)($voucherInstructions??''))!==''): ?><div class="bank instructions"><div class="label" style="margin-bottom:0.8mm">IMPORTANT INSTRUCTIONS</div><?= $richText((string)$voucherInstructions) ?></div><?php endif ?>
 <?php if($fineAfterDue>0): ?><div class="note">A fine of <?= e($money($fineAfterDue)) ?> applies after the due date.</div><?php endif ?>
 <?php if(!empty($template['body_html'])): ?><div class="note"><?= $templateService->renderText($template['body_html'],array_merge($placeholders,['student_name'=>$student['student_name'],'registration_no'=>$student['registration_no']]),$type) ?></div><?php endif ?>

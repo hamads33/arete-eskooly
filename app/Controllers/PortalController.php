@@ -162,7 +162,33 @@ abstract class PortalController extends Controller
             ]);
         }
 
+        // Teachers keep one sidebar everywhere: these portal entries plus the teaching modules
+        // their role opens under /admin (the same filtered list the admin shell would show,
+        // minus the institute dashboard). Admin pages swap this in too; see Controller::view().
+        if (self::isTeacherShell()) {
+            $seen = [];
+            foreach ($employeeNav as $e) { $seen[$e['route'] ?? ''] = true; $seen[strtolower($e['label'])] = true; }
+            $modules = [];
+            foreach ($this->navigationFor($this->app->config('navigation', [])) as $entry) {
+                if ($entry['key'] === 'dashboard' || isset($seen[$entry['route'] ?? '']) || isset($seen[strtolower($entry['label'])])) continue;
+                $modules[] = $entry;
+            }
+            array_splice($employeeNav, 1, 0, $modules);
+        }
+
         return $employeeNav;
+    }
+
+    /** A teacher without full access, and not also an admin or principal. */
+    public static function isTeacherShell(): bool
+    {
+        return hasRole('teacher') && !can('*') && !hasRole('admin') && !hasRole('principal');
+    }
+
+    /** The teacher's sidebar, for admin pages rendered for a teacher. */
+    public static function teacherNavigation(\App\Core\App $app): array
+    {
+        return (new class($app) extends PortalController {})->navigation('employee');
     }
 
     /** Whether the signed-in employee holds at least one active teaching assignment. */

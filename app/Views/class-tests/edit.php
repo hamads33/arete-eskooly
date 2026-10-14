@@ -5,13 +5,14 @@
 <form method="post" action="<?=e(url('/admin/class-tests/'.(int)$test['id'].'/update'))?>" class="module-form">
 <?=csrf_field()?>
 <div class="module-field"><label for="title">Title</label><input class="module-input" id="title" name="title" type="text" required maxlength="150" value="<?=e($test['title'])?>"></div>
+<div class="module-field"><label for="subject">Subject</label><select class="module-select" id="subject" name="subject"><?php foreach(($subjects??[]) as $sub):?><option value="<?=(int)$sub['id']?>" <?=(int)$sub['id']===(int)$test['subject_id']?'selected':''?>><?=e($sub['name'])?></option><?php endforeach?></select><small>Marks entered under the wrong subject? Pick the right subject here and save. The marks move with the test.</small></div>
 <div class="module-field"><label for="date">Test Date</label><input class="module-input" id="date" name="date" type="date" required value="<?=e($test['test_date'])?>"></div>
 <div class="module-field"><label for="total_marks">Total Marks</label><input class="module-input" id="total_marks" name="total_marks" type="number" step="0.01" min="1" required value="<?=e((string)$test['total_marks'])?>"></div>
 <div class="filter-actions"><button class="btn btn--primary" type="submit">Save Details</button></div>
 </form>
 </div></section>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Marks</h2><p>Active students in <?=e($test['class_name'])?>. Leave blank to skip a student.</p></div></header><div class="module-card__body">
+<section class="module-card"><header class="module-card__header"><div><h2>Marks</h2><p>Active students in <?=e($test['class_name'])?>. Clear a box and save to remove that student's mark.</p></div></header><div class="module-card__body">
 <form method="post" action="<?=e(url('/admin/class-tests/'.(int)$test['id'].'/marks'))?>">
 <?=csrf_field()?>
 <div class="table-scroll"><table class="data-table"><thead><tr><th>Registration</th><th>Student</th><th>Obtained (max <?=e((string)$test['total_marks'])?>)</th><th>Absent</th><th>Remarks</th></tr></thead><tbody>

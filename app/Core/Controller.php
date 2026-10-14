@@ -40,6 +40,11 @@ abstract class Controller
             'inlineScripts' => [],
             'navigation' => $this->navigationFor($this->app->config('navigation', [])),
         ];
+        // Teachers see their portal sidebar on the admin teaching pages too, so the menu does
+        // not change under them when they open Recorded Lectures, Online Tests, etc.
+        if ($layout === 'layouts/admin' && !array_key_exists('navigation', $data) && \App\Controllers\PortalController::isTeacherShell()) {
+            $defaults['navigation'] = \App\Controllers\PortalController::teacherNavigation($this->app);
+        }
         return Response::html(View::render($view, array_replace($defaults, $data), $layout));
     }
 
@@ -48,7 +53,7 @@ abstract class Controller
      * AdminAreaMiddleware will actually allow. Mirrors that middleware's rules: the required
      * permission comes from the route's module segment, and an unmapped module is admin-only.
      */
-    private function navigationFor(array $navigation): array
+    protected function navigationFor(array $navigation): array
     {
         if ($navigation === [] || can('*')) {
             return $navigation;

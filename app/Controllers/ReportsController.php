@@ -86,7 +86,47 @@ final class ReportsController extends AdminPageController
             'student'=>$student,
             'progress'=>$student?$this->reporting()->studentProgress($i,(int)$student['id']):null,
             'onlineTests'=>$student?(new \App\Repositories\OnlineTestRepository($this->app->database()))->progressSummary($i,(int)$student['id']):null,
+            'subjects'=>(new SupportRepository($this->app->database()))->subjects($i,$student?(int)$student['class_id']:0),
+            'filters'=>$filters=$this->progressFilters($r),
+            'assessments'=>$student?$this->assessments($i,(int)$student['id'],$filters):[],
         ]);
+    }
+
+    /** Optional subject / type / date filters for the progress report; an empty date means no limit. */
+    private function progressFilters(Request$r):array{
+        $date=static function(string$v):string{$d=\DateTimeImmutable::createFromFormat('Y-m-d',$v);return$d!==false&&$d->format('Y-m-d')===$v?$v:'';};
+        $from=$date((string)$r->query('from',''));$to=$date((string)$r->query('to',''));
+        if($from!==''&&$to!==''&&$from>$to)[$from,$to]=[$to,$from];
+        $type=(string)$r->query('type','');
+        return['subject'=>(int)$r->query('subject',0),'type'=>in_array($type,['class_test','exam','online_test'],true)?$type:'','from'=>$from,'to'=>$to];
+    }
+
+    /**
+     * Every assessment a student has a record for: class tests, exam papers and online tests, newest
+     * first. Absent and not-yet-marked entries are kept and flagged, never counted as zero.
+     */
+    private function assessments(int$i,int$student,array$f):array{
+        $db=$this->app->database();$rows=[];$p=['s'=>$student,'i'=>$i];
+        if($f['type']===''||$f['type']==='class_test'){
+            foreach($db->query("SELECT ct.test_date d,ct.title,s.name subject,ct.subject_id,m.obtained_marks obtained,ct.total_marks total,m.is_absent FROM class_test_marks m JOIN class_tests ct ON ct.id=m.class_test_id LEFT JOIN subjects s ON s.id=ct.subject_id WHERE m.student_id=:s AND ct.institute_id=:i",$p)->fetchAll() as$r)
+                $rows[]=$r+['type'=>'class_test','state'=>(int)$r['is_absent']?'absent':'scored'];
+        }
+        if($f['type']===''||$f['type']==='exam'){
+            foreach($db->query("SELECT e.start_date d,e.name title,s.name subject,es.subject_id,em.obtained_marks obtained,es.total_marks total,em.is_absent,e.status exam_status FROM exam_marks em JOIN exam_subjects es ON es.id=em.exam_subject_id JOIN exams e ON e.id=es.exam_id LEFT JOIN subjects s ON s.id=es.subject_id WHERE em.student_id=:s AND e.institute_id=:i",$p)->fetchAll() as$r)
+                $rows[]=$r+['type'=>'exam','state'=>(int)$r['is_absent']?'absent':'scored'];
+        }
+        if($f['type']===''||$f['type']==='online_test'){
+            foreach($db->query("SELECT DATE(COALESCE(a.submitted_at,a.started_at)) d,t.title,s.name subject,t.subject_id,a.total_score obtained,(SELECT SUM(q.marks) FROM online_test_questions q WHERE q.test_id=t.id) total,0 is_absent,a.status attempt_status,a.published_at FROM online_test_attempts a JOIN online_tests t ON t.id=a.test_id LEFT JOIN subjects s ON s.id=t.subject_id WHERE a.student_id=:s AND t.institute_id=:i",$p)->fetchAll() as$r){
+                $state=$r['attempt_status']!=='marked'?'unmarked':($r['published_at']===null?'unpublished':'scored');
+                if($state==='scored'&&(float)$r['total']<=0)$state='no_total';
+                $rows[]=$r+['type'=>'online_test','state'=>$state];
+            }
+        }
+        $rows=array_values(array_filter($rows,static fn(array$r):bool=>($f['subject']===0||(int)$r['subject_id']===$f['subject'])&&($f['from']===''||(string)$r['d']>=$f['from'])&&($f['to']===''||(string)$r['d']<=$f['to'])));
+        foreach($rows as&$r)$r['percentage']=$r['state']==='scored'&&(float)$r['total']>0?round((float)$r['obtained']/(float)$r['total']*100,2):null;
+        unset($r);
+        usort($rows,static fn(array$a,array$b):int=>[(string)$b['d'],$a['type']]<=>[(string)$a['d'],$b['type']]);
+        return$rows;
     }
 
     public function attendanceShortage(Request$r):Response{

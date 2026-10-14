@@ -9,6 +9,8 @@
     </div>
     <nav><ul class="nav-list">
 <?php foreach ($navigation as $item):
+    // Teachers have no institute dashboard; this entry takes them back to their own portal.
+    if ($item['key'] === 'dashboard' && (hasRole('teacher') && !can('*') && !hasRole('admin') && !hasRole('principal'))) { $item['label'] = 'My Portal'; $item['route'] = '/portal/employee'; }
     $isActive = $activeMenu === $item['key'];
     $hasChildren = $item['children'] !== [];
     $itemLocked = (bool)$item['locked'] || (!$hasChildren && !$item['route']);

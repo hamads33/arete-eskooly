@@ -7,11 +7,12 @@ $currentUserInitials = strtoupper(implode('', array_map(static fn (string $part)
 ?>
 <header class="app-header">
       <?php $instituteName = $institute['name'] ?? ($demo['instituteName'] ?? 'Arete Coaching Center'); ?>
-      <a class="brand" href="<?= url('/admin/dashboard') ?>" aria-label="<?= e($instituteName) ?> dashboard">
+      <?php $teacherShell = (hasRole('teacher') && !can('*') && !hasRole('admin') && !hasRole('principal')); ?>
+      <a class="brand" href="<?= url($teacherShell ? '/portal/employee' : '/admin/dashboard') ?>" aria-label="<?= e($instituteName) ?> dashboard">
         <span class="brand__mark"><img src="<?= e(brand()['logo']) ?>" alt="<?= e(brand()['short']) ?> logo"></span>
         <span class="brand__text">
           <strong data-field="institute-name"><?= e($instituteName) ?></strong>
-          <span>Institute Admin</span>
+          <span><?= $teacherShell ? 'Employee Portal' : 'Institute Admin' ?></span>
         </span>
       </a>
 

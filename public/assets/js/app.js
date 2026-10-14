@@ -111,3 +111,32 @@
     templateGrid.append(signatureFields);
   }
 })();
+
+// The Content-Security-Policy (script-src-attr 'none') blocks inline onclick handlers, so the
+// confirm() prompts written into delete buttons never ran. Ask here instead, for every form that
+// deletes, reverses or voids something, re-using the button's own message when it has one.
+(function () {
+  var risky = /\/(delete|force-delete|reverse|void|destroy|remove|withdraw)(\?|$)/;
+  document.addEventListener('submit', function (e) {
+    var form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    var button = e.submitter || null;
+    var inline = (button && button.getAttribute('onclick')) || form.getAttribute('onsubmit') || '';
+    var asked = inline.match(/confirm\((['"])([\s\S]*?)\1\)/);
+    var action = (form.getAttribute('action') || '').split('#')[0];
+    if (!asked && !risky.test(action)) return;
+    var message = asked ? asked[2] : 'Are you sure? This cannot be undone.';
+    if (!window.confirm(message)) { e.preventDefault(); e.stopImmediatePropagation(); }
+  }, true);
+})();
+
+// Print buttons were written with inline onclick="window.print()", which the CSP also blocks.
+(function () {
+  document.addEventListener('click', function (e) {
+    var button = e.target.closest ? e.target.closest('[onclick*="window.print"]') : null;
+    if (!button) return;
+    e.preventDefault();
+    if ((button.getAttribute('onclick') || '').indexOf('ek-print-mini') !== -1) document.body.classList.add('ek-print-mini');
+    window.print();
+  });
+})();

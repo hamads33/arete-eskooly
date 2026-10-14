@@ -30,7 +30,8 @@ final class DashboardController extends AdminPageController
     public function index(Request $request): Response
     {
         // Teachers see only their own classes, so the institute dashboard is not theirs.
-        if (hasRole('teacher') && !can('*') && !can('dashboard.view')) {
+        // Never the institute dashboard for a teacher, even if the role has dashboard.view ticked.
+        if (hasRole('teacher') && !can('*') && !hasRole('admin') && !hasRole('principal')) {
             return Response::redirect(url('/portal/employee'));
         }
         $institute = (new SettingsRepository($this->app->database()))->institute();

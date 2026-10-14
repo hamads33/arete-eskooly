@@ -22,9 +22,9 @@ public function store(Request$r):Response{try{$w=$this->repo();$id=$w->createCla
 public function index(Request$r):Response{$class=(int)$r->query('class',0);return$this->renderPage('test-manage',$this->data($class)+['tests'=>$this->repo()->classTests($this->i(),$class,(int)$r->query('subject',0))]);}
 
 /** Mark-entry grid for an existing test, prefilled with any marks already saved. */
-public function edit(Request$r):Response{$test=$this->repo()->classTest($this->i(),(int)$r->route('id'));if(!$test)return Response::html('Class test not found',404);return$this->renderPage('test-edit',['test'=>$test,'sheet'=>$this->repo()->classTestMarkSheet($this->i(),(int)$test['id'])]);}
+public function edit(Request$r):Response{$test=$this->repo()->classTest($this->i(),(int)$r->route('id'));if(!$test)return Response::html('Class test not found',404);return$this->renderPage('test-edit',['test'=>$test,'subjects'=>(new SupportRepository($this->app->database()))->subjects($this->i(),(int)$test['class_id']),'sheet'=>$this->repo()->classTestMarkSheet($this->i(),(int)$test['id'])]);}
 
-public function update(Request$r):Response{$id=(int)$r->route('id');try{$this->repo()->updateClassTest($this->i(),$id,(string)$r->input('title'),(string)$r->input('date'),(float)$r->input('total_marks'));Flash::add('success','Class test updated.');}catch(\DomainException$e){Flash::add('error',$e->getMessage());}return Response::redirect(url('/admin/class-tests/'.$id.'/edit'));}
+public function update(Request$r):Response{$id=(int)$r->route('id');try{$this->repo()->updateClassTest($this->i(),$id,(string)$r->input('title'),(string)$r->input('date'),(float)$r->input('total_marks'),(int)$r->input('subject',0));Flash::add('success','Class test updated.');}catch(\DomainException$e){Flash::add('error',$e->getMessage());}return Response::redirect(url('/admin/class-tests/'.$id.'/edit'));}
 
 public function saveMarks(Request$r):Response{$id=(int)$r->route('id');try{$this->repo()->saveClassTestMarks($this->i(),$id,(array)$r->input('marks',[]),(int)user()['id'],(array)$r->input('absent',[]),(array)$r->input('remarks',[]));Flash::add('success','Test marks saved.');}catch(\DomainException$e){Flash::add('error',$e->getMessage());}return Response::redirect(url('/admin/class-tests/'.$id.'/edit'));}
 
