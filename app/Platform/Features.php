@@ -37,7 +37,6 @@ final class Features
         'whatsapp' => ['WhatsApp', 'WhatsApp messages', ['/admin/whatsapp']],
         'behaviour' => ['Behaviour & Skills', 'Behaviour and skill ratings', ['/admin/behaviour']],
         'reports' => ['Reports', 'Admission, attendance, progress and other reports', ['/admin/reports']],
-        'certificates' => ['Certificates', 'Certificates for students and staff', ['/admin/certificates']],
     ];
 
     /** @var list<string>|null */
