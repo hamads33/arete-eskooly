@@ -20,6 +20,9 @@ final class PortalMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
+        if (($locked = \App\Platform\Features::lockedFor($request->path())) !== null) {
+            return \App\Platform\Features::lockedResponse($locked);
+        }
         if ($this->hasPortalRole() || $this->hasPortalRecord()) {
             return $next($request);
         }

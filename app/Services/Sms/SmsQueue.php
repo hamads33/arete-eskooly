@@ -59,6 +59,9 @@ final class SmsQueue
         if (!$s['sms_enabled']) {
             throw new DomainException('The SMS module is turned off in SMS Settings.');
         }
+        if (\App\Platform\Features::isLocked('sms')) {
+            throw new DomainException('SMS is not included in this school\'s plan.');
+        }
         $phone = PhoneNumber::normalize((string) $d['phone_number'], (string) $s['default_country_code']);
         $message = trim((string) $d['message']);
         if ($message === '') {

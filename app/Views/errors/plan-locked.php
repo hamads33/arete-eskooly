@@ -1,0 +1,1 @@
+<main class="error-card"><span>🔒</span><h1><?= e($module) ?> is not included</h1><p><?= e($module) ?> is not part of your school's current plan. To add it, please contact Arete Coaching Center.</p><a href="<?= e(url(check() ? admin_home() : '/login')) ?>">Go to my workspace</a></main>

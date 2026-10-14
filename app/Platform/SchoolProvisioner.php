@@ -82,6 +82,12 @@ final class SchoolProvisioner
         if (!in_array($school['status'], ['suspended', 'failed', 'rejected'], true)) return [false, 'Revoke access first, then delete.'];
         $slug = (string) $school['slug'];
         if (!preg_match('/^[a-z][a-z0-9-]{1,28}[a-z0-9]$/', $slug)) return [false, 'Invalid school address.'];
+        // Nothing is dropped until a full copy of the database and the site folder is safely on disk.
+        try {
+            $saved = $this->backupBeforeDelete($school);
+        } catch (\Throwable $e) {
+            return [false, 'Nothing was deleted: the safety backup failed (' . $e->getMessage() . ').'];
+        }
         try {
             $db = (string) ($school['db_name'] ?? '');
             $user = (string) ($school['db_user'] ?? '');
@@ -98,10 +104,105 @@ final class SchoolProvisioner
             }
             $this->removeSite($slug);
             $this->registry->delete($id);
-            return [true, $school['name'] . ' was permanently deleted. ' . $slug . ' is free again.'];
+            return [true, $school['name'] . ' was deleted and ' . $slug . ' is free again. A full backup was kept: ' . implode(', ', array_map('basename', $saved)) . '.'];
         } catch (\Throwable $e) {
             return [false, 'Delete did not finish: ' . $e->getMessage() . ' It is safe to try again.'];
         }
+    }
+
+    /** Where the copies taken before a school is deleted are kept (outside every web root). */
+    public static function deletedBackupsPath(): string
+    {
+        return rtrim(str_replace('\\', '/', PlatformConfig::get('DELETED_BACKUPS_PATH', BASE_PATH . '/storage/school-backups')), '/');
+    }
+
+    /**
+     * Saves the school's database (mysqldump, gzipped) and its site folder (settings and uploads;
+     * links into the shared code are stored as links, not followed). Throws on any failure so the
+     * caller deletes nothing.
+     *
+     * @return list<string> the files written
+     */
+    private function backupBeforeDelete(array $school): array
+    {
+        $dir = self::deletedBackupsPath();
+        if (!is_dir($dir) && !@mkdir($dir, 0750, true) && !is_dir($dir)) throw new \RuntimeException('cannot create the backup folder');
+        $base = $dir . '/' . $school['slug'] . '-' . date('Ymd-His');
+        $files = [];
+
+        $db = (string) ($school['db_name'] ?? '');
+        if ($db !== '') {
+            if (!preg_match('/^school_[a-z0-9_]+$/', $db)) throw new \RuntimeException('unexpected database name');
+            $exists = SchoolRegistry::serverConnection()->query('SELECT 1 FROM information_schema.SCHEMATA WHERE SCHEMA_NAME=' . SchoolRegistry::serverConnection()->quote($db))->fetchColumn();
+            if ($exists) {
+                $cnf = tempnam(sys_get_temp_dir(), 'dump');
+                file_put_contents($cnf, "[client]\nhost=" . PlatformConfig::get('DB_HOST', '127.0.0.1') . "\nport=" . PlatformConfig::get('DB_PORT', '3306')
+                    . "\nuser=" . PlatformConfig::get('DB_USERNAME') . "\npassword=\"" . addcslashes(PlatformConfig::get('DB_PASSWORD'), "\"\\") . "\"\n");
+                @chmod($cnf, 0600);
+                $sql = $base . '-database.sql';
+                try {
+                    $process = proc_open(['mysqldump', '--defaults-extra-file=' . $cnf, '--single-transaction', '--routines', '--triggers', '--no-tablespaces', $db],
+                        [1 => ['file', $sql, 'w'], 2 => ['pipe', 'w']], $pipes);
+                    if (!is_resource($process)) throw new \RuntimeException('mysqldump could not start');
+                    $err = stream_get_contents($pipes[2]);
+                    fclose($pipes[2]);
+                    $code = proc_close($process);
+                } finally {
+                    @unlink($cnf);
+                }
+                $tail = is_file($sql) ? (string) file_get_contents($sql, false, null, max(0, filesize($sql) - 200)) : '';
+                if ($code !== 0 || !str_contains($tail, 'Dump completed')) {
+                    @unlink($sql);
+                    throw new \RuntimeException('database dump failed: ' . trim(mb_substr((string) $err, 0, 300)));
+                }
+                $in = fopen($sql, 'rb');
+                $out = gzopen($sql . '.gz', 'wb6');
+                while (!feof($in)) gzwrite($out, (string) fread($in, 1 << 20));
+                fclose($in);
+                gzclose($out);
+                unlink($sql);
+                @chmod($sql . '.gz', 0640);
+                $files[] = $sql . '.gz';
+            }
+        }
+
+        $site = self::siteDir((string) $school['slug']);
+        if (is_dir($site)) {
+            $tgz = $base . '-files.tgz';
+            exec('tar -czf ' . escapeshellarg($tgz) . ' -C ' . escapeshellarg(dirname($site)) . ' ' . escapeshellarg(basename($site)) . ' 2>&1', $out, $code);
+            if ($code !== 0 || !is_file($tgz) || filesize($tgz) === 0) {
+                @unlink($tgz);
+                throw new \RuntimeException('site folder backup failed: ' . mb_substr(implode(' ', $out), 0, 300));
+            }
+            @chmod($tgz, 0640);
+            $files[] = $tgz;
+        }
+        return $files;
+    }
+
+    /** Modules locked for a school, read from its own .env. */
+    public function lockedModules(string $slug): array
+    {
+        $env = self::siteDir($slug) . '/.env';
+        $raw = is_file($env) ? (string) ($this->readEnv($env)['SCHOOL_LOCKED_MODULES'] ?? '') : '';
+        return array_values(array_intersect(array_map('trim', explode(',', $raw)), array_keys(Features::MODULES)));
+    }
+
+    /**
+     * Writes a school's locked modules into its .env. Only that one line changes; every other
+     * setting is kept byte for byte. Takes effect on the school's next request.
+     */
+    public function setLockedModules(int $id, array $locked): void
+    {
+        $school = $this->registry->find($id);
+        if (!$school || !in_array($school['status'], ['active', 'suspended'], true)) throw new \DomainException('Only live or revoked schools have features to set.');
+        $env = self::siteDir((string) $school['slug']) . '/.env';
+        if (!is_file($env)) throw new \DomainException('This school has no settings file.');
+        $locked = array_values(array_intersect(array_keys(Features::MODULES), $locked));
+        $content = (string) file_get_contents($env);
+        $content = (string) preg_replace('/^SCHOOL_LOCKED_MODULES=.*(\R|$)/m', '', $content);
+        if ($locked !== []) $content = rtrim($content, "\r\n") . "\nSCHOOL_LOCKED_MODULES=\"" . implode(',', $locked) . "\"\n";
+        $this->write($env, $content, 0640);
     }
 
     /** Removes a school's site folder. Links into the shared code are unlinked, never followed. */

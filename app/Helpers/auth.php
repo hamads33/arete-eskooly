@@ -106,7 +106,7 @@ if (!function_exists('first_admin_route')) {
                 if (str_starts_with($route, '/admin/dashboard')) {
                     continue;
                 }
-                if (can_open($route)) {
+                if (can_open($route) && \App\Platform\Features::lockedFor($route) === null) {
                     return $route;
                 }
             }

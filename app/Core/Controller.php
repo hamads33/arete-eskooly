@@ -21,12 +21,19 @@ abstract class Controller
                 'css/print.css?v=3', 'css/reports.css?v=1',
             ];
             $baseScripts = [
-                'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=5', 'js/app.js?v=3',
+                'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=5', 'js/app.js?v=4',
                 'js/class-subject-filter.js?v=1',
-                'js/preview-lock.js?v=2',
+                'js/preview-lock.js?v=3',
             ];
             $data['styles'] = array_values(array_unique(array_merge($baseStyles, $data['styles'] ?? [])));
-            $data['scripts'] = array_values(array_unique(array_merge($baseScripts, $data['scripts'] ?? [])));
+            // One copy per script file: pages list "js/app.js" while the base lists "js/app.js?v=4",
+            // and loading app.js twice ran every handler (delete confirmations, print) twice.
+            $seen = [];
+            $data['scripts'] = array_values(array_filter(array_merge($baseScripts, $data['scripts'] ?? []), static function (string $script) use (&$seen): bool {
+                $file = strtok($script, '?');
+                if (isset($seen[$file])) return false;
+                return $seen[$file] = true;
+            }));
         }
 
         $defaults = [
@@ -45,7 +52,12 @@ abstract class Controller
         if ($layout === 'layouts/admin' && !array_key_exists('navigation', $data) && \App\Controllers\PortalController::isTeacherShell()) {
             $defaults['navigation'] = \App\Controllers\PortalController::teacherNavigation($this->app);
         }
-        return Response::html(View::render($view, array_replace($defaults, $data), $layout));
+        $payload = array_replace($defaults, $data);
+        // Modules outside this school's plan: shown locked in the admin menu, left out of portals.
+        $payload['navigation'] = $layout === 'layouts/portal'
+            ? \App\Platform\Features::hideLocked((array) $payload['navigation'])
+            : \App\Platform\Features::lockNavigation((array) $payload['navigation']);
+        return Response::html(View::render($view, $payload, $layout));
     }
 
     /**

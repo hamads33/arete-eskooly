@@ -128,7 +128,7 @@ final class SmsAutomation
     {
         $s = $this->sms->settings->get($institute);
         $toggle = self::EVENTS[$event][3];
-        if (!$s['sms_enabled'] || ($toggle && !$s[$toggle])) {
+        if (!$s['sms_enabled'] || ($toggle && !$s[$toggle]) || \App\Platform\Features::isLocked('sms')) {
             return null;
         }
         $rule = $this->db->query('SELECT r.*,t.message_body,t.is_active FROM sms_automation_rules r JOIN sms_templates t ON t.id=r.template_id WHERE r.institute_id=:i AND r.event_type=:e AND r.enabled=1',

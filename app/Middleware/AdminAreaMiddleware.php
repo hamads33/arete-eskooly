@@ -24,6 +24,10 @@ final class AdminAreaMiddleware
 
     public function handle(Request $request, Closure $next): Response
     {
+        // A module left out of this school's plan is closed to everyone, the school admin included.
+        if (($locked = \App\Platform\Features::lockedFor($request->path())) !== null) {
+            return \App\Platform\Features::lockedResponse($locked);
+        }
         if (can('*')) {
             return $next($request);
         }

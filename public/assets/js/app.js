@@ -33,7 +33,7 @@
     control.addEventListener("click", (event) => {
       event.preventDefault();
       if (typeof window.showLockedModule === "function") {
-        window.showLockedModule(control.dataset.lockedModule);
+        window.showLockedModule(control.dataset.lockedModule, control.dataset.lockedReason);
       }
     });
   });

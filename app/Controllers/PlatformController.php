@@ -8,6 +8,7 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\View;
+use App\Platform\Features;
 use App\Platform\PlatformConfig;
 use App\Platform\SchoolProvisioner;
 use App\Platform\SchoolRegistry;
@@ -38,6 +39,27 @@ final class PlatformController extends Controller
             'schoolUrl' => [PlatformConfig::class, 'schoolUrl'],
             'filter' => (string) $request->query('status', ''),
             'styles' => ['css/schools.css?v=6'],
+        ]);
+    }
+
+    /** The tick-list of modules a school may use (unticked = locked behind the paywall). */
+    public function features(Request $request): Response
+    {
+        if ($x = $this->denied()) return $x;
+        $registry = new SchoolRegistry();
+        $school = $registry->find((int) $request->route('id'));
+        if (!$school) return Response::html('School not found', 404);
+        if (!in_array($school['status'], ['active', 'suspended'], true)) {
+            Flash::add('error', 'Features can be set once a school is live.');
+            return Response::redirect(url('/admin/schools'));
+        }
+        return $this->view('platform/features', [
+            'pageTitle' => 'Features · ' . $school['name'],
+            'activeMenu' => 'schools',
+            'activeSubmenu' => 'schools',
+            'school' => $school,
+            'modules' => Features::MODULES,
+            'locked' => (new SchoolProvisioner($registry))->lockedModules((string) $school['slug']),
         ]);
     }
 
@@ -72,6 +94,17 @@ final class PlatformController extends Controller
                 break;
             case 'login':
                 return $this->supportLogin($school);
+            case 'features':
+                $enabled = array_map('strval', (array) $request->input('enabled', []));
+                $locked = array_values(array_diff(array_keys(Features::MODULES), $enabled));
+                try {
+                    $provisioner->setLockedModules($id, $locked);
+                    @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' FEATURES ' . $school['slug'] . ' locked=[' . implode(',', $locked) . '] by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
+                    Flash::add('success', 'Features saved for ' . $school['name'] . ($locked ? ': ' . count($locked) . ' locked.' : ': everything is enabled.'));
+                } catch (\DomainException $e) {
+                    Flash::add('error', $e->getMessage());
+                }
+                return Response::redirect(url('/admin/schools/' . $id . '/features'));
             case 'revoke':
                 $provisioner->suspend($id, true);
                 Flash::add('success', 'Access revoked for ' . $school['name'] . '. Its data is kept and access can be restored at any time.');

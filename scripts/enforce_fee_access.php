@@ -9,6 +9,7 @@ declare(strict_types=1);
 defined('BASE_PATH') || define('BASE_PATH', dirname(__DIR__));
 require BASE_PATH . '/vendor/autoload.php';
 $app = require BASE_PATH . '/bootstrap/app.php';
+if (\App\Platform\Features::isLocked('fees')) { echo "Skipped: fee access rules are not in this school's plan.", PHP_EOL; exit(0); }
 
 $access = new App\Services\AccountAccess($app->database());
 foreach ($app->database()->query('SELECT id FROM institutes ORDER BY id')->fetchAll(PDO::FETCH_COLUMN) as $institute) {

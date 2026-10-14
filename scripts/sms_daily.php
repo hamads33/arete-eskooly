@@ -10,6 +10,7 @@ declare(strict_types=1);
 defined('BASE_PATH') || define('BASE_PATH', dirname(__DIR__));
 require BASE_PATH . '/vendor/autoload.php';
 $app = require BASE_PATH . '/bootstrap/app.php';
+if (\App\Platform\Features::isLocked('sms')) { echo "Skipped: daily SMS are not in this school's plan.", PHP_EOL; exit(0); }
 
 use App\Services\Sms\{SmsAutomation, SmsQueue};
 

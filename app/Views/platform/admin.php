@@ -101,8 +101,10 @@ $empty = [
     <form method="post" action="<?= url($base . '/login') ?>" target="_blank" title="Opens the school's portal in a new tab, signed in as its administrator. No password needed."><?= csrf_field() ?><button class="sp-btn sp-btn--primary" type="submit"><i data-lucide="log-in"></i><span>Sign in as school admin</span></button></form>
     <a class="sp-btn" href="<?= e($address) ?>" target="_blank" rel="noopener"><i data-lucide="external-link"></i><span>Open login page</span></a>
     <form method="post" action="<?= url($base . '/revoke') ?>" data-confirm="Revoke access for <?= e($s['name']) ?>? Their portal will stop working until you restore it. No data is deleted."><?= csrf_field() ?><input type="hidden" name="back" value="<?= e($filter) ?>"><button class="sp-btn sp-btn--danger" type="submit"><i data-lucide="ban"></i><span>Revoke access</span></button></form>
+    <a class="sp-btn" href="<?= e(url('/admin/schools/' . (int) $s['id'] . '/features')) ?>"><i data-lucide="sliders-horizontal"></i><span>Features</span></a>
   <?php elseif ($st === 'suspended'): ?>
     <form method="post" action="<?= url($base . '/restore') ?>" data-busy="Restoring…"><?= csrf_field() ?><input type="hidden" name="back" value="<?= e($filter) ?>"><button class="sp-btn sp-btn--primary" type="submit"><i data-lucide="rotate-ccw"></i><span>Restore access</span></button></form>
+    <a class="sp-btn" href="<?= e(url('/admin/schools/' . (int) $s['id'] . '/features')) ?>"><i data-lucide="sliders-horizontal"></i><span>Features</span></a>
   <?php endif ?>
   </div>
   <?php if (in_array($st, ['suspended', 'failed', 'rejected'], true)): $hostName = preg_replace('#^https?://#', '', $address); ?>
@@ -114,7 +116,7 @@ $empty = [
         <?php if ($s['db_name']): ?><li>All of its data is erased: students, staff, fees, attendance, results and accounts.</li>
         <li>Its uploaded files, settings and sign-ins are removed from the server.</li><?php endif ?>
         <li><?= e($hostName) ?> stops working and becomes free for a new school.</li>
-        <li>This cannot be undone.</li>
+        <li>A full backup of its database and files is saved on the server first, so it can be recovered if needed.</li>
       </ul>
       <label for="confirm-<?= (int) $s['id'] ?>">Type <code><?= e($s['slug']) ?></code> to confirm</label>
       <input id="confirm-<?= (int) $s['id'] ?>" name="confirm" autocomplete="off" autocapitalize="none" spellcheck="false" data-expect="<?= e($s['slug']) ?>">
