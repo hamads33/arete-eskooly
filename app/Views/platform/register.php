@@ -11,7 +11,7 @@
 <p class="auth-switch">Bookmark the status page, or open <strong><?= e($submitted) ?>.<?= e($domain) ?></strong> at any time to see where things stand.</p>
 <?php else: ?>
 <div class="auth-heading signup-heading"><span class="eyebrow">REGISTER YOUR SCHOOL</span><h1>Your own school portal<span>.</span></h1><p>Apply in two minutes. Once approved, your school gets a private portal with its own data, staff, students and fees.</p></div>
-<form class="auth-form signup-form sp-form" method="post" action="<?= url('/register-school') ?>" autocomplete="on" data-signup>
+<form class="auth-form signup-form sp-form" method="post" action="<?= url('/register-school') ?>" autocomplete="on" enctype="multipart/form-data" data-signup>
 <?= csrf_field() ?>
 <div style="display:none" aria-hidden="true"><label>Leave this empty <input name="zx_hp_field" tabindex="-1" autocomplete="one-time-code" value=""></label></div>
 <p class="sp-legend">YOUR SCHOOL</p>
@@ -22,6 +22,11 @@
   <p class="sp-hint<?= $slugError ? ' sp-hint--bad' : '' ?>" id="slug-hint" role="status"><?= $slugError ? e($slugError) : 'Lowercase letters, numbers and hyphens. This becomes your login address.' ?></p>
 </div>
 <?php $fields=[['city','City','text','address-level2','e.g. Lahore']]; require BASE_PATH.'/app/Views/auth/fields.php'; ?>
+<?php $logoError = error('school_logo'); ?>
+<div class="auth-field"><label for="school_logo">School logo <span style="font-weight:400;color:#8a7d82">(optional)</span></label>
+  <div class="auth-control"><input id="school_logo" name="school_logo" type="file" accept="image/png,image/jpeg"></div>
+  <p class="sp-hint<?= $logoError ? ' sp-hint--bad' : '' ?>"><?= $logoError ? e($logoError) : 'PNG or JPG, up to 1 MB. It appears on your portal, login page, receipts and app icon. You can change it later.' ?></p>
+</div>
 <p class="sp-legend">ADMINISTRATOR ACCOUNT</p>
 <?php $fields=[['admin_name','Your full name','text','name','e.g. Sara Khan'],['email','Email address','email','email','you@school.edu'],['phone','Mobile number','tel','tel','03xx xxxxxxx'],['password','Password','password','new-password','At least 8 characters'],['password_confirmation','Confirm password','password','new-password','Repeat password']]; require BASE_PATH.'/app/Views/auth/fields.php'; ?>
 <button class="auth-submit" type="submit"><span>Submit application</span><span aria-hidden="true">↗</span></button>

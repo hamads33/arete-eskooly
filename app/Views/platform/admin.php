@@ -33,6 +33,7 @@ $empty = [
     <h1>School Sign-ups</h1>
     <p>Review schools that applied for their own portal. Approving sets up a separate portal with its own data in a few seconds; Arete's data is never shared.</p>
   </div>
+  <a class="sp-btn sp-btn--primary" href="<?= url('/admin/schools/new') ?>"><i data-lucide="plus"></i><span>Create a school</span></a>
   <div class="sp-share" title="Registration link for schools">
     <code><?= e($signupUrl) ?></code>
     <button class="sp-btn sp-btn--sm" type="button" data-copy="<?= e($signupUrl) ?>"><i data-lucide="copy"></i><span>Copy link</span></button>
@@ -57,7 +58,9 @@ $empty = [
 <?php foreach ($visible as $s): $address = $schoolUrl($s['slug']); $base = '/admin/schools/' . (int) $s['id']; $st = (string) $s['status']; ?>
 <article class="sp-card sp-card--<?= e($st) ?>" data-sp-text="<?= e(mb_strtolower($s['name'] . ' ' . $s['slug'] . ' ' . $s['admin_name'] . ' ' . $s['admin_email'] . ' ' . $s['admin_phone'] . ' ' . $s['city'])) ?>">
   <div class="sp-card__top">
-    <span class="sp-avatar" aria-hidden="true"><?= e($initials((string) $s['name'])) ?></span>
+    <?php $logoPreview = in_array($st, ['pending', 'failed'], true) && \App\Platform\SchoolLogo::pending((string) $s['slug']) !== null ? url('/admin/schools/' . (int) $s['id'] . '/logo') : null; ?>
+    <?php if ($logoPreview): ?><span class="sp-avatar" style="background:#fff;overflow:hidden;padding:0"><img src="<?= e($logoPreview) ?>" alt="<?= e($s['name']) ?> logo" style="width:100%;height:100%;object-fit:contain"></span>
+    <?php else: ?><span class="sp-avatar" aria-hidden="true"><?= e($initials((string) $s['name'])) ?></span><?php endif ?>
     <div class="sp-card__title">
       <h2><?= e($s['name']) ?></h2>
       <?php if ($st === 'active'): ?><a href="<?= e($address) ?>" target="_blank" rel="noopener"><?= $host($address) ?>&nbsp;↗</a><?php else: ?><span class="sp-addr"><?= $host($address) ?></span><?php endif ?>

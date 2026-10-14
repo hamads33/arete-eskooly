@@ -94,6 +94,40 @@ final class Features
         return self::MODULES[$module][0] ?? 'This feature';
     }
 
+    /** Countable limits a school's plan can set: key => [.env name, label, table, rows that count]. */
+    public const LIMITS = [
+        'students' => ['SCHOOL_MAX_STUDENTS', 'Students', 'students', 'archived_at IS NULL'],
+        'staff' => ['SCHOOL_MAX_STAFF', 'Staff', 'employees', '1=1'],
+    ];
+
+    /** The school's cap for a limit, or null when unlimited (always null on the main portal). */
+    public static function limit(string $key): ?int
+    {
+        if (school_slug() === '' || !isset(self::LIMITS[$key])) return null;
+        $raw = trim((string) getenv(self::LIMITS[$key][0]));
+        return ctype_digit($raw) && (int) $raw > 0 ? (int) $raw : null;
+    }
+
+    /**
+     * Null when $adding more records fit the plan, otherwise the message to show. Archived students
+     * do not count, so archiving makes room.
+     */
+    public static function roomFor(\App\Core\Database $db, string $key, int $adding = 1): ?string
+    {
+        $max = self::limit($key);
+        if ($max === null) return null;
+        [, $label, $table, $where] = self::LIMITS[$key];
+        $current = (int) $db->query("SELECT COUNT(*) FROM {$table} WHERE {$where}")->fetchColumn();
+        if ($current + $adding <= $max) return null;
+        return "Your plan allows up to {$max} " . strtolower($label) . " and you have {$current}" . ($adding > 1 ? ", so {$adding} more cannot be added" : '') . '. Contact Arete Coaching Center to raise the limit.';
+    }
+
+    /** Throws when the plan has no room; the last line of defence inside the repositories. */
+    public static function assertRoom(\App\Core\Database $db, string $key, int $adding = 1): void
+    {
+        if (($message = self::roomFor($db, $key, $adding)) !== null) throw new \DomainException($message);
+    }
+
     /** The page shown instead of a locked module. */
     public static function lockedResponse(string $module): Response
     {

@@ -14,6 +14,9 @@ $router->post('/register-school', [SchoolSignupController::class, 'store'], [Ver
 $router->get('/register-school/check', [SchoolSignupController::class, 'check']);
 $router->get('/school-status', [SchoolSignupController::class, 'status']);
 $router->get('/admin/schools', [PlatformController::class, 'index']);
+$router->get('/admin/schools/new', [PlatformController::class, 'create']);
+$router->post('/admin/schools/new', [PlatformController::class, 'store'], [VerifyCsrfToken::class]);
 $router->get('/admin/schools/{id}/features', [PlatformController::class, 'features']);
+$router->get('/admin/schools/{id}/logo', [PlatformController::class, 'logo']);
 $router->post('/admin/schools/{id}/{action}', [PlatformController::class, 'action'], [VerifyCsrfToken::class]);
 $router->get('/platform', static fn() => Response::redirect(url('/admin/schools')));

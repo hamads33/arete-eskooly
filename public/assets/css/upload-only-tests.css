@@ -14,3 +14,10 @@
 .paper-upload-filename button{display:grid;place-items:center;width:24px;height:24px;flex:0 0 auto;border:0;border-radius:50%;background:var(--surface-soft);color:var(--text-secondary);cursor:pointer}
 .paper-upload-filename button:hover{background:#f3dfe5;color:var(--primary)}
 @media screen and (max-width:600px){.file-drop--lg{padding:24px 16px}}
+/* The question-paper heading sits inside its mode fieldset, so the step-header rules in
+   online-tests.css (".builder-step__content>header") no longer reach it. */
+.question-mode-section>.questions-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:24px 28px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#fff,#fbf7f8)}
+.question-mode-section>.questions-heading span{font-size:10px;font-weight:800;letter-spacing:1.5px;color:var(--primary)}
+.question-mode-section>.questions-heading h2{margin:5px 0;font-size:22px}
+.question-mode-section>.questions-heading p{margin:0;color:var(--text-secondary);font-size:13px}
+@media (max-width:640px){.question-mode-section>.questions-heading{padding-left:18px;padding-right:18px}}

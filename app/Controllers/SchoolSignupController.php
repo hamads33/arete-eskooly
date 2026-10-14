@@ -49,6 +49,10 @@ final class SchoolSignupController extends Controller
         }
         if (!isset($errors['slug']) && ($registry->slugTaken($data['slug']) || is_dir(SchoolProvisioner::siteDir($data['slug'])))) $errors['slug'] = ['This address is already taken. Try another.'];
         if (!$errors && $registry->pendingFromIp($request->ip()) >= 3) $errors['school_name'] = ['Too many requests from this connection. Please wait for the earlier ones to be reviewed.'];
+        $logo = $request->file('school_logo');
+        if (!$errors && $logo && ($logo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE && \App\Platform\SchoolLogo::storePending($logo, $data['slug']) === false) {
+            $errors['school_logo'] = ['The logo must be a PNG or JPG image no larger than 1 MB.'];
+        }
         if ($errors) {
             $this->app->session()->flash('_errors', $errors);
             $this->app->session()->flash('_old', $data);

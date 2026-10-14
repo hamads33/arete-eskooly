@@ -10,6 +10,7 @@ use App\Core\Response;
 use App\Core\View;
 use App\Platform\Features;
 use App\Platform\PlatformConfig;
+use App\Platform\SchoolLogo;
 use App\Platform\SchoolProvisioner;
 use App\Platform\SchoolRegistry;
 use App\Repositories\SettingsRepository;
@@ -42,6 +43,90 @@ final class PlatformController extends Controller
         ]);
     }
 
+    /** The logo a school uploaded with its application, for the approvals page (admin only). */
+    public function logo(Request $request): Response
+    {
+        if ($x = $this->denied()) return $x;
+        $school = (new SchoolRegistry())->find((int) $request->route('id'));
+        $path = $school ? SchoolLogo::pending((string) $school['slug']) : null;
+        if ($path === null) return Response::html('Not found', 404);
+        return new Response((string) file_get_contents($path), 200, ['Content-Type' => str_ends_with($path, '.png') ? 'image/png' : 'image/jpeg', 'Cache-Control' => 'private, no-store', 'X-Content-Type-Options' => 'nosniff']);
+    }
+
+    /** Form for the Arete admin to set up a school directly, with its features and limits. */
+    public function create(Request $request): Response
+    {
+        if ($x = $this->denied()) return $x;
+        return $this->view('platform/create', [
+            'pageTitle' => 'Create a School',
+            'activeMenu' => 'schools',
+            'activeSubmenu' => 'schools',
+            'modules' => Features::MODULES,
+        ]);
+    }
+
+    /**
+     * Creates and immediately provisions a school from the admin form, then applies the chosen
+     * features and limits. Uses the same checks as the public sign-up.
+     */
+    public function store(Request $request): Response
+    {
+        if ($x = $this->denied()) return $x;
+        $data = [
+            'school_name' => trim((string) $request->input('school_name')),
+            'slug' => strtolower(trim((string) $request->input('slug'))),
+            'city' => trim((string) $request->input('city')),
+            'admin_name' => trim((string) $request->input('admin_name')),
+            'email' => strtolower(trim((string) $request->input('email'))),
+            'phone' => trim((string) $request->input('phone')),
+        ];
+        $password = (string) $request->input('password');
+        $validator = new \App\Core\Validator();
+        $validator->validate($data, ['school_name' => 'required|max:160', 'slug' => 'required|max:30', 'city' => 'required|max:120', 'admin_name' => 'required|max:120', 'email' => 'required|email|max:190', 'phone' => 'required']);
+        $errors = $validator->errors();
+        if (!preg_match('/^\+?[0-9 ()-]{7,20}$/', $data['phone'])) $errors['phone'] = ['Enter a valid mobile number.'];
+        if (!SchoolProvisioner::validSlug($data['slug'])) $errors['slug'] = ['Use 3–30 lowercase letters, numbers or single hyphens, starting with a letter.'];
+        if (strlen($password) < 8 || strlen($password) > 72) $errors['password'] = ['Use between 8 and 72 characters.'];
+        $registry = new SchoolRegistry();
+        if (!isset($errors['slug']) && ($registry->slugTaken($data['slug']) || is_dir(SchoolProvisioner::siteDir($data['slug'])))) $errors['slug'] = ['This address is already taken.'];
+        $limits = [];
+        foreach (array_keys(Features::LIMITS) as $key) {
+            $raw = trim((string) $request->input('limit_' . $key, ''));
+            if ($raw !== '' && (!ctype_digit($raw) || (int) $raw > 1000000)) $errors['limit_' . $key] = ['Enter a whole number, or leave empty for no limit.'];
+            $limits[$key] = (int) $raw;
+        }
+        $logo = $request->file('school_logo');
+        if (!$errors && $logo && ($logo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE && SchoolLogo::storePending($logo, $data['slug']) === false) {
+            $errors['school_logo'] = ['The logo must be a PNG or JPG image no larger than 1 MB.'];
+        }
+        if ($errors) {
+            $this->app->session()->flash('_errors', $errors);
+            $this->app->session()->flash('_old', $data + ['enabled' => (array) $request->input('enabled', [])] + array_combine(array_map(static fn ($k) => 'limit_' . $k, array_keys($limits)), array_map(static fn ($v) => $v ?: '', $limits)));
+            return Response::redirect(url('/admin/schools/new'));
+        }
+        $id = $registry->create([
+            'slug' => $data['slug'], 'name' => $data['school_name'], 'city' => $data['city'], 'admin_name' => $data['admin_name'],
+            'admin_email' => $data['email'], 'admin_phone' => $data['phone'], 'hash' => password_hash($password, PASSWORD_DEFAULT), 'ip' => $request->ip(),
+        ]);
+        @set_time_limit(300);
+        $provisioner = new SchoolProvisioner($registry);
+        [$ok, $message] = $provisioner->provision($id);
+        if (!$ok) {
+            Flash::add('error', $message . ' The school is listed under "Awaiting approval" with Retry setup; set its features after it is live.');
+            return Response::redirect(url('/admin/schools?status=pending'));
+        }
+        $locked = array_values(array_diff(array_keys(Features::MODULES), array_map('strval', (array) $request->input('enabled', []))));
+        try {
+            $provisioner->setLimits($id, $limits);
+            $provisioner->setLockedModules($id, $locked);
+            @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' CREATED ' . $data['slug'] . ' locked=[' . implode(',', $locked) . '] by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
+            Flash::add('success', $message . ($locked ? ' ' . count($locked) . ' feature(s) locked.' : ' All features enabled.'));
+        } catch (\DomainException $e) {
+            Flash::add('error', $message . ' But its plan could not be saved: ' . $e->getMessage() . ' Open Features to set it.');
+        }
+        return Response::redirect(url('/admin/schools?status=active'));
+    }
+
     /** The tick-list of modules a school may use (unticked = locked behind the paywall). */
     public function features(Request $request): Response
     {
@@ -60,7 +145,22 @@ final class PlatformController extends Controller
             'school' => $school,
             'modules' => Features::MODULES,
             'locked' => (new SchoolProvisioner($registry))->lockedModules((string) $school['slug']),
+            'limits' => (new SchoolProvisioner($registry))->limits((string) $school['slug']),
+            'usage' => $this->usage($school),
         ]);
+    }
+
+    /** Current students / staff in a school, for showing next to its limits. */
+    private function usage(array $school): array
+    {
+        $out = array_fill_keys(array_keys(Features::LIMITS), null);
+        try {
+            $pdo = SchoolRegistry::serverConnection((string) $school['db_name']);
+            foreach (Features::LIMITS as $key => [, , $table, $where]) $out[$key] = (int) $pdo->query("SELECT COUNT(*) FROM {$table} WHERE {$where}")->fetchColumn();
+        } catch (\Throwable) {
+            // Shown as "—" when the school's database cannot be read.
+        }
+        return $out;
     }
 
     public function action(Request $request): Response
@@ -80,6 +180,7 @@ final class PlatformController extends Controller
             case 'reject':
                 if ($school['status'] === 'pending' || $school['status'] === 'failed') {
                     $registry->update($id, ['status' => 'rejected', 'note' => mb_substr(trim((string) $request->input('note')), 0, 500)]);
+                    \App\Platform\SchoolLogo::discard((string) $school['slug']);
                     Flash::add('success', $school['name'] . ' was rejected.');
                 }
                 break;
@@ -98,9 +199,16 @@ final class PlatformController extends Controller
                 $enabled = array_map('strval', (array) $request->input('enabled', []));
                 $locked = array_values(array_diff(array_keys(Features::MODULES), $enabled));
                 try {
+                    $limits = [];
+                    foreach (array_keys(Features::LIMITS) as $key) {
+                        $raw = trim((string) $request->input('limit_' . $key, ''));
+                        if ($raw !== '' && !ctype_digit($raw)) throw new \DomainException('Limits must be whole numbers; leave a box empty for no limit.');
+                        $limits[$key] = (int) $raw;
+                    }
+                    $provisioner->setLimits($id, $limits);
                     $provisioner->setLockedModules($id, $locked);
                     @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' FEATURES ' . $school['slug'] . ' locked=[' . implode(',', $locked) . '] by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
-                    Flash::add('success', 'Features saved for ' . $school['name'] . ($locked ? ': ' . count($locked) . ' locked.' : ': everything is enabled.'));
+                    Flash::add('success', 'Plan saved for ' . $school['name'] . ($locked ? ': ' . count($locked) . ' locked.' : ': everything is enabled.'));
                 } catch (\DomainException $e) {
                     Flash::add('error', $e->getMessage());
                 }

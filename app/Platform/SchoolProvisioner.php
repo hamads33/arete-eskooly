@@ -49,9 +49,12 @@ final class SchoolProvisioner
             $site = $this->buildSite($slug, (string) $school['name'], $dbName, $dbUser, $dbPassword);
             $this->migrate($site);
             $this->seedSchool($dbName, $school);
+            // The sign-up logo is a nicety: a problem with it never fails the school's setup.
+            $logoNote = '';
+            try { SchoolLogo::install($slug, $site, $dbName); } catch (\Throwable $e) { $logoNote = ' (the logo could not be applied; the school can upload it in Institute Profile)'; }
             @unlink($site . '/SUSPENDED');
             $this->registry->update($id, ['status' => 'active', 'approved_at' => date('Y-m-d H:i:s'), 'last_error' => null]);
-            return [true, $school['name'] . ' is live at ' . PlatformConfig::schoolUrl($slug)];
+            return [true, $school['name'] . ' is live at ' . PlatformConfig::schoolUrl($slug) . $logoNote];
         } catch (\Throwable $e) {
             $this->registry->update($id, ['status' => 'failed', 'last_error' => mb_substr($e->getMessage(), 0, 4000)]);
             return [false, 'Setup failed: ' . $e->getMessage()];
@@ -103,6 +106,7 @@ final class SchoolProvisioner
                 }
             }
             $this->removeSite($slug);
+            SchoolLogo::discard($slug);
             $this->registry->delete($id);
             return [true, $school['name'] . ' was deleted and ' . $slug . ' is free again. A full backup was kept: ' . implode(', ', array_map('basename', $saved)) . '.'];
         } catch (\Throwable $e) {
@@ -194,14 +198,51 @@ final class SchoolProvisioner
      */
     public function setLockedModules(int $id, array $locked): void
     {
+        $locked = array_values(array_intersect(array_keys(Features::MODULES), $locked));
+        $this->setEnvValues($id, ['SCHOOL_LOCKED_MODULES' => $locked === [] ? null : implode(',', $locked)]);
+    }
+
+    /** A school's caps, e.g. ['students' => 200, 'staff' => null] (null = unlimited). */
+    public function limits(string $slug): array
+    {
+        $env = self::siteDir($slug) . '/.env';
+        $values = is_file($env) ? $this->readEnv($env) : [];
+        $out = [];
+        foreach (Features::LIMITS as $key => [$name]) {
+            $raw = trim((string) ($values[$name] ?? ''));
+            $out[$key] = ctype_digit($raw) && (int) $raw > 0 ? (int) $raw : null;
+        }
+        return $out;
+    }
+
+    /** @param array<string,int|null> $limits null or 0 = unlimited */
+    public function setLimits(int $id, array $limits): void
+    {
+        $values = [];
+        foreach (Features::LIMITS as $key => [$name]) {
+            $n = (int) ($limits[$key] ?? 0);
+            if ($n < 0 || $n > 1000000) throw new \DomainException('Limits must be between 0 (unlimited) and 1,000,000.');
+            $values[$name] = $n > 0 ? (string) $n : null;
+        }
+        $this->setEnvValues($id, $values);
+    }
+
+    /**
+     * Sets (or, with null, removes) lines in a school's .env. Every other line is kept byte for
+     * byte, and the file is replaced atomically. Takes effect on the school's next request.
+     */
+    private function setEnvValues(int $id, array $values): void
+    {
         $school = $this->registry->find($id);
         if (!$school || !in_array($school['status'], ['active', 'suspended'], true)) throw new \DomainException('Only live or revoked schools have features to set.');
         $env = self::siteDir((string) $school['slug']) . '/.env';
         if (!is_file($env)) throw new \DomainException('This school has no settings file.');
-        $locked = array_values(array_intersect(array_keys(Features::MODULES), $locked));
         $content = (string) file_get_contents($env);
-        $content = (string) preg_replace('/^SCHOOL_LOCKED_MODULES=.*(\R|$)/m', '', $content);
-        if ($locked !== []) $content = rtrim($content, "\r\n") . "\nSCHOOL_LOCKED_MODULES=\"" . implode(',', $locked) . "\"\n";
+        foreach ($values as $name => $value) {
+            if (!preg_match('/^SCHOOL_[A-Z_]+$/', $name)) throw new \DomainException('Invalid setting.');
+            $content = (string) preg_replace('/^' . $name . '=.*(\R|$)/m', '', $content);
+            if ($value !== null) $content = rtrim($content, "\r\n") . "\n" . $name . '="' . $value . "\"\n";
+        }
         $this->write($env, $content, 0640);
     }
 
