@@ -76,6 +76,12 @@ final class PersonStatus
     {
         $kept = self::keptStatuses($db, $institute, $type, $action);
         $or = $kept ? " OR {$a}.status IN ('" . implode("','", $kept) . "')" : '';
+        // Students leave every register, defaulter list and report the moment they are made
+        // inactive, earlier periods included (the institute's instruction). Staff keep the
+        // date-aware rule so the month they last worked still reaches the salary sheet.
+        if ($type === 'student') {
+            return "({$a}.status='active'{$or} OR ({$since} IS NULL AND 1=0))";
+        }
         return "({$a}.status='active'{$or} OR ({$a}.status_changed_at IS NOT NULL AND {$a}.status_changed_at>{$since}))";
     }
 

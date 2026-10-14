@@ -38,7 +38,7 @@ final class ReportingRepository
                 LEFT JOIN classes c ON c.id = s.class_id
                 LEFT JOIN student_attendance a
                        ON a.student_id = s.id AND DATE_FORMAT(a.attendance_date, \'%Y-%m\') = :p
-                WHERE s.institute_id = :i AND (' . \App\Support\PersonStatus::visibleSql($this->database, $instituteId, 'student', 's', 'attendance', ':since') . ' OR a.id IS NOT NULL)';
+                WHERE s.institute_id = :i AND (' . \App\Support\PersonStatus::visibleSql($this->database, $instituteId, 'student', 's', 'attendance', ':since') . ')';
         $params = ['i' => $instituteId, 'p' => $period, 'since' => $period . '-01 00:00:00'];
         if ($classId > 0) {
             $sql .= ' AND s.class_id = :c';
@@ -251,7 +251,7 @@ final class ReportingRepository
                 LEFT JOIN classes c ON c.id = s.class_id
                 LEFT JOIN student_attendance a
                        ON a.student_id = s.id AND a.attendance_date BETWEEN :from AND :to
-                WHERE s.institute_id = :i AND (" . \App\Support\PersonStatus::visibleSql($this->database, $instituteId, 'student', 's', 'attendance', ':since') . " OR a.id IS NOT NULL)";
+                WHERE s.institute_id = :i AND (" . \App\Support\PersonStatus::visibleSql($this->database, $instituteId, 'student', 's', 'attendance', ':since') . ")";
         $params = ['i' => $instituteId, 'from' => $from, 'to' => $to, 'since' => $from . ' 00:00:00'];
         if ($classId > 0) {
             $sql .= ' AND s.class_id = :c';

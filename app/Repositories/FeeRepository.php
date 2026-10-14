@@ -48,8 +48,9 @@ public function paymentMethodsUsed(int $i): array { return $this->db->query('SEL
  */
 public function defaulters(int $i, array $f): array
 {
-    $where = ' WHERE s.institute_id=:i AND fi.remaining_amount>0.004 AND fi.voided_at IS NULL';
-    $p = ['i' => $i];
+    // Inactive students (and any status the admin leaves out of billing) are not defaulters.
+    $where = ' WHERE s.institute_id=:i AND fi.remaining_amount>0.004 AND fi.voided_at IS NULL AND ' . \App\Support\PersonStatus::visibleSql($this->db, $i, 'student', 's', 'billing', ':since');
+    $p = ['i' => $i, 'since' => date('Y-m-d H:i:s')];
     if (!empty($f['month']) && preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', (string) $f['month'])) { $where .= ' AND fi.fee_month=:month'; $p['month'] = $f['month']; }
     if (!empty($f['class'])) { $where .= ' AND s.class_id=:class'; $p['class'] = (int) $f['class']; }
     if (($f['q'] ?? '') !== '') { $where .= ' AND (s.student_name LIKE :q OR s.registration_no LIKE :q2 OR fi.invoice_no LIKE :q3 OR s.father_name LIKE :q4 OR s.mobile LIKE :q5 OR s.father_mobile LIKE :q6)'; foreach (['q', 'q2', 'q3', 'q4', 'q5', 'q6'] as $k) $p[$k] = '%' . $f['q'] . '%'; }
