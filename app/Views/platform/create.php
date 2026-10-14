@@ -38,7 +38,9 @@ $oldEnabled = old('enabled', null);
 <tr><td><input type="checkbox" id="feature-<?= e($key) ?>" name="enabled[]" value="<?= e($key) ?>" <?= $on ? 'checked' : '' ?>></td><td><label for="feature-<?= e($key) ?>"><strong><?= e($label) ?></strong></label></td><td><?= e($description) ?></td></tr>
 <?php endforeach ?>
 </tbody></table></div>
-<div class="filter-actions"><button class="btn btn--primary" type="submit">Create school portal</button><a class="btn" href="<?= e(url('/admin/schools')) ?>">Cancel</a></div>
+</div></section>
+<?php require __DIR__ . '/_pages.php'; ?>
+<section><div><div class="filter-actions"><button class="btn btn--primary" type="submit">Create school portal</button><a class="btn" href="<?= e(url('/admin/schools')) ?>">Cancel</a></div>
 </div></section>
 </form>
 </div></div></main>

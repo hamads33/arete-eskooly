@@ -62,6 +62,8 @@ final class PlatformController extends Controller
             'activeMenu' => 'schools',
             'activeSubmenu' => 'schools',
             'modules' => Features::MODULES,
+            'pages' => Features::pages(),
+            'lockedPages' => [],
         ]);
     }
 
@@ -101,7 +103,7 @@ final class PlatformController extends Controller
         }
         if ($errors) {
             $this->app->session()->flash('_errors', $errors);
-            $this->app->session()->flash('_old', $data + ['enabled' => (array) $request->input('enabled', [])] + array_combine(array_map(static fn ($k) => 'limit_' . $k, array_keys($limits)), array_map(static fn ($v) => $v ?: '', $limits)));
+            $this->app->session()->flash('_old', $data + ['enabled' => (array) $request->input('enabled', []), 'pages_enabled' => (array) $request->input('pages_enabled', [])] + array_combine(array_map(static fn ($k) => 'limit_' . $k, array_keys($limits)), array_map(static fn ($v) => $v ?: '', $limits)));
             return Response::redirect(url('/admin/schools/new'));
         }
         $id = $registry->create([
@@ -119,6 +121,7 @@ final class PlatformController extends Controller
         try {
             $provisioner->setLimits($id, $limits);
             $provisioner->setLockedModules($id, $locked);
+            if ($request->input('pages_form') === '1') $provisioner->setLockedPages($id, array_values(array_diff(array_column(Features::pages(), 'route'), array_map('strval', (array) $request->input('pages_enabled', [])))));
             @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' CREATED ' . $data['slug'] . ' locked=[' . implode(',', $locked) . '] by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
             Flash::add('success', $message . ($locked ? ' ' . count($locked) . ' feature(s) locked.' : ' All features enabled.'));
         } catch (\DomainException $e) {
@@ -145,6 +148,8 @@ final class PlatformController extends Controller
             'school' => $school,
             'modules' => Features::MODULES,
             'locked' => (new SchoolProvisioner($registry))->lockedModules((string) $school['slug']),
+            'lockedPages' => (new SchoolProvisioner($registry))->lockedPages((string) $school['slug']),
+            'pages' => Features::pages(),
             'limits' => (new SchoolProvisioner($registry))->limits((string) $school['slug']),
             'usage' => $this->usage($school),
         ]);
@@ -207,6 +212,7 @@ final class PlatformController extends Controller
                     }
                     $provisioner->setLimits($id, $limits);
                     $provisioner->setLockedModules($id, $locked);
+                    if ($request->input('pages_form') === '1') $provisioner->setLockedPages($id, array_values(array_diff(array_column(Features::pages(), 'route'), array_map('strval', (array) $request->input('pages_enabled', [])))));
                     @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' FEATURES ' . $school['slug'] . ' locked=[' . implode(',', $locked) . '] by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
                     Flash::add('success', 'Plan saved for ' . $school['name'] . ($locked ? ': ' . count($locked) . ' locked.' : ': everything is enabled.'));
                 } catch (\DomainException $e) {

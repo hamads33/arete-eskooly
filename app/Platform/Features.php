@@ -23,7 +23,7 @@ final class Features
      * matches it longest, so /admin/reports/fee-collection is Fees while /admin/reports is Reports.
      */
     public const MODULES = [
-        'fees' => ['Fees & Invoices', 'Fee vouchers, collection, defaulters and fee automation', ['/admin/fees', '/admin/reports/fee-collection', '/portal/student/fees', '/portal/student/documents/fee-slip']],
+        'fees' => ['Fees & Invoices', 'Fee vouchers, collection, defaulters, fee automation and fee settings', ['/admin/fees', '/admin/reports/fee-collection', '/admin/settings/fee-particulars', '/admin/settings/fee-structure', '/admin/settings/discount-types', '/admin/settings/fee-invoice-accounts', '/admin/settings/fee-voucher', '/portal/student/fees', '/portal/student/documents/fee-slip']],
         'accounts' => ['Accounts', 'Income, expenses and account statements', ['/admin/accounts', '/admin/reports/accounts']],
         'salary' => ['Salary', 'Salary sheets, payments and advances', ['/admin/salary', '/admin/reports/salary', '/portal/employee/salary', '/portal/employee/documents/salary-slip']],
         'attendance' => ['Attendance', 'Student and staff attendance', ['/admin/attendance', '/admin/reports/student-attendance', '/admin/reports/employee-attendance', '/admin/reports/attendance-shortage', '/portal/student/attendance', '/portal/employee/attendance', '/portal/employee/teaching/attendance']],
@@ -78,18 +78,74 @@ final class Features
         return $best;
     }
 
-    /** The locked module a request path falls under, if any. */
+    /** Menu pages that can never be locked: signing out and the user's own account. */
+    private const ALWAYS_OPEN = ['/admin/dashboard', '/admin/settings/account', '/admin/schools'];
+
+    /** @var list<string>|null */
+    private static ?array $lockedPages = null;
+    /** @var list<array{route:string,label:string,group:string}>|null */
+    private static ?array $pages = null;
+
+    /**
+     * Every admin menu page that can be locked on its own, from config/navigation.php, as
+     * [route, label, group]. Groups follow the sidebar sections.
+     */
+    public static function pages(): array
+    {
+        if (self::$pages !== null) return self::$pages;
+        $out = [];
+        foreach ((array) app()->config('navigation', []) as $item) {
+            $entries = ($item['children'] ?? []) !== [] ? $item['children'] : [$item];
+            foreach ($entries as $entry) {
+                $route = (string) ($entry['route'] ?? '');
+                if ($route === '' || ($entry['key'] ?? '') === 'logout' || !str_starts_with($route, '/admin/') || in_array($route, self::ALWAYS_OPEN, true)) continue;
+                $out[] = ['route' => $route, 'label' => (string) $entry['label'], 'group' => ($item['children'] ?? []) !== [] ? (string) $item['label'] : 'Other'];
+            }
+        }
+        return self::$pages = $out;
+    }
+
+    /** Single pages locked for the school this request is serving. */
+    public static function lockedPages(): array
+    {
+        if (self::$lockedPages !== null) return self::$lockedPages;
+        $raw = school_slug() === '' ? '' : (string) getenv('SCHOOL_LOCKED_PAGES');
+        $valid = array_column(self::pages(), 'route');
+        return self::$lockedPages = array_values(array_intersect(array_map('trim', explode(',', $raw)), $valid));
+    }
+
+    /** The menu page a path belongs to: the page whose address is the longest prefix of it. */
+    public static function pageFor(string $path): ?string
+    {
+        $path = '/' . trim((string) parse_url($path, PHP_URL_PATH), '/');
+        $best = null;
+        foreach (self::pages() as ['route' => $route]) {
+            if (($path === $route || str_starts_with($path, $route . '/')) && ($best === null || strlen($route) > strlen($best))) $best = $route;
+        }
+        return $best;
+    }
+
+    /**
+     * Why a request path is locked: a module key, "page:<route>" for a single locked page, or null
+     * when it is open.
+     */
     public static function lockedFor(string $path): ?string
     {
-        if (self::locked() === []) {
+        if (self::locked() === [] && self::lockedPages() === []) {
             return null;
         }
         $module = self::moduleFor($path);
-        return $module !== null && self::isLocked($module) ? $module : null;
+        if ($module !== null && self::isLocked($module)) return $module;
+        if (self::lockedPages() !== [] && ($page = self::pageFor($path)) !== null && in_array($page, self::lockedPages(), true)) return 'page:' . $page;
+        return null;
     }
 
     public static function label(string $module): string
     {
+        if (str_starts_with($module, 'page:')) {
+            foreach (self::pages() as $p) if ('page:' . $p['route'] === $module) return $p['label'];
+            return 'This page';
+        }
         return self::MODULES[$module][0] ?? 'This feature';
     }
 
@@ -139,7 +195,7 @@ final class Features
      */
     public static function lockNavigation(array $navigation): array
     {
-        if (self::locked() === []) {
+        if (self::locked() === [] && self::lockedPages() === []) {
             return $navigation;
         }
         foreach ($navigation as &$item) {
@@ -166,7 +222,7 @@ final class Features
     /** Student / parent / staff portal menus: locked entries are simply left out. */
     public static function hideLocked(array $navigation): array
     {
-        if (self::locked() === []) {
+        if (self::locked() === [] && self::lockedPages() === []) {
             return $navigation;
         }
         return array_values(array_filter($navigation, static fn (array $item): bool => self::lockedFor((string) ($item['route'] ?? '')) === null));

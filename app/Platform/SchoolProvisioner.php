@@ -202,6 +202,20 @@ final class SchoolProvisioner
         $this->setEnvValues($id, ['SCHOOL_LOCKED_MODULES' => $locked === [] ? null : implode(',', $locked)]);
     }
 
+    /** Single menu pages locked for a school (their addresses), read from its own .env. */
+    public function lockedPages(string $slug): array
+    {
+        $env = self::siteDir($slug) . '/.env';
+        $raw = is_file($env) ? (string) ($this->readEnv($env)['SCHOOL_LOCKED_PAGES'] ?? '') : '';
+        return array_values(array_intersect(array_map('trim', explode(',', $raw)), array_column(Features::pages(), 'route')));
+    }
+
+    public function setLockedPages(int $id, array $routes): void
+    {
+        $routes = array_values(array_intersect(array_column(Features::pages(), 'route'), $routes));
+        $this->setEnvValues($id, ['SCHOOL_LOCKED_PAGES' => $routes === [] ? null : implode(',', $routes)]);
+    }
+
     /** A school's caps, e.g. ['students' => 200, 'staff' => null] (null = unlimited). */
     public function limits(string $slug): array
     {
