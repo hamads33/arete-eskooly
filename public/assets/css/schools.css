@@ -146,3 +146,17 @@
   .sp-actions form .sp-btn,.sp-reject>.sp-btn{width:100%}
   .sp-share{width:100%}
 }
+/* Header actions grouped on the right; plan strip on live schools. */
+.sp-head__actions{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.sp-head__buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.sp-share{display:flex;align-items:center;gap:8px}
+.sp-share>svg{width:16px;height:16px;color:var(--sp-muted)}
+.sp-plan{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 2px}
+.sp-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid var(--sp-border);border-radius:999px;background:#fbf8f9;color:inherit;font-size:12.5px;text-decoration:none;line-height:1.2}
+.sp-chip svg{width:15px;height:15px;color:var(--sp-muted)}
+.sp-chip b{font-weight:750}
+a.sp-chip:hover{border-color:#d9b8c4;background:#fff}
+.sp-chip--ok{background:#eef8f2;border-color:#cfe9da;color:#14704a}.sp-chip--ok svg{color:#14704a}
+.sp-chip--warn{background:#fff7e6;border-color:#f2deb0;color:#8a5a0a}.sp-chip--warn svg{color:#8a5a0a}
+.sp-chip--bad{background:#fdecec;border-color:#f3c4c4;color:#b42323}.sp-chip--bad svg{color:#b42323}
+@media (max-width:767px){.sp-head__actions{align-items:stretch;width:100%}.sp-head__buttons{justify-content:stretch}.sp-head__buttons .sp-btn{flex:1;justify-content:center}.sp-share code{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}}

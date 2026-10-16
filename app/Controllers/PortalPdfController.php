@@ -104,7 +104,7 @@ final class PortalPdfController extends PortalController
             return Response::html('Report card record not found.', 404);
         }
         $institute = $this->repo()->institute($instituteId);
-        $result = (new WorkflowRepository($this->app->database()))->studentResult($instituteId, $examId, (int) $student['id']);
+        $result = (new WorkflowRepository($this->app->database()))->studentResult($instituteId, $examId, (int) $student['id'], true);
 
         return $this->pdf($request, $institute, 'report-card', 'report-card-' . $student['registration_no'] . '-' . $exam['name'], [
             'meta' => [

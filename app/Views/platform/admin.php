@@ -18,6 +18,14 @@ $age = static function (?string $d): string {
     return $days <= 0 ? 'today' : ($days === 1 ? '1 day' : $days . ' days');
 };
 $signupUrl = url('/register-school');
+$provisioner = new \App\Platform\SchoolProvisioner(new \App\Platform\SchoolRegistry());
+$plan = static function (string $slug) use ($provisioner): array {
+    $locked = count($provisioner->lockedModules($slug)) + 0;
+    $total = count(\App\Platform\Features::MODULES);
+    $until = $provisioner->validUntil($slug);
+    $days = $until !== null ? (int) floor((strtotime($until) - strtotime(date('Y-m-d'))) / 86400) + 1 : null;
+    return ['features' => $total - $locked, 'total' => $total, 'pages' => count($provisioner->lockedPages($slug)), 'limits' => $provisioner->limits($slug), 'until' => $until, 'days' => $days];
+};
 $empty = [
     'pending' => ['No requests waiting', 'New school applications will appear here for your approval.'],
     'active' => ['No live schools yet', 'Schools you approve appear here with a link to their portal.'],
@@ -33,11 +41,15 @@ $empty = [
     <h1>School Sign-ups</h1>
     <p>Review schools that applied for their own portal. Approving sets up a separate portal with its own data in a few seconds; Arete's data is never shared.</p>
   </div>
-  <a class="sp-btn sp-btn--primary" href="<?= url('/admin/schools/new') ?>"><i data-lucide="plus"></i><span>Create a school</span></a>
-  <a class="sp-btn" href="<?= url('/admin/schools/defaults') ?>"><i data-lucide="sliders-horizontal"></i><span>Default plan</span></a>
-  <div class="sp-share" title="Registration link for schools">
-    <code><?= e($signupUrl) ?></code>
-    <button class="sp-btn sp-btn--sm" type="button" data-copy="<?= e($signupUrl) ?>"><i data-lucide="copy"></i><span>Copy link</span></button>
+  <div class="sp-head__actions">
+    <div class="sp-head__buttons">
+      <a class="sp-btn" href="<?= url('/admin/schools/defaults') ?>"><i data-lucide="sliders-horizontal"></i><span>Default plan</span></a>
+      <a class="sp-btn sp-btn--primary" href="<?= url('/admin/schools/new') ?>"><i data-lucide="plus"></i><span>Create a school</span></a>
+    </div>
+    <div class="sp-share" title="Registration link for schools">
+      <i data-lucide="link"></i><code><?= e($signupUrl) ?></code>
+      <button class="sp-btn sp-btn--sm" type="button" data-copy="<?= e($signupUrl) ?>"><i data-lucide="copy"></i><span>Copy link</span></button>
+    </div>
   </div>
 </header>
 
@@ -75,11 +87,21 @@ $empty = [
     <div><dt>City</dt><dd><?= e($s['city'] ?: '—') ?></dd></div>
     <div><dt>Applied</dt><dd><?= e($when($s['created_at'])) ?></dd></div>
     <?php if ($s['approved_at']): ?><div><dt>Approved</dt><dd><?= e($when($s['approved_at'])) ?></dd></div><?php endif ?>
-    <?php if ($st === 'active' || $st === 'suspended'): $vu = (new \App\Platform\SchoolProvisioner(new \App\Platform\SchoolRegistry()))->validUntil((string) $s['slug']); ?><div><dt>Subscription</dt><dd><?php if ($vu === null): ?>No end date<?php elseif (date('Y-m-d') > $vu): ?><span style="color:#b4232f;font-weight:700">Ended <?= e(date('j M Y', (int) strtotime($vu))) ?></span><?php else: ?>Until <?= e(date('j M Y', (int) strtotime($vu))) ?> (<?= (int) ((strtotime($vu) - strtotime(date('Y-m-d'))) / 86400) + 1 ?> days left)<?php endif ?></dd></div><?php endif ?>
+    <?php $planInfo = ($st === 'active' || $st === 'suspended') ? $plan((string) $s['slug']) : null; ?>
     <?php if ($st === 'suspended'): ?><div><dt>Access revoked</dt><dd><?= e($when($s['updated_at'])) ?></dd></div><?php endif ?>
     <?php if ($st === 'rejected'): ?><div><dt>Rejected</dt><dd><?= e($when($s['updated_at'])) ?></dd></div><?php endif ?>
     <?php if ($st === 'pending' || $st === 'failed'): ?><div><dt>Waiting</dt><dd class="sp-wait"><?= $age($s['created_at']) === 'today' ? 'Applied today' : e($age($s['created_at'])) ?></dd></div><?php endif ?>
   </dl>
+  <?php if ($planInfo): $pi = $planInfo; ?>
+  <div class="sp-plan">
+    <a class="sp-chip" href="<?= e(url('/admin/schools/' . (int) $s['id'] . '/features')) ?>"><i data-lucide="layout-grid"></i><span><b><?= (int) $pi['features'] ?>/<?= (int) $pi['total'] ?></b> features<?= $pi['pages'] ? ' · ' . (int) $pi['pages'] . ' page(s) locked' : '' ?></span></a>
+    <span class="sp-chip"><i data-lucide="users"></i><span><?= $pi['limits']['students'] !== null ? 'Up to <b>' . (int) $pi['limits']['students'] . '</b> students' : '<b>Unlimited</b> students' ?></span></span>
+    <span class="sp-chip"><i data-lucide="briefcase"></i><span><?= $pi['limits']['staff'] !== null ? 'Up to <b>' . (int) $pi['limits']['staff'] . '</b> staff' : '<b>Unlimited</b> staff' ?></span></span>
+    <?php if ($pi['until'] === null): ?><span class="sp-chip sp-chip--ok"><i data-lucide="infinity"></i><span>No end date</span></span>
+    <?php elseif ($pi['days'] < 1): ?><span class="sp-chip sp-chip--bad"><i data-lucide="calendar-x"></i><span>Subscription ended <?= e(date('j M Y', (int) strtotime($pi['until']))) ?></span></span>
+    <?php else: ?><span class="sp-chip<?= $pi['days'] <= 7 ? ' sp-chip--warn' : '' ?>"><i data-lucide="calendar-clock"></i><span>Until <?= e(date('j M Y', (int) strtotime($pi['until']))) ?> · <b><?= (int) $pi['days'] ?></b> day(s) left</span></span><?php endif ?>
+  </div>
+  <?php endif ?>
   <?php if ($st === 'failed' && $s['last_error']): $error = (string) $s['last_error']; $summary = trim(preg_replace('/\s+in \S+:\d+.*$/s', '', strtok($error, "
 ")) ?: 'Unknown error'); ?>
   <div class="sp-alert sp-alert--bad"><strong>Setup did not finish.</strong> Nothing is lost: press <strong>Retry setup</strong> and it continues where it stopped. If it fails again, share the details below with your developer.

@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="<?= e(asset('css/schools.css?v=6')) ?>">
+<link rel="stylesheet" href="<?= e(asset('css/schools.css?v=7')) ?>">
 <div class="sp">
 <?php if ($submitted !== ''): ?>
 <div class="auth-heading signup-heading"><span class="eyebrow">APPLICATION SUBMITTED</span><h1>Thank you<span>.</span></h1><p>Your application for <strong><?= e($submitted) ?>.<?= e($domain) ?></strong> is with the Arete team for review.</p></div>

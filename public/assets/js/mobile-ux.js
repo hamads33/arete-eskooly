@@ -53,7 +53,7 @@
 
     // A local scrolling region is explicit and keyboard accessible, never page-wide.
     document.querySelectorAll('table.data-table').forEach(table => {
-      if (table.matches('.mobile-records,.mobile-details,.attendance-table') || table.closest('.table-scroll,.report-table-wrap,.class-table-wrap,.fd-table-wrap,.ss-table-wrap,.ek-table-wrap')) return;
+      if (table.matches('.mobile-records,.mobile-details,.attendance-table') || table.closest('.table-scroll,.report-table-wrap,.class-table-wrap,.fd-table-wrap,.ss-table-wrap,.ek-table-wrap,.ec-scroll')) return;
       const wrap = document.createElement('div'); wrap.className = 'mobile-table-scroll';
       table.before(wrap); wrap.append(table);
       undo.push(() => wrap.replaceWith(table));

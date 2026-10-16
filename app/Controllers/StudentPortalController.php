@@ -150,6 +150,7 @@ final class StudentPortalController extends PortalController
             'instituteId' => $instituteId,
             'student' => $student,
             'exams' => $exams,
+            'pendingExams' => array_values(array_filter($this->repo()->studentPendingExams($studentId, (int) $student['class_id'], $instituteId), static fn ($x) => !isset($exams[(int) $x['id']]))),
             'tests' => $this->repo()->studentClassTests($studentId, $instituteId),
             'onlineTests' => (new \App\Repositories\OnlineTestRepository($this->app->database()))->resultsForStudent($student),
             'certificates' => $this->repo()->studentCertificates($studentId, $instituteId),

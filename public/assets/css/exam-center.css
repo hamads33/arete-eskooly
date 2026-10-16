@@ -1,0 +1,165 @@
+/* Exam Center: exams list, exam dashboard, marks sheet. Uses the site's colour tokens. */
+.exam-center .num { text-align: right; font-variant-numeric: tabular-nums; }
+.exam-center .ec-muted { color: var(--text-muted); }
+.exam-center .ec-link { color: var(--primary); font-weight: 700; text-decoration: none; }
+.exam-center .ec-link:hover { text-decoration: underline; }
+.exam-center .ec-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: flex-end; }
+.exam-center .ec-actions form { margin: 0; }
+.exam-center td.ec-actions { white-space: nowrap; }
+.exam-center .ec-two { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+.exam-center .ec-stack { display: grid; gap: 12px; margin-top: 14px; }
+.exam-center .ec-sub { margin: 18px 0 8px; font-size: 15px; }
+.exam-center .ec-count { display: inline-block; min-width: 26px; padding: 2px 8px; border-radius: 999px; background: var(--primary-50); color: var(--primary); font-size: 13px; text-align: center; vertical-align: middle; }
+.exam-center .ec-danger { display: flex; justify-content: flex-end; margin-top: 4px; }
+
+.exam-center .status-badge--published { background: #e8f5ee; color: #117046; }
+.exam-center .status-badge--upcoming { background: #eef3fb; color: #3b5b8c; }
+.exam-center .status-badge--absent { background: #fdecec; color: #b42323; }
+.exam-center .status-badge--completed { background: #edf7f2; color: #14704a; }
+
+/* Tabs and class pills */
+.exam-center .ec-tabs { display: flex; gap: 4px; margin: 0 0 18px; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+.exam-center .ec-tabs a { padding: 11px 16px; color: var(--text-secondary); font-weight: 700; text-decoration: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+.exam-center .ec-tabs a[aria-current="page"] { color: var(--primary); border-bottom-color: var(--primary); }
+.exam-center .ec-dot { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 11px; }
+.exam-center .ec-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.exam-center .ec-pills a { padding: 7px 14px; border: 1px solid var(--border-strong); border-radius: 999px; background: var(--surface); color: var(--text-primary); font-weight: 600; text-decoration: none; }
+.exam-center .ec-pills a[aria-current="page"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* Metrics and progress */
+.exam-center .ec-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-bottom: 18px; }
+.exam-center .ec-progress { width: 120px; max-width: 100%; height: 8px; border-radius: 999px; background: var(--primary-100); overflow: hidden; margin-bottom: 4px; }
+.exam-center .ec-progress span { display: block; height: 100%; border-radius: inherit; background: var(--success); }
+
+/* Checklists */
+.exam-center .ec-classes { border: 0; padding: 0; margin: 14px 0; }
+.exam-center .ec-classes legend { font-weight: 700; margin-bottom: 8px; display: flex; gap: 10px; align-items: center; }
+.exam-center .ec-classes legend small { font-weight: 500; color: var(--text-muted); }
+.exam-center .ec-check-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.exam-center .ec-check { display: flex; gap: 8px; align-items: center; padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; min-height: 40px; }
+.exam-center .ec-check:has(input:checked) { border-color: var(--primary-200); background: var(--primary-50); }
+.exam-center .ec-check small { color: var(--text-muted); }
+.exam-center .ec-check.is-disabled { opacity: .55; cursor: default; }
+.exam-center .ec-check--inline { display: inline-flex; padding: 4px 8px; min-height: 0; border: 0; background: transparent; }
+.exam-center .ec-check--abs { display: inline-flex; padding: 6px 10px; min-height: 36px; }
+.exam-center .ec-check--abs:has(input:checked) { border-color: #f1b7b7; background: #fdecec; color: #b42323; font-weight: 700; }
+.exam-center .ec-toggle { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.exam-center .ec-toggle:last-of-type { margin-bottom: 14px; }
+.exam-center .ec-toggle input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--primary); }
+.exam-center .ec-toggle span { display: grid; gap: 3px; }
+.exam-center .ec-toggle small { color: var(--text-muted); line-height: 1.45; }
+.exam-center .ec-list { list-style: none; margin: 0; padding: 0; }
+.exam-center .ec-list li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.exam-center .ec-list form { margin: 0; }
+.exam-center .ec-search { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
+.exam-center .ec-pick { display: grid; gap: 6px; max-height: 300px; overflow: auto; padding-right: 4px; }
+.exam-center .ec-filter { max-width: 280px; }
+.exam-center .ec-inline { display: inline-flex; gap: 4px; align-items: center; margin: 0; }
+.exam-center .ec-total { width: 84px; text-align: right; }
+
+/* Paper cards (teacher) */
+.exam-center .ec-paper-list { display: grid; gap: 10px; }
+.exam-center .ec-paper { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: inherit; text-decoration: none; transition: border-color var(--transition-fast), box-shadow var(--transition-fast); }
+.exam-center .ec-paper:hover { border-color: var(--primary-200); box-shadow: var(--shadow-sm); }
+.exam-center .ec-paper__main { display: grid; gap: 3px; }
+.exam-center .ec-paper__main small { color: var(--text-muted); font-weight: 600; }
+.exam-center .ec-paper__meta { color: var(--text-secondary); font-size: 13px; }
+.exam-center .ec-paper__meta b { color: #946514; }
+
+/* Marks sheet */
+.exam-center .ec-context { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; margin-bottom: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--border); overflow: hidden; }
+.exam-center .ec-context div { display: grid; gap: 3px; padding: 12px 14px; background: var(--surface); }
+.exam-center .ec-context span { color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.exam-center .ec-context strong { font-size: 15px; }
+.exam-center .ec-note { display: flex; gap: 10px; align-items: center; padding: 12px 14px; margin-bottom: 14px; border-radius: var(--radius-md); background: #eef3fb; color: #3b5b8c; }
+.exam-center .ec-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+.exam-center .ec-toolbar input[type=search] { max-width: 280px; }
+.exam-center .ec-hint { font-size: 13px; }
+.exam-center .ec-sheet-table .ec-mark { width: 96px; text-align: right; font-weight: 700; font-size: 15px; }
+.exam-center .ec-sheet-table .ec-mark:disabled { background: var(--surface-soft); }
+.exam-center .ec-sheet-table .ec-remark { min-width: 160px; }
+.exam-center .ec-sheet-table tr.is-unmarked td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+.exam-center .is-invalid { border-color: var(--danger) !important; background: #fff4f4 !important; }
+.exam-center .ec-sticky small, .exam-center .ec-results td small { display: block; color: var(--text-muted); font-size: 12px; font-weight: 500; }
+.exam-center .ec-savebar { position: sticky; bottom: 0; z-index: 3; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; padding: 12px 14px; margin-top: 12px; border: 1px solid var(--border); border-radius: var(--radius-md); background: rgba(255, 255, 255, .96); box-shadow: var(--shadow-md); backdrop-filter: blur(6px); }
+.exam-center .ec-savebar [data-ec-status] { margin-right: auto; }
+.exam-center .ec-error { color: var(--danger); font-weight: 600; }
+.exam-center .ec-after { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+.exam-center .ec-after form { margin: 0; display: flex; gap: 6px; align-items: center; }
+
+/* Consolidated results */
+.exam-center .ec-results th small { display: block; font-weight: 500; color: var(--text-muted); text-transform: none; letter-spacing: 0; }
+.exam-center .ec-results th a { color: inherit; text-decoration: none; }
+.exam-center .ec-results th a:hover { color: var(--primary); }
+.exam-center .ec-results .ec-sticky { position: sticky; left: 0; z-index: 1; background: var(--surface); min-width: 170px; }
+.exam-center .ec-results thead .ec-sticky { z-index: 2; }
+
+@media screen and (max-width: 1023px) {
+  .exam-center .ec-context { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .exam-center .ec-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media screen and (max-width: 767px) {
+  .exam-center .ec-context { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exam-center .ec-search { grid-template-columns: 1fr; }
+  .exam-center .ec-filter, .exam-center .ec-toolbar input[type=search] { max-width: none; width: 100%; }
+  .exam-center .ec-hint { display: none; }
+  .exam-center .ec-paper { flex-direction: column; align-items: flex-start; }
+
+  /* Lists become cards: each row a block with labelled values. */
+  .exam-center .ec-table:not(.ec-results) thead { display: none; }
+  .exam-center .ec-table:not(.ec-results) tbody tr { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+  .exam-center .ec-table:not(.ec-results) tbody td { display: block; padding: 0; border: 0; text-align: left; }
+  .exam-center .ec-table:not(.ec-results) tbody td[data-label]::before { content: attr(data-label); display: block; margin-bottom: 2px; color: var(--text-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+  .exam-center .ec-table:not(.ec-results) tbody td:first-child, .exam-center .ec-table:not(.ec-results) tbody td.ec-actions { grid-column: 1 / -1; }
+  .exam-center .ec-table:not(.ec-results) tbody td.ec-actions { justify-content: flex-start; white-space: normal; }
+
+  /* Marks sheet on a phone: name and mark first, big touch targets, the rest below. */
+  .exam-center .ec-sheet-table tbody tr { grid-template-columns: 1fr auto; align-items: center; }
+  .exam-center .ec-sheet-table tbody td.ec-sticky { grid-column: 1; grid-row: 1; }
+  .exam-center .ec-sheet-table tbody td.ec-sticky::before, .exam-center .ec-sheet-table tbody td[data-label="Marks"]::before { display: none; }
+  .exam-center .ec-sheet-table tbody td[data-label="Marks"] { grid-column: 2; grid-row: 1; }
+  .exam-center .ec-sheet-table tbody td.ec-reg { grid-column: 1 / -1; grid-row: 2; font-size: 13px; }
+  .exam-center .ec-sheet-table tbody td.ec-reg::before { display: inline; margin-right: 6px; }
+  .exam-center .ec-sheet-table tbody td[data-label="Absent"] { grid-column: 1; }
+  .exam-center .ec-sheet-table tbody td[data-label="%"] { grid-column: 2; text-align: right; }
+  .exam-center .ec-sheet-table tbody td[data-label="Remarks"] { grid-column: 1 / -1; }
+  .exam-center .ec-sheet-table .ec-mark { width: 110px; min-height: 44px; font-size: 17px; }
+  .exam-center .ec-sheet-table .ec-remark { width: 100%; min-width: 0; }
+  .exam-center .ec-sheet-table tr.is-unmarked td:first-child { box-shadow: none; }
+  .exam-center .ec-sheet-table tr.is-unmarked { border-left: 4px solid var(--accent); }
+  .exam-center .ec-savebar { margin: 12px -4px 0; }
+  .exam-center .ec-savebar .btn { flex: 1 1 auto; min-height: 44px; }
+  .exam-center .ec-savebar [data-ec-status] { flex-basis: 100%; }
+}
+
+/* Own scroll wrapper (the site's mobile "swipe" wrapper is skipped for these tables). */
+.exam-center .ec-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+@media screen and (max-width: 767px) {
+  .exam-center .ec-scroll:has(.ec-results) { margin: 0 -4px; }
+  .exam-center .ec-table:not(.ec-results) { min-width: 0 !important; width: 100%; }
+}
+
+/* Student result page */
+.exam-center .ec-search--student { grid-template-columns: 1fr 220px auto; }
+.exam-center .ec-pick--results { max-height: none; margin-top: 14px; }
+.exam-center .ec-student-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+.exam-center .ec-result-card { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+.exam-center .ec-result-card header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.exam-center .ec-result-card h3 { margin: 0 0 2px; font-size: 16px; }
+.exam-center .ec-result-card small { color: var(--text-muted); }
+.exam-center .ec-result-card__score { text-align: right; display: grid; }
+.exam-center .ec-result-card__score strong { font-size: 22px; color: var(--primary); }
+.exam-center .ec-result-card footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.exam-center .ec-mini td, .exam-center .ec-mini th { padding: 7px 8px; }
+@media screen and (max-width: 767px) {
+  .exam-center .ec-search--student { grid-template-columns: 1fr; }
+  .exam-center .ec-student-results { grid-template-columns: 1fr; }
+}
+@media screen and (max-width: 767px) {
+  .exam-center .ec-table:not(.ec-results), .exam-center .ec-table:not(.ec-results) tbody { display: block; width: 100%; }
+}
+.exam-center .ec-mini { width: 100%; min-width: 0 !important; }
+@media screen and (max-width: 767px) {
+  .exam-center .ec-table:not(.ec-results) tbody tr { width: 100%; box-sizing: border-box; }
+}

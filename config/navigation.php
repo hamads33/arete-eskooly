@@ -90,7 +90,7 @@ return [
     $item('Live Classes', 'live-classes', 'video', '/admin/live-classes'),
     $item('Recorded Lectures', 'recorded-lectures', 'clapperboard', '/admin/recorded-lectures'),
     $item('Exams', 'exams', 'file-check-2', null, [
-        $child('Create New Exam', 'exam-create', '/admin/exams/create'), $child('Exam Setup', 'exam-setup', '/admin/exams/setup'),
+        $child('All Exams', 'exam-center', '/admin/exams'), $child('Student Result', 'exam-student', '/admin/exams/student'), $child('Exam Setup', 'exam-setup', '/admin/exams/setup'),
         $child('Add / Update Marks', 'exam-marks', '/admin/exams/marks'), $child('Result Card', 'exam-results', '/admin/exams/results'),
     ]),
     $item('Class Tests', 'class-tests', 'clipboard-list', null, [

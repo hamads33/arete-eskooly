@@ -39,7 +39,7 @@ final class PlatformController extends Controller
             'schools' => (new SchoolRegistry())->all(),
             'schoolUrl' => [PlatformConfig::class, 'schoolUrl'],
             'filter' => (string) $request->query('status', ''),
-            'styles' => ['css/schools.css?v=6'],
+            'styles' => ['css/schools.css?v=7'],
         ]);
     }
 

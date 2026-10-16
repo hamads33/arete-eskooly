@@ -152,7 +152,7 @@ abstract class PortalController extends Controller
                 $item('Class Notes', 'portal-teaching-notes', 'file-text', '/portal/employee/teaching/notes'),
                 $item('Class Tests', 'portal-teaching-tests', 'clipboard-list', '/portal/employee/teaching/tests'),
                 $item('Online Tests & Submissions', 'online-tests', 'clipboard-check', '/admin/online-tests'),
-                $item('Exam Marks', 'exam-marks', 'file-check-2', '/admin/exams/marks'),
+                $item('Exams & Marks', 'exam-center', 'file-check-2', '/admin/exams'),
                 $item('Live Classes', 'portal-teaching-live-classes', 'video', '/portal/employee/teaching/live-classes'),
                 $item('Announcements', 'portal-teaching-announcements', 'megaphone', '/portal/employee/teaching/announcements'),
             ]);

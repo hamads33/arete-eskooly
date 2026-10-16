@@ -7,5 +7,5 @@
 <script src="<?= e(asset('js/table-tools.js?v=1')) ?>" defer></script>
 <script src="<?= e(asset('js/form-a11y.js?v=2')) ?>" defer></script>
 <script src="<?= e(asset('js/print-options.js?v=1')) ?>" defer></script>
-<script src="<?= e(asset('js/mobile-ux.js?v=8')) ?>" defer></script>
+<script src="<?= e(asset('js/mobile-ux.js?v=9')) ?>" defer></script>
 

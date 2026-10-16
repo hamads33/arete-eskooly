@@ -4,7 +4,7 @@ $st = $school['status'] ?? null;
 $host = $slug !== '' ? $slug . '.' . $domain : '';
 $applied = $school ? date('d M Y', strtotime((string) $school['created_at'])) : '';
 ?>
-<link rel="stylesheet" href="<?= e(asset('css/schools.css?v=6')) ?>">
+<link rel="stylesheet" href="<?= e(asset('css/schools.css?v=7')) ?>">
 <div class="sp">
 <?php if ($notice !== ''): ?><p class="sp-banner" role="status"><?= e($notice) ?></p><?php endif ?>
 

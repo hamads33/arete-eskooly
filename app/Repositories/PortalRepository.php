@@ -139,7 +139,9 @@ final class PortalRepository
             'SELECT 1 FROM exam_marks m
              JOIN exam_subjects es ON es.id = m.exam_subject_id
              JOIN exams x ON x.id = es.exam_id
-             WHERE m.student_id = :student AND x.id = :exam AND x.institute_id = :institute LIMIT 1',
+             WHERE m.student_id = :student AND x.id = :exam AND x.institute_id = :institute
+               AND (es.published_at IS NOT NULL OR x.status IN (\'published\',\'locked\'))
+               AND NOT EXISTS (SELECT 1 FROM exam_students xs WHERE xs.exam_id = x.id AND xs.student_id = m.student_id AND xs.mode = \'exclude\') LIMIT 1',
             ['student' => $studentId, 'exam' => $examId, 'institute' => $instituteId]
         )->fetchColumn();
     }
@@ -153,9 +155,26 @@ final class PortalRepository
              JOIN exam_subjects es ON es.id = m.exam_subject_id
              JOIN exams x ON x.id = es.exam_id
              JOIN subjects sub ON sub.id = es.subject_id
-             WHERE m.student_id = :student AND x.institute_id = :institute AND x.status = \'published\'
-             ORDER BY x.start_date DESC, sub.name',
+             WHERE m.student_id = :student AND x.institute_id = :institute
+               AND (es.published_at IS NOT NULL OR x.status IN (\'published\',\'locked\'))
+               AND NOT EXISTS (SELECT 1 FROM exam_students xs WHERE xs.exam_id = x.id AND xs.student_id = m.student_id AND xs.mode = \'exclude\')
+             ORDER BY x.start_date DESC, x.id DESC, sub.name',
             ['student' => $studentId, 'institute' => $instituteId]
+        )->fetchAll();
+    }
+
+    /** Exams the student is taking whose results are not published yet (shown as "Result pending"). */
+    public function studentPendingExams(int $studentId, int $classId, int $instituteId): array
+    {
+        return $this->database->query(
+            'SELECT x.id, x.name, x.start_date, x.end_date FROM exams x
+             WHERE x.institute_id = :institute AND x.status NOT IN (\'published\',\'locked\')
+               AND NOT EXISTS (SELECT 1 FROM exam_students xs WHERE xs.exam_id = x.id AND xs.student_id = :s1 AND xs.mode = \'exclude\')
+               AND EXISTS (SELECT 1 FROM exam_subjects es WHERE es.exam_id = x.id AND es.published_at IS NULL
+                   AND ((es.class_id = :c1 AND NOT EXISTS (SELECT 1 FROM exam_students xi WHERE xi.exam_id = x.id AND xi.student_id = :s2))
+                        OR es.class_id = (SELECT xi2.class_id FROM exam_students xi2 WHERE xi2.exam_id = x.id AND xi2.student_id = :s3 AND xi2.mode = \'include\')))
+             ORDER BY x.start_date DESC LIMIT 20',
+            ['institute' => $instituteId, 's1' => $studentId, 'c1' => $classId, 's2' => $studentId, 's3' => $studentId]
         )->fetchAll();
     }
 

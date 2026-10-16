@@ -247,6 +247,20 @@ $router->post('/admin/exams/setup/{id}/delete', [ExamsController::class, 'delete
 $router->post('/admin/exams/marks', [ExamsController::class, 'saveMarks'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/exams/{id}/delete', [ExamsController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/exams/{id}/status', [ExamsController::class, 'status'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+// Exam Center: exams → classes / students → papers → marks → results → publishing.
+$router->get('/admin/exams', [\App\Controllers\ExamCenterController::class, 'index'], name: 'exams.center');
+$router->post('/admin/exams/new', [\App\Controllers\ExamCenterController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/settings', [\App\Controllers\ExamCenterController::class, 'saveSettings'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/exams/student', [\App\Controllers\ExamCenterController::class, 'student']);
+$router->get('/admin/exams/papers/{paper}', [\App\Controllers\ExamCenterController::class, 'sheet']);
+$router->post('/admin/exams/papers/{paper}/marks', [\App\Controllers\ExamCenterController::class, 'saveSheet'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/papers/{paper}/total', [\App\Controllers\ExamCenterController::class, 'paperTotal'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/papers/{paper}/{action}', [\App\Controllers\ExamCenterController::class, 'paperAction'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->get('/admin/exams/{id}', [\App\Controllers\ExamCenterController::class, 'show']);
+$router->post('/admin/exams/{id}/update', [\App\Controllers\ExamCenterController::class, 'update'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/{id}/students', [\App\Controllers\ExamCenterController::class, 'students'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/{id}/papers', [\App\Controllers\ExamCenterController::class, 'addPapers'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/{id}/{action}', [\App\Controllers\ExamCenterController::class, 'examAction'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->get('/admin/online-tests', [\App\Controllers\OnlineTestsController::class, 'index'], name: 'online-tests');
 $router->post('/admin/online-tests', [\App\Controllers\OnlineTestsController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->get('/admin/online-tests/{id}/edit', [\App\Controllers\OnlineTestsController::class, 'edit'], name: 'online-tests.edit');
