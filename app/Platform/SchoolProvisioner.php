@@ -54,6 +54,8 @@ final class SchoolProvisioner
             try { SchoolLogo::install($slug, $site, $dbName); } catch (\Throwable $e) { $logoNote = ' (the logo could not be applied; the school can upload it in Institute Profile)'; }
             @unlink($site . '/SUSPENDED');
             $this->registry->update($id, ['status' => 'active', 'approved_at' => date('Y-m-d H:i:s'), 'last_error' => null]);
+            // Every new school starts on the default plan; the admin can change it per school later.
+            try { $this->applyDefaultPlan($id); } catch (\Throwable $e) { $logoNote .= ' (the default plan could not be applied: ' . $e->getMessage() . ' Set it on the Features page)'; }
             return [true, $school['name'] . ' is live at ' . PlatformConfig::schoolUrl($slug) . $logoNote];
         } catch (\Throwable $e) {
             $this->registry->update($id, ['status' => 'failed', 'last_error' => mb_substr($e->getMessage(), 0, 4000)]);
@@ -182,6 +184,66 @@ final class SchoolProvisioner
             $files[] = $tgz;
         }
         return $files;
+    }
+
+    /** Where the default plan for new schools is kept (on the main portal, outside every web root). */
+    public static function defaultPlanPath(): string
+    {
+        return str_replace('\\', '/', PlatformConfig::get('DEFAULT_PLAN_PATH', BASE_PATH . '/storage/platform-default-plan.json'));
+    }
+
+    /**
+     * The plan every new school starts with. Without a saved default: everything enabled, no limits.
+     *
+     * @return array{locked:list<string>,pages:list<string>,limits:array<string,int|null>}
+     */
+    public static function defaultPlan(): array
+    {
+        $raw = is_file(self::defaultPlanPath()) ? json_decode((string) file_get_contents(self::defaultPlanPath()), true) : null;
+        $raw = is_array($raw) ? $raw : [];
+        $limits = [];
+        foreach (array_keys(Features::LIMITS) as $key) {
+            $n = (int) ($raw['limits'][$key] ?? 0);
+            $limits[$key] = $n > 0 ? $n : null;
+        }
+        return [
+            'locked' => array_values(array_intersect(array_keys(Features::MODULES), (array) ($raw['locked'] ?? []))),
+            'pages' => array_values(array_intersect(array_column(Features::pages(), 'route'), (array) ($raw['pages'] ?? []))),
+            'limits' => $limits,
+        ];
+    }
+
+    /** @param array<string,int|null> $limits null or 0 = unlimited */
+    public static function saveDefaultPlan(array $locked, array $pages, array $limits): void
+    {
+        $clean = [];
+        foreach (array_keys(Features::LIMITS) as $key) {
+            $n = (int) ($limits[$key] ?? 0);
+            if ($n < 0 || $n > 1000000) throw new \DomainException('Limits must be between 0 (unlimited) and 1,000,000.');
+            $clean[$key] = $n > 0 ? $n : null;
+        }
+        $plan = [
+            'locked' => array_values(array_intersect(array_keys(Features::MODULES), $locked)),
+            'pages' => array_values(array_intersect(array_column(Features::pages(), 'route'), $pages)),
+            'limits' => $clean,
+            'updated_at' => date('c'),
+        ];
+        $path = self::defaultPlanPath();
+        if (!is_dir(dirname($path)) && !@mkdir(dirname($path), 0750, true) && !is_dir(dirname($path))) throw new \DomainException('Cannot create the folder for the default plan.');
+        $tmp = $path . '.tmp' . bin2hex(random_bytes(4));
+        if (file_put_contents($tmp, json_encode($plan, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false || !rename($tmp, $path)) {
+            @unlink($tmp);
+            throw new \DomainException('The default plan could not be saved.');
+        }
+    }
+
+    /** Copies the default plan into a school's .env (used when a school goes live). */
+    public function applyDefaultPlan(int $id): void
+    {
+        $plan = self::defaultPlan();
+        $this->setLimits($id, $plan['limits']);
+        $this->setLockedModules($id, $plan['locked']);
+        $this->setLockedPages($id, $plan['pages']);
     }
 
     /** Modules locked for a school, read from its own .env. */

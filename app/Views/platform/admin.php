@@ -34,6 +34,7 @@ $empty = [
     <p>Review schools that applied for their own portal. Approving sets up a separate portal with its own data in a few seconds; Arete's data is never shared.</p>
   </div>
   <a class="sp-btn sp-btn--primary" href="<?= url('/admin/schools/new') ?>"><i data-lucide="plus"></i><span>Create a school</span></a>
+  <a class="sp-btn" href="<?= url('/admin/schools/defaults') ?>"><i data-lucide="sliders-horizontal"></i><span>Default plan</span></a>
   <div class="sp-share" title="Registration link for schools">
     <code><?= e($signupUrl) ?></code>
     <button class="sp-btn sp-btn--sm" type="button" data-copy="<?= e($signupUrl) ?>"><i data-lucide="copy"></i><span>Copy link</span></button>

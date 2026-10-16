@@ -57,14 +57,55 @@ final class PlatformController extends Controller
     public function create(Request $request): Response
     {
         if ($x = $this->denied()) return $x;
+        $plan = SchoolProvisioner::defaultPlan();
         return $this->view('platform/create', [
             'pageTitle' => 'Create a School',
             'activeMenu' => 'schools',
             'activeSubmenu' => 'schools',
             'modules' => Features::MODULES,
             'pages' => Features::pages(),
-            'lockedPages' => [],
+            'locked' => $plan['locked'],
+            'lockedPages' => $plan['pages'],
+            'limits' => $plan['limits'],
         ]);
+    }
+
+    /** The plan (features, pages, limits) every new school starts with, sign-ups included. */
+    public function defaults(Request $request): Response
+    {
+        if ($x = $this->denied()) return $x;
+        $plan = SchoolProvisioner::defaultPlan();
+        return $this->view('platform/defaults', [
+            'pageTitle' => 'Default Plan for New Schools',
+            'activeMenu' => 'schools',
+            'activeSubmenu' => 'schools',
+            'modules' => Features::MODULES,
+            'pages' => Features::pages(),
+            'locked' => $plan['locked'],
+            'lockedPages' => $plan['pages'],
+            'limits' => $plan['limits'],
+        ]);
+    }
+
+    public function saveDefaults(Request $request): Response
+    {
+        if ($x = $this->denied()) return $x;
+        try {
+            $limits = [];
+            foreach (array_keys(Features::LIMITS) as $key) {
+                $raw = trim((string) $request->input('limit_' . $key, ''));
+                if ($raw !== '' && !ctype_digit($raw)) throw new \DomainException('Limits must be whole numbers; leave a box empty for no limit.');
+                $limits[$key] = (int) $raw;
+            }
+            $locked = array_values(array_diff(array_keys(Features::MODULES), array_map('strval', (array) $request->input('enabled', []))));
+            $pages = array_values(array_diff(array_column(Features::pages(), 'route'), array_map('strval', (array) $request->input('pages_enabled', []))));
+            SchoolProvisioner::saveDefaultPlan($locked, $pages, $limits);
+            @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' DEFAULT-PLAN locked=[' . implode(',', $locked) . '] pages=' . count($pages) . ' by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
+            Flash::add('success', 'Default plan saved. New schools start with it; existing schools are unchanged.');
+        } catch (\DomainException $e) {
+            Flash::add('error', $e->getMessage());
+        }
+        return Response::redirect(url('/admin/schools/defaults'));
     }
 
     /**
