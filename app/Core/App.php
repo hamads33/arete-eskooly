@@ -30,6 +30,8 @@ final class App
     public function run(Request $request): Response
     {
         try {
+            // A school whose subscription has run out stops here, before sign-in or any page.
+            if (\App\Platform\Features::expired()) return \App\Platform\Features::expiredResponse();
             (new \App\Services\RememberMeService($this->database,$this->session,(array)$this->config('session',[])))->resume();
             return $this->router->dispatch($request, $this);
         } catch (Throwable $exception) {

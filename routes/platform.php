@@ -18,6 +18,7 @@ $router->get('/admin/schools/new', [PlatformController::class, 'create']);
 $router->post('/admin/schools/new', [PlatformController::class, 'store'], [VerifyCsrfToken::class]);
 $router->get('/admin/schools/defaults', [PlatformController::class, 'defaults']);
 $router->post('/admin/schools/defaults', [PlatformController::class, 'saveDefaults'], [VerifyCsrfToken::class]);
+$router->post('/admin/schools/lock-message', [PlatformController::class, 'saveLockMessage'], [VerifyCsrfToken::class]);
 $router->get('/admin/schools/{id}/features', [PlatformController::class, 'features']);
 $router->get('/admin/schools/{id}/logo', [PlatformController::class, 'logo']);
 $router->post('/admin/schools/{id}/{action}', [PlatformController::class, 'action'], [VerifyCsrfToken::class]);

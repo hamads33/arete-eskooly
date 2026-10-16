@@ -1,4 +1,6 @@
 <div id="globalModalRoot" aria-live="polite">
+<?php $lockInfo = \App\Platform\Features::lockMessage(); ?>
+  <div id="planLockInfo" hidden data-title="<?= e($lockInfo['title']) ?>" data-message="<?= e($lockInfo['message']) ?>" data-whatsapp="<?= e($lockInfo['whatsapp']) ?>" data-school="<?= e((string) getenv('APP_NAME')) ?>" data-button="<?= e($lockInfo['button']) ?>"></div>
   <div class="modal-shell locked-module-modal" id="lockedModuleModal" role="dialog" aria-modal="true" aria-labelledby="lockedModuleTitle" aria-hidden="true" hidden>
     <div class="modal-shell__backdrop" data-locked-modal-close></div>
     <div class="modal-shell__dialog locked-module-modal__dialog">
@@ -24,7 +26,7 @@
       var control = event.target.closest('[data-locked-module]');
       if (control) {
         event.preventDefault();
-        window.showLockedModule(control.getAttribute('data-locked-module'));
+        window.showLockedModule(control.getAttribute('data-locked-module'), control.getAttribute('data-locked-reason'));
       }
       var demoControl = event.target.closest('[data-'+'demo-action],[data-confirm-demo]');
       if (demoControl) {

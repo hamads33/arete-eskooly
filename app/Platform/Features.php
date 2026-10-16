@@ -184,6 +184,45 @@ final class Features
     }
 
     /** The page shown instead of a locked module. */
+    /** Wording used when no message has been set by the Arete admin. */
+    public const LOCK_DEFAULTS = [
+        'title' => 'Upgrade to unlock',
+        'message' => "This feature is not included in your school's current plan. Buy a subscription to start using it.",
+        'whatsapp' => '',
+        'button' => 'Contact us on WhatsApp',
+    ];
+
+    /** The "not in your plan" wording set by the Arete admin (copied into each school's settings). */
+    public static function lockMessage(): array
+    {
+        $out = self::LOCK_DEFAULTS;
+        foreach (['title' => 'SCHOOL_LOCK_TITLE', 'message' => 'SCHOOL_LOCK_MESSAGE', 'whatsapp' => 'SCHOOL_LOCK_WHATSAPP', 'button' => 'SCHOOL_LOCK_BUTTON'] as $key => $name) {
+            $value = trim((string) getenv($name));
+            if ($value !== '') $out[$key] = $value;
+        }
+        $out['whatsapp'] = preg_replace('/\D+/', '', $out['whatsapp']);
+        return $out;
+    }
+
+    /** Last day of the school's subscription (Y-m-d), or null when it never expires. */
+    public static function validUntil(): ?string
+    {
+        $raw = school_slug() === '' ? '' : trim((string) getenv('SCHOOL_VALID_UNTIL'));
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw) ? $raw : null;
+    }
+
+    /** True once the subscription's last day has passed; access stops on its own, data is kept. */
+    public static function expired(): bool
+    {
+        $until = self::validUntil();
+        return $until !== null && date('Y-m-d') > $until;
+    }
+
+    public static function expiredResponse(): Response
+    {
+        return Response::html(View::render('errors/subscription-expired', ['pageTitle' => 'Subscription ended', 'until' => (string) self::validUntil()], 'layouts/error'), 403, ['Cache-Control' => 'no-store']);
+    }
+
     public static function lockedResponse(string $module): Response
     {
         return Response::html(View::render('errors/plan-locked', ['pageTitle' => self::label($module) . ' is not included', 'module' => self::label($module)], 'layouts/error'), 403);

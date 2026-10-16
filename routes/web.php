@@ -243,6 +243,7 @@ $router->get('/admin/exams/marks', [ExamsController::class, 'marks'], name: 'exa
 $router->get('/admin/exams/results', [ExamsController::class, 'results'], name: 'exams.results');
 $router->post('/admin/exams', [ExamsController::class, 'store'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/exams/setup', [ExamsController::class, 'saveSetup'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
+$router->post('/admin/exams/setup/{id}/delete', [ExamsController::class, 'deleteSetup'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/exams/marks', [ExamsController::class, 'saveMarks'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/exams/{id}/delete', [ExamsController::class, 'delete'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);
 $router->post('/admin/exams/{id}/status', [ExamsController::class, 'status'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);

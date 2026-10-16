@@ -75,6 +75,7 @@ $empty = [
     <div><dt>City</dt><dd><?= e($s['city'] ?: '—') ?></dd></div>
     <div><dt>Applied</dt><dd><?= e($when($s['created_at'])) ?></dd></div>
     <?php if ($s['approved_at']): ?><div><dt>Approved</dt><dd><?= e($when($s['approved_at'])) ?></dd></div><?php endif ?>
+    <?php if ($st === 'active' || $st === 'suspended'): $vu = (new \App\Platform\SchoolProvisioner(new \App\Platform\SchoolRegistry()))->validUntil((string) $s['slug']); ?><div><dt>Subscription</dt><dd><?php if ($vu === null): ?>No end date<?php elseif (date('Y-m-d') > $vu): ?><span style="color:#b4232f;font-weight:700">Ended <?= e(date('j M Y', (int) strtotime($vu))) ?></span><?php else: ?>Until <?= e(date('j M Y', (int) strtotime($vu))) ?> (<?= (int) ((strtotime($vu) - strtotime(date('Y-m-d'))) / 86400) + 1 ?> days left)<?php endif ?></dd></div><?php endif ?>
     <?php if ($st === 'suspended'): ?><div><dt>Access revoked</dt><dd><?= e($when($s['updated_at'])) ?></dd></div><?php endif ?>
     <?php if ($st === 'rejected'): ?><div><dt>Rejected</dt><dd><?= e($when($s['updated_at'])) ?></dd></div><?php endif ?>
     <?php if ($st === 'pending' || $st === 'failed'): ?><div><dt>Waiting</dt><dd class="sp-wait"><?= $age($s['created_at']) === 'today' ? 'Applied today' : e($age($s['created_at'])) ?></dd></div><?php endif ?>

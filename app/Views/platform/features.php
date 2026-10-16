@@ -4,6 +4,13 @@
 <form method="post" action="<?= e(url('/admin/schools/' . (int) $school['id'] . '/features')) ?>">
 <?= csrf_field() ?>
 <section class="module-card"><header class="module-card__header"><div><h2>Included features</h2><p><?= count($modules) - count($locked) ?> of <?= count($modules) ?> enabled. Students, staff, classes, subjects, settings and roles are always included.</p></div></header><div class="module-card__body">
+<h3 style="margin:0 0 .5rem">Subscription</h3>
+<?php $expired = $validUntil !== null && date('Y-m-d') > $validUntil; ?>
+<p style="margin:0 0 .5rem"><?php if ($validUntil === null): ?>No end date: the school can be used until you set one.<?php elseif ($expired): ?><span class="status-badge status-badge--absent">Ended</span> Access stopped after <?= e(date('j M Y', (int) strtotime($validUntil))) ?>. The school sees "Subscription ended"; its data is kept. Extend it below to bring it back straight away.<?php else: ?>Valid until the end of <strong><?= e(date('j M Y', (int) strtotime($validUntil))) ?></strong> (<?= (int) ((strtotime($validUntil) - strtotime(date('Y-m-d'))) / 86400) + 1 ?> day(s) left). Access stops by itself after that.<?php endif ?></p>
+<div class="filter-bar filter-bar--compact" style="margin-bottom:1.25rem">
+<div class="module-field"><label for="valid_until">Last day of access</label><input class="module-input" id="valid_until" name="valid_until" type="date" value="<?= e((string) $validUntil) ?>"><small>Leave empty for no end date.</small></div>
+<div class="module-field"><label for="extend_days">Or add days</label><input class="module-input" id="extend_days" name="extend_days" type="number" min="1" max="3660" step="1" inputmode="numeric" placeholder="e.g. 10 or 30"><small>Added to the current end date (or from today if it has ended). Overrides the date box.</small></div>
+</div>
 <h3 style="margin:0 0 .5rem">Limits</h3>
 <div class="filter-bar filter-bar--compact" style="margin-bottom:1.25rem">
 <?php foreach (\App\Platform\Features::LIMITS as $key => [, $label]): ?>

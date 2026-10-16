@@ -28,7 +28,8 @@ $oldEnabled = old('enabled', null);
 <?php $field('password', 'Password', 'password', 'At least 8 characters. Share it with the school privately.', ['required' => 'required', 'minlength' => 8, 'maxlength' => 72, 'autocomplete' => 'new-password']); ?>
 </div></div></section>
 
-<section class="module-card"><header class="module-card__header"><div><h2>Limits</h2><p>Leave empty for no limit.</p></div></header><div class="module-card__body"><div class="filter-bar filter-bar--compact">
+<section class="module-card"><header class="module-card__header"><div><h2>Subscription and limits</h2><p>Leave a box empty for no end date or no limit.</p></div></header><div class="module-card__body"><div class="filter-bar filter-bar--compact">
+<?php $field('valid_days', 'Access lasts (days)', 'number', 'e.g. 10 for a trial, 30 for a month. Access stops by itself afterwards.', ['min' => 1, 'max' => 3660, 'step' => 1, 'placeholder' => 'No end date'], $validDays !== null ? (string) $validDays : ''); ?>
 <?php foreach (\App\Platform\Features::LIMITS as $key => [, $label]) $field('limit_' . $key, 'Maximum ' . strtolower($label), 'number', '', ['min' => 0, 'step' => 1, 'placeholder' => 'No limit'], $limits[$key] !== null ? (string) $limits[$key] : ''); ?>
 </div></div></section>
 

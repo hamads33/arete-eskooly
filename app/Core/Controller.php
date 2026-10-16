@@ -23,7 +23,7 @@ abstract class Controller
             $baseScripts = [
                 'vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=5', 'js/app.js?v=4',
                 'js/class-subject-filter.js?v=1',
-                'js/preview-lock.js?v=3',
+                'js/preview-lock.js?v=4',
             ];
             $data['styles'] = array_values(array_unique(array_merge($baseStyles, $data['styles'] ?? [])));
             // One copy per script file: pages list "js/app.js" while the base lists "js/app.js?v=4",

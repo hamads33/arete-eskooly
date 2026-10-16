@@ -195,7 +195,7 @@ final class SchoolProvisioner
     /**
      * The plan every new school starts with. Without a saved default: everything enabled, no limits.
      *
-     * @return array{locked:list<string>,pages:list<string>,limits:array<string,int|null>}
+     * @return array{locked:list<string>,pages:list<string>,limits:array<string,int|null>,valid_days:int|null}
      */
     public static function defaultPlan(): array
     {
@@ -210,12 +210,14 @@ final class SchoolProvisioner
             'locked' => array_values(array_intersect(array_keys(Features::MODULES), (array) ($raw['locked'] ?? []))),
             'pages' => array_values(array_intersect(array_column(Features::pages(), 'route'), (array) ($raw['pages'] ?? []))),
             'limits' => $limits,
+            'valid_days' => (int) ($raw['valid_days'] ?? 0) > 0 ? (int) $raw['valid_days'] : null,
         ];
     }
 
     /** @param array<string,int|null> $limits null or 0 = unlimited */
-    public static function saveDefaultPlan(array $locked, array $pages, array $limits): void
+    public static function saveDefaultPlan(array $locked, array $pages, array $limits, int $validDays = 0): void
     {
+        if ($validDays < 0 || $validDays > 3660) throw new \DomainException('Validity must be between 1 and 3660 days, or empty for no end date.');
         $clean = [];
         foreach (array_keys(Features::LIMITS) as $key) {
             $n = (int) ($limits[$key] ?? 0);
@@ -226,8 +228,17 @@ final class SchoolProvisioner
             'locked' => array_values(array_intersect(array_keys(Features::MODULES), $locked)),
             'pages' => array_values(array_intersect(array_column(Features::pages(), 'route'), $pages)),
             'limits' => $clean,
+            'valid_days' => $validDays > 0 ? $validDays : null,
             'updated_at' => date('c'),
         ];
+        self::writePlanFile($plan);
+    }
+
+    /** Keeps the rest of the platform file (e.g. the locked-feature message) when one part is saved. */
+    private static function writePlanFile(array $changes): void
+    {
+        $existing = is_file(self::defaultPlanPath()) ? json_decode((string) file_get_contents(self::defaultPlanPath()), true) : null;
+        $plan = array_replace(is_array($existing) ? $existing : [], $changes);
         $path = self::defaultPlanPath();
         if (!is_dir(dirname($path)) && !@mkdir(dirname($path), 0750, true) && !is_dir(dirname($path))) throw new \DomainException('Cannot create the folder for the default plan.');
         $tmp = $path . '.tmp' . bin2hex(random_bytes(4));
@@ -244,6 +255,66 @@ final class SchoolProvisioner
         $this->setLimits($id, $plan['limits']);
         $this->setLockedModules($id, $plan['locked']);
         $this->setLockedPages($id, $plan['pages']);
+        $this->setEnvValues($id, self::lockMessageEnv(self::lockMessageSettings()));
+        $this->setValidUntil($id, $plan['valid_days'] !== null ? date('Y-m-d', strtotime('+' . ($plan['valid_days'] - 1) . ' days')) : null);
+    }
+
+    /** The admin's wording for locked features and ended subscriptions (empty = built-in wording). */
+    public static function lockMessageSettings(): array
+    {
+        $raw = is_file(self::defaultPlanPath()) ? json_decode((string) file_get_contents(self::defaultPlanPath()), true) : null;
+        $saved = is_array($raw) && is_array($raw['lock_message'] ?? null) ? $raw['lock_message'] : [];
+        $out = [];
+        foreach (array_keys(Features::LOCK_DEFAULTS) as $key) $out[$key] = trim((string) ($saved[$key] ?? ''));
+        return $out;
+    }
+
+    private static function lockMessageEnv(array $m): array
+    {
+        // One line each in .env: line breaks become spaces and double quotes become typographic ones.
+        $clean = static fn (string $v): ?string => ($v = trim(str_replace(['"', "\r", "\n", '\\'], ['”', ' ', ' ', '/'], $v))) === '' ? null : $v;
+        return ['SCHOOL_LOCK_TITLE' => $clean($m['title'] ?? ''), 'SCHOOL_LOCK_MESSAGE' => $clean($m['message'] ?? ''), 'SCHOOL_LOCK_WHATSAPP' => $clean(preg_replace('/\D+/', '', (string) ($m['whatsapp'] ?? ''))), 'SCHOOL_LOCK_BUTTON' => $clean($m['button'] ?? '')];
+    }
+
+    /**
+     * Saves the wording and copies it into every live or revoked school straight away.
+     *
+     * @return array{0:int,1:list<string>} schools updated, and the ones that could not be
+     */
+    public function saveLockMessage(array $input): array
+    {
+        $m = [];
+        foreach (['title' => 80, 'message' => 400, 'whatsapp' => 20, 'button' => 40] as $key => $max) {
+            $v = trim((string) ($input[$key] ?? ''));
+            if (mb_strlen($v) > $max) throw new \DomainException(ucfirst($key) . ' can be at most ' . $max . ' characters.');
+            $m[$key] = $v;
+        }
+        $digits = preg_replace('/\D+/', '', $m['whatsapp']);
+        if ($m['whatsapp'] !== '' && (strlen($digits) < 10 || strlen($digits) > 15)) throw new \DomainException('Enter the WhatsApp number with country code, e.g. 923001234567.');
+        $m['whatsapp'] = $digits;
+        self::writePlanFile(['lock_message' => $m]);
+        $done = 0;
+        $failed = [];
+        foreach ($this->registry->all() as $school) {
+            if (!in_array($school['status'], ['active', 'suspended'], true)) continue;
+            try { $this->setEnvValues((int) $school['id'], self::lockMessageEnv($m)); $done++; } catch (\Throwable) { $failed[] = (string) $school['slug']; }
+        }
+        return [$done, $failed];
+    }
+
+    /** Last day of a school's subscription (Y-m-d), or null for no end date. */
+    public function validUntil(string $slug): ?string
+    {
+        $env = self::siteDir($slug) . '/.env';
+        $raw = is_file($env) ? trim((string) ($this->readEnv($env)['SCHOOL_VALID_UNTIL'] ?? '')) : '';
+        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $raw) ? $raw : null;
+    }
+
+    /** Sets the last day the school can be used; access stops by itself the day after. Null = no end date. */
+    public function setValidUntil(int $id, ?string $date): void
+    {
+        if ($date !== null && (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || !checkdate((int) substr($date, 5, 2), (int) substr($date, 8, 2), (int) substr($date, 0, 4)))) throw new \DomainException('Enter a valid end date.');
+        $this->setEnvValues($id, ['SCHOOL_VALID_UNTIL' => $date]);
     }
 
     /** Modules locked for a school, read from its own .env. */

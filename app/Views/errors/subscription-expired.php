@@ -1,0 +1,1 @@
+<main class="error-card"><span>⏳</span><h1>Subscription ended</h1><p>This school's access ended on <?= e(date('j F Y', (int) strtotime($until))) ?>. All of its data is kept safely and comes back as soon as the subscription is renewed.</p><?php $lockAsk = 'renew our subscription'; require __DIR__ . '/_lock-contact.php'; ?></main>

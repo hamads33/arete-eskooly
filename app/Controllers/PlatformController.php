@@ -67,6 +67,7 @@ final class PlatformController extends Controller
             'locked' => $plan['locked'],
             'lockedPages' => $plan['pages'],
             'limits' => $plan['limits'],
+            'validDays' => $plan['valid_days'],
         ]);
     }
 
@@ -84,7 +85,22 @@ final class PlatformController extends Controller
             'locked' => $plan['locked'],
             'lockedPages' => $plan['pages'],
             'limits' => $plan['limits'],
+            'validDays' => $plan['valid_days'],
+            'lockMessage' => SchoolProvisioner::lockMessageSettings(),
         ]);
+    }
+
+    /** Wording and WhatsApp number shown to schools on locked features and ended subscriptions. */
+    public function saveLockMessage(Request $request): Response
+    {
+        if ($x = $this->denied()) return $x;
+        try {
+            [$done, $failed] = (new SchoolProvisioner(new SchoolRegistry()))->saveLockMessage((array) $request->input('lock', []));
+            Flash::add($failed ? 'error' : 'success', 'Message saved and applied to ' . $done . ' school(s)' . ($failed ? '; could not update: ' . implode(', ', $failed) . '.' : '.'));
+        } catch (\DomainException $e) {
+            Flash::add('error', $e->getMessage());
+        }
+        return Response::redirect(url('/admin/schools/defaults#lock-message'));
     }
 
     public function saveDefaults(Request $request): Response
@@ -99,7 +115,9 @@ final class PlatformController extends Controller
             }
             $locked = array_values(array_diff(array_keys(Features::MODULES), array_map('strval', (array) $request->input('enabled', []))));
             $pages = array_values(array_diff(array_column(Features::pages(), 'route'), array_map('strval', (array) $request->input('pages_enabled', []))));
-            SchoolProvisioner::saveDefaultPlan($locked, $pages, $limits);
+            $days = trim((string) $request->input('valid_days', ''));
+            if ($days !== '' && !ctype_digit($days)) throw new \DomainException('Validity must be a whole number of days; leave it empty for no end date.');
+            SchoolProvisioner::saveDefaultPlan($locked, $pages, $limits, (int) $days);
             @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' DEFAULT-PLAN locked=[' . implode(',', $locked) . '] pages=' . count($pages) . ' by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
             Flash::add('success', 'Default plan saved. New schools start with it; existing schools are unchanged.');
         } catch (\DomainException $e) {
@@ -138,13 +156,15 @@ final class PlatformController extends Controller
             if ($raw !== '' && (!ctype_digit($raw) || (int) $raw > 1000000)) $errors['limit_' . $key] = ['Enter a whole number, or leave empty for no limit.'];
             $limits[$key] = (int) $raw;
         }
+        $validDays = trim((string) $request->input('valid_days', ''));
+        if ($validDays !== '' && (!ctype_digit($validDays) || (int) $validDays < 1 || (int) $validDays > 3660)) $errors['valid_days'] = ['Enter 1 to 3660 days, or leave empty for no end date.'];
         $logo = $request->file('school_logo');
         if (!$errors && $logo && ($logo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE && SchoolLogo::storePending($logo, $data['slug']) === false) {
             $errors['school_logo'] = ['The logo must be a PNG or JPG image no larger than 1 MB.'];
         }
         if ($errors) {
             $this->app->session()->flash('_errors', $errors);
-            $this->app->session()->flash('_old', $data + ['enabled' => (array) $request->input('enabled', []), 'pages_enabled' => (array) $request->input('pages_enabled', [])] + array_combine(array_map(static fn ($k) => 'limit_' . $k, array_keys($limits)), array_map(static fn ($v) => $v ?: '', $limits)));
+            $this->app->session()->flash('_old', $data + ['enabled' => (array) $request->input('enabled', []), 'pages_enabled' => (array) $request->input('pages_enabled', [])] + array_combine(array_map(static fn ($k) => 'limit_' . $k, array_keys($limits)), array_map(static fn ($v) => $v ?: '', $limits)) + ['valid_days' => $validDays]);
             return Response::redirect(url('/admin/schools/new'));
         }
         $id = $registry->create([
@@ -163,6 +183,7 @@ final class PlatformController extends Controller
             $provisioner->setLimits($id, $limits);
             $provisioner->setLockedModules($id, $locked);
             if ($request->input('pages_form') === '1') $provisioner->setLockedPages($id, array_values(array_diff(array_column(Features::pages(), 'route'), array_map('strval', (array) $request->input('pages_enabled', [])))));
+            $provisioner->setValidUntil($id, $validDays !== '' ? date('Y-m-d', strtotime('+' . ((int) $validDays - 1) . ' days')) : null);
             @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' CREATED ' . $data['slug'] . ' locked=[' . implode(',', $locked) . '] by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
             Flash::add('success', $message . ($locked ? ' ' . count($locked) . ' feature(s) locked.' : ' All features enabled.'));
         } catch (\DomainException $e) {
@@ -193,6 +214,7 @@ final class PlatformController extends Controller
             'pages' => Features::pages(),
             'limits' => (new SchoolProvisioner($registry))->limits((string) $school['slug']),
             'usage' => $this->usage($school),
+            'validUntil' => (new SchoolProvisioner($registry))->validUntil((string) $school['slug']),
         ]);
     }
 
@@ -251,10 +273,20 @@ final class PlatformController extends Controller
                         if ($raw !== '' && !ctype_digit($raw)) throw new \DomainException('Limits must be whole numbers; leave a box empty for no limit.');
                         $limits[$key] = (int) $raw;
                     }
+                    $until = trim((string) $request->input('valid_until', ''));
+                    $extend = trim((string) $request->input('extend_days', ''));
+                    if ($extend !== '') {
+                        if (!ctype_digit($extend) || (int) $extend < 1 || (int) $extend > 3660) throw new \DomainException('Add between 1 and 3660 days.');
+                        // Extends from the current end date, or from today when it has already ended.
+                        $current = $provisioner->validUntil((string) $school['slug']);
+                        $from = $current !== null && $current >= date('Y-m-d') ? $current : date('Y-m-d', strtotime('-1 day'));
+                        $until = date('Y-m-d', strtotime($from . ' +' . (int) $extend . ' days'));
+                    }
+                    $provisioner->setValidUntil($id, $until !== '' ? $until : null);
                     $provisioner->setLimits($id, $limits);
                     $provisioner->setLockedModules($id, $locked);
                     if ($request->input('pages_form') === '1') $provisioner->setLockedPages($id, array_values(array_diff(array_column(Features::pages(), 'route'), array_map('strval', (array) $request->input('pages_enabled', [])))));
-                    @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' FEATURES ' . $school['slug'] . ' locked=[' . implode(',', $locked) . '] by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
+                    @file_put_contents(BASE_PATH . '/storage/logs/platform-support-logins.log', date('c') . ' FEATURES ' . $school['slug'] . ' locked=[' . implode(',', $locked) . '] valid_until=' . ($until !== '' ? $until : 'none') . ' by ' . (user()['email'] ?? '?') . PHP_EOL, FILE_APPEND | LOCK_EX);
                     Flash::add('success', 'Plan saved for ' . $school['name'] . ($locked ? ': ' . count($locked) . ' locked.' : ': everything is enabled.'));
                 } catch (\DomainException $e) {
                     Flash::add('error', $e->getMessage());
