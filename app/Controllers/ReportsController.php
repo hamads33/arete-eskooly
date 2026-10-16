@@ -121,6 +121,9 @@ final class ReportsController extends AdminPageController
                 if($state==='scored'&&(float)$r['total']<=0)$state='no_total';
                 $rows[]=$r+['type'=>'online_test','state'=>$state];
             }
+            // Closed tests of the student's class that were never opened count as absent.
+            foreach($db->query("SELECT DATE(COALESCE(t.closes_at,t.updated_at)) d,t.title,s.name subject,t.subject_id,NULL obtained,(SELECT SUM(q.marks) FROM online_test_questions q WHERE q.test_id=t.id) total,1 is_absent FROM online_tests t JOIN students st ON st.id=:s AND st.class_id=t.class_id LEFT JOIN subjects s ON s.id=t.subject_id WHERE t.institute_id=:i AND t.status<>'draft' AND (t.status='closed' OR t.closes_at<:now) AND NOT EXISTS(SELECT 1 FROM online_test_attempts a WHERE a.test_id=t.id AND a.student_id=st.id)",$p+['now'=>date('Y-m-d H:i:s')])->fetchAll() as$r)
+                $rows[]=$r+['type'=>'online_test','state'=>'absent'];
         }
         $rows=array_values(array_filter($rows,static fn(array$r):bool=>($f['subject']===0||(int)$r['subject_id']===$f['subject'])&&($f['from']===''||(string)$r['d']>=$f['from'])&&($f['to']===''||(string)$r['d']<=$f['to'])));
         foreach($rows as&$r)$r['percentage']=$r['state']==='scored'&&(float)$r['total']>0?round((float)$r['obtained']/(float)$r['total']*100,2):null;

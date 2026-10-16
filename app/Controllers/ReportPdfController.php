@@ -111,9 +111,19 @@ final class ReportPdfController extends Controller
         if (!$test) return $this->missing('Test not found.');
         $studentId = (int) $r->query('student', 0);
         $rows = $repo->submissions((int) $i['id'], $testId);
+        // Students of the class who never opened the test: Absent once it has closed, otherwise not attempted yet.
+        $closed = $test['status'] === 'closed' || (!empty($test['closes_at']) && $test['closes_at'] < date('Y-m-d H:i:s'));
+        $attempted = array_flip(array_map('intval', array_column($rows, 'student_id')));
+        foreach ($this->app->database()->query("SELECT id student_id,student_name,registration_no FROM students WHERE class_id=:c AND institute_id=:i AND status='active' ORDER BY student_name,registration_no", ['c' => (int) $test['class_id'], 'i' => (int) $i['id']])->fetchAll() as $s) {
+            if (!isset($attempted[(int) $s['student_id']])) $rows[] = $s + ['status' => $closed ? 'absent' : 'not_attempted', 'total_score' => null, 'published_at' => null, 'visible_to' => null];
+        }
         if ($studentId) $rows = array_values(array_filter($rows, fn($x) => (int) $x['student_id'] === $studentId));
         foreach ($rows as &$x) {
-            $x['marks_display'] = $x['status'] === 'marked' && $x['total_score'] !== null ? number_format((float) $x['total_score'], 2) : ($x['status'] === 'submitted' ? 'Pending' : ($x['status'] === 'in_progress' ? 'In progress' : '—'));
+            $x['marks_display'] = $x['status'] === 'marked' && $x['total_score'] !== null ? number_format((float) $x['total_score'], 2) : ($x['status'] === 'submitted' ? 'Pending' : ($x['status'] === 'in_progress' ? 'In progress' : ($x['status'] === 'absent' ? 'Absent' : ($x['status'] === 'not_attempted' ? 'Not attempted yet' : '—'))));
+            if (in_array($x['status'], ['absent', 'not_attempted'], true)) {
+                $x['publish_status'] = $x['status'] === 'absent' ? 'Did not attempt' : '—';
+                continue;
+            }
             $x['publish_status'] = $x['published_at'] ? ('Published — ' . (['student' => 'Student', 'parent' => 'Parent', 'both' => 'Student & Parent'][$x['visible_to']] ?? 'Student')) : 'Not published';
         }
         unset($x);
@@ -123,10 +133,10 @@ final class ReportPdfController extends Controller
             'meta' => ['Test' => $test['title'], 'Class' => $test['class_name'], 'Subject' => $test['subject_name'] ?: '—', 'Total Marks' => $totalMarks !== false && $totalMarks !== null ? number_format((float) $totalMarks, 2) : '—'],
             'columns' => ['Registration' => 'registration_no', 'Student' => 'student_name', 'Marks' => 'marks_display', 'Status' => 'publish_status'],
             'rows' => $rows,
-            'summary' => 'Students: ' . count($rows),
+            'summary' => 'Students: ' . count($rows) . ' | Absent: ' . count(array_filter($rows, static fn($x) => $x['status'] === 'absent')),
             'signatures' => ['Subject Teacher', 'Administrator'],
         ]);
     }
 
-    public function classExamResult(Request$r):Response{$i=$this->institute();$exam=(int)$r->route('exam');$class=(int)$r->route('class');$examRow=$this->app->database()->query('SELECT e.*,c.name class_name FROM exams e JOIN classes c ON c.id=:c AND c.institute_id=e.institute_id WHERE e.id=:e AND e.institute_id=:i',['c'=>$class,'e'=>$exam,'i'=>(int)$i['id']])->fetch();if(!$examRow)return$this->missing('Exam or class not found.');$rows=(new WorkflowRepository($this->app->database()))->classResults((int)$i['id'],$exam,$class);foreach($rows as$n=>&$x){$x['sr']=$n+1;$x['percentage']=number_format((float)($x['percentage']??0),2).'%';}return$this->pdf($r,'report-card','exam-'.$exam.'-class-'.$class.'-gazette',['meta'=>['Exam'=>$examRow['name'],'Class'=>$examRow['class_name'],'Session'=>$examRow['session_id']?:'Institute session'],'columns'=>['SR'=>'sr','Registration'=>'registration_no','Student'=>'student_name','Obtained'=>'obtained','Total'=>'total','Percentage'=>'percentage'],'rows'=>$rows,'summary'=>'Students: '.count($rows),'signatures'=>['Class Teacher','Principal']]);}
+    public function classExamResult(Request$r):Response{$i=$this->institute();$exam=(int)$r->route('exam');$class=(int)$r->route('class');$examRow=$this->app->database()->query('SELECT e.*,c.name class_name FROM exams e JOIN classes c ON c.id=:c AND c.institute_id=e.institute_id WHERE e.id=:e AND e.institute_id=:i',['c'=>$class,'e'=>$exam,'i'=>(int)$i['id']])->fetch();if(!$examRow)return$this->missing('Exam or class not found.');$rows=(new WorkflowRepository($this->app->database()))->classResults((int)$i['id'],$exam,$class);foreach($rows as$n=>&$x){$x['sr']=$n+1;$abs=(int)($x['absent_subjects']??0);if($abs>0&&$abs===(int)$x['subjects']){$x['obtained']='Absent';$x['percentage']='—';}else{$x['obtained']=($x['obtained']??0).($abs?' (absent in '.$abs.')':'');$x['percentage']=number_format((float)($x['percentage']??0),2).'%';}}return$this->pdf($r,'report-card','exam-'.$exam.'-class-'.$class.'-gazette',['meta'=>['Exam'=>$examRow['name'],'Class'=>$examRow['class_name'],'Session'=>$examRow['session_id']?:'Institute session'],'columns'=>['SR'=>'sr','Registration'=>'registration_no','Student'=>'student_name','Obtained'=>'obtained','Total'=>'total','Percentage'=>'percentage'],'rows'=>$rows,'summary'=>'Students: '.count($rows),'signatures'=>['Class Teacher','Principal']]);}
 }
