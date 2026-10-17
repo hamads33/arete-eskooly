@@ -221,3 +221,44 @@
 
   refresh();
 })();
+
+/* Exam Setup: several classes and subjects at once. A subject is listed when any ticked class
+   studies it; the summary says how many papers will be made. */
+(function () {
+  'use strict';
+  var form = document.querySelector('[data-ec-setup]');
+  if (!form) return;
+  var hint = form.querySelector('[data-ec-setup-hint]');
+  var summary = form.querySelector('[data-ec-setup-summary]');
+  function ticked(name) { return Array.prototype.map.call(form.querySelectorAll('input[name="' + name + '[]"]:checked'), function (i) { return i.value; }); }
+  function update() {
+    var classes = ticked('classes');
+    var pairs = 0;
+    form.querySelectorAll('[data-ec-subject-classes]').forEach(function (label) {
+      var list = label.getAttribute('data-ec-subject-classes').split(',');
+      var hits = classes.filter(function (c) { return list.indexOf(c) !== -1; }).length;
+      label.hidden = hits === 0;
+      var box = label.querySelector('input');
+      if (hits === 0) box.checked = false;
+      var note = label.querySelector('[data-ec-subject-note]');
+      if (note) note.textContent = classes.length > 1 && hits > 0 && hits < classes.length ? '(' + hits + ' of ' + classes.length + ' classes)' : '';
+      if (box.checked) pairs += hits;
+    });
+    if (hint) hint.hidden = classes.length > 0;
+    summary.hidden = pairs === 0;
+    summary.textContent = pairs + ' paper(s) will be set up across ' + classes.length + ' class(es).';
+  }
+  form.addEventListener('change', update);
+  form.querySelectorAll('[data-ec-tick]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var boxes = Array.prototype.filter.call(form.querySelectorAll('input[name="' + btn.getAttribute('data-ec-tick') + '[]"]'), function (b) { return !b.closest('[hidden]'); });
+      var allOn = boxes.every(function (b) { return b.checked; });
+      boxes.forEach(function (b) { b.checked = !allOn; });
+      update();
+    });
+  });
+  form.addEventListener('submit', function (e) {
+    if (!ticked('classes').length || !ticked('subjects').length) { e.preventDefault(); window.alert('Tick at least one class and one subject.'); }
+  });
+  update();
+})();

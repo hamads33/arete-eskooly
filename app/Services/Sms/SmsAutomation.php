@@ -31,9 +31,9 @@ final class SmsAutomation
     /** Extra variables each event fills. A template may only use BASE_VARIABLES + these. */
     public const EVENT_VARIABLES = [
         'attendance_absent' => ['attendance_status'],
-        'fee_due' => ['fee_month', 'fee_amount', 'due_date', 'invoice_no'],
-        'fee_overdue' => ['fee_month', 'fee_amount', 'due_date', 'invoice_no'],
-        'fee_payment' => ['amount_paid', 'receipt_no', 'fee_month', 'invoice_no', 'fee_amount'],
+        'fee_due' => ['fee_month', 'fee_amount', 'due_date', 'invoice_no', 'balance'],
+        'fee_overdue' => ['fee_month', 'fee_amount', 'due_date', 'invoice_no', 'balance'],
+        'fee_payment' => ['amount_paid', 'receipt_no', 'fee_month', 'invoice_no', 'fee_amount', 'balance'],
         'result_published' => ['exam_name', 'marks', 'percentage'],
         'admission_confirmed' => [],
     ];
@@ -242,6 +242,7 @@ final class SmsAutomation
                 'invoice_no' => $p['invoice_no'],
                 'fee_amount' => $p['fee_month'] !== null ? $this->sms->recipients->money($institute, (float) $p['remaining_amount']) : null,
                 'date' => $p['payment_date'] ? date('d M Y', strtotime($p['payment_date'])) : null,
+                'balance' => $this->sms->recipients->money($institute, $this->sms->recipients->balance($institute, (int) $p['student_id'])),
             ], static fn($v) => $v !== null && $v !== '')];
             return $this->queueFor($institute, $rule, $this->sms->recipients->parentsOf($institute, [(int) $p['student_id']], $vars), 'fee', 'fee_module',
                 static fn($e) => "payment:{$paymentId}");
@@ -365,7 +366,8 @@ final class SmsAutomation
                     ['i' => $institute, 'a' => $range[0], 'b' => $range[1]])->fetchAll();
                 foreach ($rows as $inv) {
                     $vars = [(int) $inv['student_id'] => ['fee_amount' => $this->sms->recipients->money($institute, (float) $inv['remaining_amount']),
-                        'due_date' => date('d M Y', strtotime($inv['due_date'])), 'fee_month' => date('F Y', strtotime($inv['fee_month'] . '-01')), 'invoice_no' => $inv['invoice_no']]];
+                        'due_date' => date('d M Y', strtotime($inv['due_date'])), 'fee_month' => date('F Y', strtotime($inv['fee_month'] . '-01')), 'invoice_no' => $inv['invoice_no'],
+                        'balance' => $this->sms->recipients->money($institute, $this->sms->recipients->balance($institute, (int) $inv['student_id']))]];
                     $made += $this->queueFor($institute, $rule, $this->sms->recipients->parentsOf($institute, [(int) $inv['student_id']], $vars), 'fee', 'fee_module',
                         static fn($e) => "{$event}:{$inv['id']}");
                 }

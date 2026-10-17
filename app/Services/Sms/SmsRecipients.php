@@ -40,6 +40,13 @@ final class SmsRecipients
         return $this->instituteCache[$institute];
     }
 
+    /** A student's total unpaid fees across every open invoice (carried-forward months are already inside the newest one). */
+    public function balance(int $institute, int $student): float
+    {
+        return (float) $this->db->query("SELECT COALESCE(SUM(fi.remaining_amount),0) FROM fee_invoices fi JOIN students s ON s.id=fi.student_id
+            WHERE s.institute_id=:i AND fi.student_id=:s AND fi.voided_at IS NULL AND fi.status IN('unpaid','partial') AND fi.remaining_amount>0", ['i' => $institute, 's' => $student])->fetchColumn();
+    }
+
     public function money(int $institute, float $amount): string
     {
         return $this->instituteVars($institute)['_currency'] . ' ' . number_format($amount, $amount == floor($amount) ? 0 : 2);
@@ -214,7 +221,7 @@ final class SmsRecipients
                 $rows = $this->db->query("SELECT fi.student_id,SUM(fi.remaining_amount) due,MIN(fi.due_date) due_date,MIN(fi.fee_month) fee_month FROM fee_invoices fi JOIN students s ON s.id=fi.student_id
                     WHERE s.institute_id=:i AND fi.voided_at IS NULL AND fi.status IN('unpaid','partial') AND fi.remaining_amount>0 GROUP BY fi.student_id", ['i' => $institute])->fetchAll();
                 foreach ($rows as $r) {
-                    $extra[(int) $r['student_id']] = ['fee_amount' => $this->money($institute, (float) $r['due']), 'due_date' => $r['due_date'] ? date('d M Y', strtotime($r['due_date'])) : null,
+                    $extra[(int) $r['student_id']] = ['fee_amount' => $this->money($institute, (float) $r['due']), 'balance' => $this->money($institute, (float) $r['due']), 'due_date' => $r['due_date'] ? date('d M Y', strtotime($r['due_date'])) : null,
                         'fee_month' => date('F Y', strtotime($r['fee_month'] . '-01'))];
                 }
                 break;

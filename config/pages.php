@@ -766,8 +766,8 @@ return [
         'breadcrumb' => ['Admin', 'Exam Setup'],
         'activeMenu' => 'exams',
         'activeSubmenu' => 'exam-setup',
-        'styles' => ['css/variables.css?v=2', 'css/reset.css', 'css/base.css', 'css/layout.css', 'css/components.css?v=104', 'css/account-settings.css?v=1', 'css/settings.css?v=101', 'css/admin-pages.css?v=106', 'css/dashboard.css', 'css/responsive.css'],
-        'scripts' => ['vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=5', 'js/app.js', 'js/settings-shared.js?v=1', 'js/admin-pages.js?v=3'],
+        'styles' => ['css/variables.css?v=2', 'css/reset.css', 'css/base.css', 'css/layout.css', 'css/components.css?v=104', 'css/account-settings.css?v=1', 'css/settings.css?v=101', 'css/admin-pages.css?v=106', 'css/dashboard.css', 'css/responsive.css', 'css/exam-center.css?v=5'],
+        'scripts' => ['vendor/lucide.min.js', 'js/dropdowns.js', 'js/sidebar.js?v=5', 'js/app.js', 'js/settings-shared.js?v=1', 'js/admin-pages.js?v=3', 'js/exam-center.js?v=3'],
         'source' => 'exam-setup.html',
     ],
     'exam-marks' => [

@@ -48,7 +48,7 @@ $validCount = $preview ? count($preview['valid']) : 0;
         <small>Adds {{exam_name}}, {{marks}} and {{percentage}} for each student.</small>
       </div>
     </div>
-    <p class="sms-hint" data-bulk-hint-fee <?= $f['filter'] === 'fee_outstanding' ? '' : 'hidden' ?>>Adds {{fee_amount}}, {{fee_month}} and {{due_date}} for each student.</p>
+    <p class="sms-hint" data-bulk-hint-fee <?= $f['filter'] === 'fee_outstanding' ? '' : 'hidden' ?>>Adds {{fee_amount}}, {{balance}}, {{fee_month}} and {{due_date}} for each student.</p>
   </div>
 </section>
 

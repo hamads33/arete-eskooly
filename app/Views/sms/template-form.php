@@ -7,7 +7,7 @@ $pageIntro = 'Use {{variable}} placeholders. Only the variables listed are allow
 <form method="post" action="<?= url($templateId ? '/admin/sms/templates/' . $templateId : '/admin/sms/templates') ?>" data-sms-compose data-sms-template-form data-sample='<?= e(json_encode([
     'school_name' => $institute['name'] ?? 'Your Institute', 'school_phone' => $institute['phone'] ?? '0300 0000000', 'recipient_name' => 'Imran Khan', 'student_name' => 'Ayesha Khan',
     'parent_name' => 'Imran Khan', 'class_name' => 'Grade 6', 'registration_no' => 'STU-001', 'date' => date('d M Y'), 'attendance_status' => 'Absent', 'fee_month' => date('F Y'),
-    'fee_amount' => 'Rs 5,000', 'due_date' => date('d M Y', strtotime('+5 days')), 'invoice_no' => 'INV-001', 'amount_paid' => 'Rs 5,000', 'receipt_no' => 'RCPT-001',
+    'fee_amount' => 'Rs 5,000', 'balance' => 'Rs 12,500', 'due_date' => date('d M Y', strtotime('+5 days')), 'invoice_no' => 'INV-001', 'amount_paid' => 'Rs 5,000', 'receipt_no' => 'RCPT-001',
     'exam_name' => 'Mid Term', 'marks' => '420/500', 'percentage' => '84', 'grade' => 'A', 'announcement_title' => 'School closed on Friday',
 ])) ?>'>
 <?= csrf_field() ?>

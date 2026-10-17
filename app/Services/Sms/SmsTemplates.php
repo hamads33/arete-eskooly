@@ -14,9 +14,9 @@ final class SmsTemplates
     /** slug => [name, category, body]; referenced by the default automation rules. */
     public const DEFAULTS = [
         'attendance-absent' => ['Attendance Absence Alert', 'attendance', 'Dear {{parent_name}}, {{student_name}} ({{class_name}}) was marked {{attendance_status}} on {{date}}. - {{school_name}}'],
-        'fee-due' => ['Fee Due Reminder', 'fees', 'Dear {{parent_name}}, fee of {{fee_amount}} for {{student_name}} ({{fee_month}}) is due on {{due_date}}. - {{school_name}}'],
-        'fee-overdue' => ['Fee Overdue Reminder', 'fees', 'Dear {{parent_name}}, fee of {{fee_amount}} for {{student_name}} ({{fee_month}}) was due on {{due_date}} and is still unpaid. Please clear it at the earliest. - {{school_name}}'],
-        'fee-payment' => ['Payment Confirmation', 'fees', 'Dear {{parent_name}}, we received {{amount_paid}} for {{student_name}} (receipt {{receipt_no}}). Thank you. - {{school_name}}'],
+        'fee-due' => ['Fee Due Reminder', 'fees', 'Dear {{parent_name}}, fee of {{fee_amount}} for {{student_name}} ({{fee_month}}) is due on {{due_date}}. Total remaining balance: {{balance}}. - {{school_name}}'],
+        'fee-overdue' => ['Fee Overdue Reminder', 'fees', 'Dear {{parent_name}}, fee of {{fee_amount}} for {{student_name}} ({{fee_month}}) was due on {{due_date}} and is still unpaid. Total remaining balance: {{balance}}. Please clear it at the earliest. - {{school_name}}'],
+        'fee-payment' => ['Payment Confirmation', 'fees', 'Dear {{parent_name}}, we received {{amount_paid}} for {{student_name}} (receipt {{receipt_no}}). Remaining balance: {{balance}}. Thank you. - {{school_name}}'],
         'result-published' => ['Result Published', 'results', 'Dear {{parent_name}}, {{student_name}}\'s result for {{exam_name}} has been published. Percentage: {{percentage}}%. - {{school_name}}'],
         'admission-confirmed' => ['Admission Confirmed', 'admissions', 'Dear {{parent_name}}, admission of {{student_name}} in {{class_name}} is confirmed. Registration no: {{registration_no}}. - {{school_name}}'],
         'announcement' => ['Announcement', 'announcements', '{{announcement_title}} - {{school_name}}'],

@@ -25,6 +25,7 @@ final class SmsTemplateRenderer
         'attendance_status' => 'Attendance status (Absent, Late...)',
         'fee_month' => 'Fee month',
         'fee_amount' => 'Outstanding fee amount, with currency',
+        'balance' => 'Total remaining balance of the student (all unpaid months), with currency',
         'due_date' => 'Fee due date',
         'invoice_no' => 'Fee invoice number',
         'amount_paid' => 'Amount of a received payment, with currency',
@@ -75,7 +76,7 @@ final class SmsTemplateRenderer
         // before the placeholder ("Rs. {{amount_paid}}"), print the number only.
         $out = preg_replace_callback('/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/', static function (array $m) use ($values, $body): string {
             $value = trim((string) $values[$m[1][0]]);
-            if (in_array($m[1][0], ['amount_paid', 'fee_amount'], true) && preg_match('/(?:rs|pkr|rupees?)\.?\s*:?\s*$/i', substr($body, max(0, $m[0][1] - 12), min(12, $m[0][1])))) {
+            if (in_array($m[1][0], ['amount_paid', 'fee_amount', 'balance'], true) && preg_match('/(?:rs|pkr|rupees?)\.?\s*:?\s*$/i', substr($body, max(0, $m[0][1] - 12), min(12, $m[0][1])))) {
                 $value = (string) preg_replace('/^[^\d\-]+/', '', $value);
             }
             return $value;
