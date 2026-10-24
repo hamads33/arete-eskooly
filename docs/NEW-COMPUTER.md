@@ -84,6 +84,8 @@ See the Android README for Metro, phone pairing and release commands.
 
 ## Validation
 
+See [the recorded verification results and known failures](PORTABILITY-VERIFICATION.md).
+
 `composer check-platform-reqs` checks installed PHP dependencies.
 Run `php tests/run.php` only against a disposable test database: feature tests write records.
 Verify login, dashboard, a fee voucher PDF and uploaded attachments after restoring private data.
