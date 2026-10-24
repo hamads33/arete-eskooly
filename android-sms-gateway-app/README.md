@@ -145,11 +145,11 @@ listing would need a special-use justification.
 
 ## Build
 
-Requirements: Node ≥ 22.11, JDK 17–21, Android SDK (Gradle downloads platform 37 / build-tools
+Requirements: Node 22.13+ (22.x), 24.3+ (24.x), or 26+, JDK 17–21, Android SDK (Gradle downloads platform 37 / build-tools
 / NDK on first build if licences are accepted).
 
 ```bash
-npm install
+npm ci
 npm run typecheck && npm test
 cd android
 ./gradlew assembleDebug        # Windows: gradlew.bat assembleDebug

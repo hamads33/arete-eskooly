@@ -23,5 +23,4 @@ services:
 
 volumes:
   greenfield_mysql_data:
-    external: true
     name: admin-dashboard-ui_greenfield_mysql_data

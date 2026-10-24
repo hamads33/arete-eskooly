@@ -7,7 +7,7 @@ The approved 50-page admin frontend running through a framework-free, extendable
 From this folder:
 
 ```powershell
-Copy-Item .env.example .env
+php scripts/setup-local.php
 composer install
 composer dump-autoload
 docker compose up -d mysql
@@ -16,7 +16,9 @@ php database/seed.php
 php -S 127.0.0.1:8081 -t public public/router.php
 ```
 
-Current local workspace: `C:\Users\OGDCL\Desktop\arete-eskooly`
+For a new workstation or to continue with existing school data, follow
+[the new computer guide](docs/NEW-COMPUTER.md). GitHub contains code; existing databases,
+uploads, environment secrets and Android signing keys require a separate private transfer.
 
 Open `http://127.0.0.1:8081/login` for the local development server.
 
