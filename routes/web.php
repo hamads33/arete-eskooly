@@ -406,3 +406,5 @@ $router->middlewarePrefix('/admin', AuthMiddleware::class);
 $router->middlewarePrefix('/admin', AdminAreaMiddleware::class);
 $router->middlewarePrefix('/admin', \App\Middleware\AccountRestrictionMiddleware::class);
 $router->get('/account/restricted', [\App\Controllers\AccountRestrictedController::class, 'show'], [AuthMiddleware::class]);
+$router->get('/admin/fees/dummy-invoice', [\App\Controllers\DummyInvoiceController::class, 'index'], [AdminAreaMiddleware::class], name: 'fees.dummy-invoice');
+$router->post('/admin/fees/dummy-invoice', [\App\Controllers\DummyInvoiceController::class, 'generate'], [AdminAreaMiddleware::class, VerifyCsrfToken::class]);

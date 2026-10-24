@@ -56,7 +56,7 @@ return [
         $child('Generate Fees Invoice', 'fees-generate', '/admin/fees/vouchers'), $child('Collect Fees', 'fees-collect', '/admin/fees/collect'),
         $child('Fees Paid Slip', 'fees-receipt', '/admin/fees/receipt'), $child('Fees Defaulters', 'fees-defaulters', '/admin/fees/defaulters'),
         $child('Fees Report', 'fees-report', '/admin/fees/report'), $child('Delete Fees', 'fees-delete', '/admin/fees/delete'),
-        $child('Fee Automation', 'fee-automation', '/admin/fees/automation'),
+        $child('Fee Automation', 'fee-automation', '/admin/fees/automation'), $child('Dummy Fee Invoice', 'fees-dummy', '/admin/fees/dummy-invoice'),
     ]),
     $item('Salary', 'salary', 'wallet-cards', null, [
         $child('Salary Sheet', 'salary-sheet', '/admin/salary/sheet'), $child('Pay Salary', 'salary-pay', '/admin/salary/pay'), $child('Advance Salary', 'salary-advances', '/admin/salary/advances'), $child('Salary Paid Slip', 'salary-receipt', '/admin/salary/receipt'),

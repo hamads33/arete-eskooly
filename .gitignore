@@ -17,3 +17,4 @@
 *.pem
 .playwright-mcp/
 /storage/sessions/
+/outputs/
